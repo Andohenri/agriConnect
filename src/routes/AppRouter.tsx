@@ -26,8 +26,8 @@ const AppRouter = () => {
   return (
     <Routes>
       {/* Routes publiques */}
-      <Route path="/login" element={<PublicRoute><SignIn /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><SignUp /></PublicRoute>} />
+      <Route path="/sign-in" element={<PublicRoute><SignIn /></PublicRoute>} />
+      <Route path="/sign-up" element={<PublicRoute><SignUp /></PublicRoute>} />
 
       {/* Routes privées avec Layout */}
       <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
