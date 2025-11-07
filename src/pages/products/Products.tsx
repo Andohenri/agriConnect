@@ -7,9 +7,9 @@ const Products = () => {
   const userRole = user?.role;
 
   const products = [
-    { id: 1, name: 'Riz Premium', type: 'Grain', quantity: 500, unit: 'kg', price: 2500, date: '2025-01-15', image: '🌾', location: 'Analamanga', lat: -18.8792, lng: 47.5079, farmer: 'Jean Rakoto', phone: '034 12 345 67' },
-    { id: 2, name: 'Maïs Bio', type: 'Grain', quantity: 300, unit: 'kg', price: 1800, date: '2025-01-20', image: '🌽', location: 'Vakinankaratra', lat: -19.4, lng: 46.95, farmer: 'Marie Rasoa', phone: '033 98 765 43' },
-    { id: 3, name: 'Haricots Secs', type: 'Légumineuse', quantity: 200, unit: 'kg', price: 3200, date: '2025-01-18', image: '🫘', location: 'Analamanga', lat: -18.95, lng: 47.52, farmer: 'Paul Randria', phone: '032 55 444 33' },
+    { id: 1, nom: 'Riz Premium', type: 'Grain', sous_type: 'Bio', quantite_disponible: 500, unite: 'kg', prix_unitaire: 2500, date_recolte: '2025-01-15', image: '🌾', localisation: 'Analamanga', latitude: -18.8792, longitude: 47.5079, paysan: 'Jean Rakoto', telephone: '034 12 345 67', description: 'Riz de qualité supérieure, cultivé biologiquement', certification: 'Bio', statut: 'disponible' },
+    { id: 2, nom: 'Maïs Bio', type: 'Grain', sous_type: 'Frais', quantite_disponible: 300, unite: 'kg', prix_unitaire: 1800, date_recolte: '2025-01-20', image: '🌽', localisation: 'Vakinankaratra', latitude: -19.4, longitude: 46.95, paysan: 'Marie Rasoa', telephone: '033 98 765 43', description: 'Maïs frais et bio', certification: 'Bio', statut: 'disponible' },
+    { id: 3, nom: 'Haricots Secs', type: 'Légumineuse', sous_type: 'Sec', quantite_disponible: 200, unite: 'kg', prix_unitaire: 3200, date_recolte: '2025-01-18', image: '🫘', localisation: 'Analamanga', latitude: -18.95, longitude: 47.52, paysan: 'Paul Randria', telephone: '032 55 444 33', description: 'Haricots secs de première qualité', certification: '', statut: 'disponible' },
   ];
 
   return (
@@ -36,7 +36,7 @@ const Products = () => {
               <div className="p-4 md:p-6 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-lg md:text-xl font-bold">{product.name}</h3>
+                    <h3 className="text-lg md:text-xl font-bold">{product.nom}</h3>
                     <p className="text-xs md:text-sm text-gray-500">{product.type}</p>
                   </div>
                   <span className="bg-green-100 text-green-700 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
@@ -47,21 +47,21 @@ const Products = () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Package size={14} className="shrink-0" />
-                    <span className="text-xs md:text-sm">{product.quantity} {product.unit}</span>
+                    <span className="text-xs md:text-sm">{product.quantite_disponible} {product.unite}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin size={14} className="shrink-0" />
-                    <span className="text-xs md:text-sm">{product.location}</span>
+                    <span className="text-xs md:text-sm">{product.localisation}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Calendar size={14} className="shrink-0" />
-                    <span className="text-xs md:text-sm">Récolté le {product.date}</span>
+                    <span className="text-xs md:text-sm">Récolté le {product.date_recolte}</span>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                   <div>
-                    <p className="text-xl md:text-2xl font-bold text-green-600">{product.price.toLocaleString()} Ar</p>
+                    <p className="text-xl md:text-2xl font-bold text-green-600">{product.prix_unitaire.toLocaleString()} Ar</p>
                     <p className="text-xs text-gray-500">par kg</p>
                   </div>
                   {userRole === 'collector' ? (

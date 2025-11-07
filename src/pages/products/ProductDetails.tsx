@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Calendar, Edit, MapPin, MessageSquare, Package, Phone, ShoppingCart, Star, Trash2, User } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface ProductProps {
   id: number;
@@ -26,6 +27,9 @@ const ProductDetail = ({ product }: { product: ProductProps }) => {
   const { user } = useAuth();
   const userRole = user?.role;
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -154,14 +158,10 @@ const ProductDetail = ({ product }: { product: ProductProps }) => {
                     </button>
                   </>
                 )}
-                {userRole === 'farmer' && (
+                {true && (
                   <>
                     <button
-                      onClick={() => {
-                        // setEditingProduct(product);
-                        // setIsAddingProduct(true);
-                        // setProductForm(product);
-                      }}
+                      onClick={() => navigate(`/products/edit/${product.id}`)}
                       className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2 font-semibold"
                     >
                       <Edit size={20} />

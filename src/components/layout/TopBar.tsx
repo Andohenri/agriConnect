@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import Tooltip from "../composant/Tooltip";
 import UserAvatar from "../composant/Avatar";
 import SearchCommand from "../composant/SearchCommand";
+import { Link } from "react-router-dom";
 
 type TopBarProps = {
   onMenuClick: () => void;
@@ -47,15 +48,17 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
           </button>
         </Tooltip>
         <Tooltip text="Profile">
-          <div className="p-2 md:flex items-center cursor-pointer gap-2">
-            <UserAvatar fallback={user?.nom?.charAt(0) || "U"} />
-            <div className="hidden md:block">
-              <p className="font-semibold text-sm">
-                Baba Code
-              </p>
-              <p className="text-[10px] text-gray-500 capitalize">Collecteur</p>
+          <Link to="/profile">
+            <div className="p-2 bg-gray-100 rounded-full md:flex items-center cursor-pointer gap-2">
+              <UserAvatar fallback={user?.nom?.charAt(0) || "U"} />
+              <div className="hidden md:block px-2">
+                <p className="font-semibold text-sm">
+                  Baba Code
+                </p>
+                <p className="text-[10px] text-gray-500 capitalize">Collecteur</p>
+              </div>
             </div>
-          </div>
+          </Link>
         </Tooltip>
       </div>
     </div>

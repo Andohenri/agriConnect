@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
 
 import PublicRoute from "./PublicRoute";
 import PrivateRoute from "./PrivateRoute";
@@ -15,6 +14,9 @@ import Orders from "../pages/orders/Orders";
 import MapView from "../pages/map/Map";
 import Messages from "../pages/messages/Messages";
 import ProductDetail from "@/pages/products/ProductDetails";
+import AddProduct from "@/pages/products/AddProduct";
+import Profile from "@/pages/profile/Profile";
+import OrderDetails from "@/pages/orders/OrderDetails";
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
@@ -58,8 +60,8 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Products /> },
           { path: ":id", element: <ProductDetail product={product} /> },
-          // { path: "add", element: <AddProduct /> },
-          // { path: "edit/:id", element: <AddProduct /> },
+          { path: "add", element: <AddProduct /> },
+          { path: "edit/:id", element: <AddProduct /> },
         ],
       },
 
@@ -67,13 +69,13 @@ const router = createBrowserRouter([
         path: "orders",
         children: [
           { index: true, element: <Orders /> },
-          // { path=":id", element: <OrderDetail /> }
+          { path:":id", element: <OrderDetails /> }
         ],
       },
 
       { path: "map", element: <MapView /> },
       { path: "messages", element: <Messages /> },
-      // { path: "profile", element: <Profile /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
   // ✅ Routes privées admin avec Layout
@@ -93,9 +95,9 @@ const router = createBrowserRouter([
         path: "products",
         children: [
           { index: true, element: <Products /> },
-          // { path: ":id", element: <ProductDetail /> },
-          // { path: "add", element: <AddProduct /> },
-          // { path: "edit/:id", element: <AddProduct /> },
+          { path: ":id", element: <ProductDetail product={product} /> },
+          { path: "add", element: <AddProduct /> },
+          { path: "edit/:id", element: <AddProduct /> },
         ],
       },
 
@@ -109,7 +111,7 @@ const router = createBrowserRouter([
 
       { path: "map", element: <MapView /> },
       { path: "messages", element: <Messages /> },
-      // { path: "profile", element: <Profile /> },
+      { path: "profile", element: <Profile /> },
     ],
   },
 
