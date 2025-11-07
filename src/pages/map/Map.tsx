@@ -1,4 +1,5 @@
-import { MessageSquare, Package, Phone, User, Map } from "lucide-react";
+// import { MessageSquare, Package, Phone, User, Map } from "lucide-react";
+import { MessageSquare, Phone } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
@@ -50,7 +51,7 @@ const MapView = () => {
       phone: "032 55 444 33",
     },
   ];
-  
+
   const createEmojiIcon = (emoji: string) =>
     L.divIcon({
       html: `<div style="
