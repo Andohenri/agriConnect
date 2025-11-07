@@ -1,8 +1,8 @@
-import { Search, Bell, Menu, MessageSquare } from "lucide-react";
+import { Bell, Menu, MessageSquare, Search } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import Tooltip from "../composant/Tooltip";
-import SearchInput from "../composant/SearchInput";
 import UserAvatar from "../composant/Avatar";
+import SearchCommand from "../composant/SearchCommand";
 
 type TopBarProps = {
   onMenuClick: () => void;
@@ -13,17 +13,23 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-white border-b px-4 md:px-8 py-1 flex justify-between items-center gap-2">
-      <div className="flex items-center gap-4 flex-1">
+    <div className="bg-white border-b px-4 md:px-8 py-1 flex justify-between md:justify-end items-center">
+      <div className="flex items-center justify-between gap-2 md:mr-4">
         {isMobile && (
           <button onClick={onMenuClick} className="p-2">
-            <Menu size={24} />
+            <Menu size={20} />
           </button>
         )}
-        <SearchInput isMobile={isMobile} />
+        <div className="relative w-full max-w-md">
+          <span className="absolute left-3 top-1/2 z-20 -translate-y-1/2 text-gray-400 pointer-events-none">
+            <Search size={16} />
+          </span>
+          <SearchCommand className="pl-10" placeholder={isMobile ? "" : "Rechercher des produits, paysans, collecteurs..."}
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 md:gap-6">
+      <div className="flex items-center gap-2 md:gap-3">
         <Tooltip text="Notifications">
           <button className="relative hover:bg-gray-100 p-2 rounded-xl border transition cursor-pointer">
             <Bell size={20} className="text-gray-600" />
@@ -40,9 +46,8 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
             </span>
           </button>
         </Tooltip>
-
         <Tooltip text="Profile">
-          <div className="p-2 md:flex items-center cursor-pointer gap-2 ">
+          <div className="p-2 md:flex items-center cursor-pointer gap-2">
             <UserAvatar fallback={user?.nom?.charAt(0) || "U"} />
             <div className="hidden md:block">
               <p className="font-semibold text-sm">
