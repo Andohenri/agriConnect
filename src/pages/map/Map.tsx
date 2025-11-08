@@ -2,6 +2,7 @@
 import { MessageSquare, Phone } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { useRef } from "react";
 
 const MapView = () => {
   const products = [
@@ -52,6 +53,8 @@ const MapView = () => {
     },
   ];
 
+  const markerRefs = useRef<(L.Marker | null)[]>([]);
+
   const createEmojiIcon = (emoji: string) =>
     L.divIcon({
       html: `<div style="
@@ -85,11 +88,16 @@ const MapView = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Marker
               key={product.id}
               position={[product.lat, product.lng]}
               icon={createEmojiIcon(product.image)}
+              ref={(ref) => { markerRefs.current[index] = ref; }}
+              eventHandlers={{
+                mouseover: () => markerRefs.current[index]?.openPopup(),
+                mouseout: () => markerRefs.current[index]?.closePopup(),
+              }}
             >
               <Popup>
                 <div className="space-y-1">
@@ -109,7 +117,6 @@ const MapView = () => {
           ))}
         </MapContainer>
       </div>
-
       {/* Liste des producteurs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
