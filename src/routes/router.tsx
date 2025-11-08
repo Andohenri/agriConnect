@@ -43,7 +43,6 @@ const router = createBrowserRouter([
       </PublicRoute>
     ),
   },
-
   // ✅ Routes privées avec Layout
   {
     path: "/",
