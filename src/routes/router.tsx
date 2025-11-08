@@ -17,6 +17,8 @@ import ProductDetail from "@/pages/products/ProductDetails";
 import AddProduct from "@/pages/products/AddProduct";
 import Profile from "@/pages/profile/Profile";
 import OrderDetails from "@/pages/orders/OrderDetails";
+import AdminRoute from "./AdminRoute";
+
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
@@ -80,11 +82,11 @@ const router = createBrowserRouter([
   },
   // ✅ Routes privées admin avec Layout
   {
-    path: "/",
+    path: "/admin",
     element: (
-      <PrivateRoute>
+      <AdminRoute>
         <Layout />
-      </PrivateRoute>
+      </AdminRoute>
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
