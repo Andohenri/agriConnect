@@ -9,7 +9,7 @@ import {
 
 export default function AdminDashboard() {
   return (
-    <div className="p-6 space-y-6">
+    <section className="p-6 space-y-6">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4">
           <div className="flex items-center space-x-4">
@@ -74,6 +74,6 @@ export default function AdminDashboard() {
           </div>
         </Card>
       </div>
-    </div>
+    </section>
   );
 }

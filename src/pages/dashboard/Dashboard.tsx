@@ -1,4 +1,4 @@
-import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
+import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext';
 
 
@@ -8,7 +8,7 @@ const Dashboard = () => {
   console.log(userRole);
   
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
        
 
@@ -66,7 +66,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   )
 }
 
