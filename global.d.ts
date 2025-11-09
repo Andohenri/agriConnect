@@ -1,6 +1,18 @@
 import type { Role, Statut } from "@/types/enums";
 
 declare global {
+  enum Statut {
+    ACTIF = "actif",
+    INACTIF = "inactif",
+    SUSPENDU = "suspendu",
+  }
+
+  enum Role {
+    PAYSAN = "paysan",
+    COLLECTEUR = "collecteur",
+    ADMIN = "admin",
+  }
+
   interface User {
     id: string;
     nom: string;
@@ -19,6 +31,38 @@ declare global {
     updatedAt?: string;
   }
 
+  // Types pour les requêtes
+  interface SignUpRequest {
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone: string;
+    mot_de_passe: string;
+    role: Role;
+  }
+
+  interface SignInRequest {
+    email: string;
+    password: string;
+  }
+
+  interface UpdateUserRequest {
+    nom?: string;
+    prenom?: string;
+    email?: string;
+    telephone?: string;
+    adresse?: string;
+    localisation?: string;
+    latitude?: number;
+    longitude?: number;
+    avatar?: string;
+  }
+
+  // Réponses d'authentification
+  interface AuthResponse {
+    access_token: string;
+    user: any;
+  }
 }
 
 export {};

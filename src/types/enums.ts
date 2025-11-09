@@ -1,11 +1,12 @@
-export enum Statut {
-  ACTIF = "actif",
-  INACTIF = "inactif",
-  SUSPENDU = "suspendu",
-}
+// Objet constant pour le statut
+export const Statut = {
+  ACTIF: "actif",
+  INACTIF: "inactif",
+  SUSPENDU: "suspendu",
+} as const;
 
-export enum Role {
-  PAYSAN = "paysan",
-  COLLECTEUR = "collecteur",
-  ADMIN = "admin",
-}
+export const Role = {
+  PAYSAN: "paysan",
+  COLLECTEUR: "collecteur",
+  ADMIN: "admin",
+} as const;

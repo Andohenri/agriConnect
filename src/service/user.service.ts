@@ -1,40 +1,5 @@
-
-
-import type { Role, Statut, User } from "@/types/global";
 import Axios from "../lib/axiosInstance";
 
-// Types pour les requêtes
-interface SignUpRequest {
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  mot_de_passe: string;
-  role: Role;
-}
-
-interface SignInRequest {
-  email: string;
-  password: string;
-}
-
-interface UpdateUserRequest {
-  nom?: string;
-  prenom?: string;
-  email?: string;
-  telephone?: string;
-  adresse?: string;
-  localisation?: string;
-  latitude?: number;
-  longitude?: number;
-  avatar?: string;
-}
-
-// Réponses d'authentification
-interface AuthResponse {
-  access_token: string;
-  user:any
-}
 
 export const UserService = {
   // Configuration
