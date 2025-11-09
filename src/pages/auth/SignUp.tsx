@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { LocationCombobox } from "@/components/composant/LocationCombobox";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import InputField from "@/components/composant/forms/InputField";
+import { Button } from "@/components/ui/button";
+import FooterLink from "@/components/composant/forms/FooterLink";
+import SelectField from "@/components/composant/forms/SelectField";
+import { LocationField } from "@/components/composant/forms/LocationField";
 
 interface Location {
   adresse: string;
@@ -9,38 +13,47 @@ interface Location {
   lon: string;
 }
 
+const ROLE = [
+  { value: 'paysan', label: 'Paysan' },
+  { value: 'collecteur', label: 'Collecteur' },
+  { value: 'admin', label: 'Administrateur' },
+]
+
 const SignUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const { login } = useAuth();
+  const { register, handleSubmit, control, formState: { errors, isSubmitting } } = useForm<SignUpRequest>({
+    defaultValues: {
+      nom: '',
+      prenom: '',
+      email: '',
+      telephone: '',
+      mot_de_passe: '',
+      role: Role.PAYSAN,
+      avatar: '',
+      adresse: '',
+      localisation: '',
+      latitude: undefined,
+      longitude: undefined,
+    },
+    mode: 'onBlur',
+  })
+
   const navigate = useNavigate();
 
   const handleLocationSelect = (location: Location) => {
-    console.log("Adresse sélectionnée :", location.adresse);
-    console.log("Coordonnées :", location.lat, location.lon);
     setSelectedLocation(location);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    // Simulation de connexion (à remplacer par un appel API)
-    const userData = {
-      id: 1,
-      nom: "Rakoto",
-      prenom: "Jean",
-      email: email,
-      role: "paysan", // ou 'collecteur'
-      location: selectedLocation, // Ajout de la localisation
-    };
-
-    login(JSON.stringify(userData));
-    navigate("/dashboard");
-  };
+  const onSubmit = async (data: SignUpRequest) => {
+    try {
+      console.log("Form Data Submitted: ", data);
+    } catch (error) {
+      console.error("Error during sign up: ", error);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-green-600 to-green-800 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-green-700 mb-2">
@@ -49,49 +62,130 @@ const SignUp = () => {
           <p className="text-gray-600">Connectez-vous à votre compte</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit(onSubmit as SubmitHandler<SignUpRequest>)} className="space-y-4">
+          <InputField
+            name="nom"
+            label="Nom *"
+            placeholder="Votre nom"
+            register={register}
+            error={errors.nom}
+            validation={{
+              required: 'Le nom est requis',
+              minLength: { value: 2, message: 'Le nom doit contenir au moins 2 caractères' }
+            }}
+          />
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
-          </div>
+          <InputField
+            name="prenom"
+            label="Prénom *"
+            placeholder="Votre prénom"
+            register={register}
+            error={errors.prenom}
+            validation={{
+              required: 'Le prénom est requis',
+              minLength: { value: 2, message: 'Le prénom doit contenir au moins 2 caractères' }
+            }}
+          />
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Adresse
-            </label>
-            <LocationCombobox onSelectLocation={handleLocationSelect} />
-          </div>
+          {/* Email */}
+          <InputField
+            name="email"
+            label="Email *"
+            placeholder="exemple@email.com"
+            type="email"
+            register={register}
+            error={errors.email}
+            validation={{
+              required: "L'email est requis",
+              pattern: {
+                value: /^\S+@\S+\.\S+$/,
+                message: 'Email invalide'
+              }
+            }}
+          />
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition"
-          >
-            Se connecter
-          </button>
+          {/* Téléphone */}
+          <InputField
+            name="telephone"
+            label="Téléphone *"
+            placeholder="+261 34 00 000 00"
+            type="tel"
+            register={register}
+            error={errors.telephone}
+            validation={{
+              required: 'Le téléphone est requis',
+              pattern: {
+                value: /^(\+261|0)[0-9]{9}$/,
+                message: 'Format: +261 34 00 000 00'
+              }
+            }}
+          />
+
+          {/* Rôle */}
+          <SelectField
+            name="role"
+            label="Rôle *"
+            placeholder="Sélectionnez votre rôle"
+            options={ROLE}
+            error={errors.role}
+            control={control}
+            required
+          />
+
+          {/* Localisation */}
+          <LocationField
+            control={control}
+            localisationName="localisation"
+            latitudeName="latitude"
+            longitudeName="longitude"
+            label="Localisation"
+            required
+            errors={{
+              localisation: errors.localisation,
+              latitude: errors.latitude,
+              longitude: errors.longitude,
+            }}
+          />
+
+          {/* Mot de passe */}
+          <InputField
+            name="mot_de_passe"
+            label="Mot de passe *"
+            placeholder="********"
+            type="password"
+            register={register}
+            error={errors.mot_de_passe}
+            validation={{
+              required: 'Le mot de passe est requis',
+              minLength: {
+                value: 8,
+                message: 'Le mot de passe doit contenir au moins 8 caractères'
+              },
+              pattern: {
+                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                message: 'Doit contenir majuscule, minuscule et chiffre'
+              }
+            }}
+          />
+
+          {/* Avatar URL (optionnel) */}
+          <InputField
+            name="avatar"
+            label="Avatar (URL)"
+            placeholder="https://example.com/avatar.jpg"
+            type="url"
+            register={register}
+            error={errors.avatar}
+          />
+
+          <Button type="submit" disabled={isSubmitting} className="yellow-btn w-full mt-5">
+            {isSubmitting ? 'Enregistrement...' : "S'inscrire"}
+          </Button>
+
+          <FooterLink text="Vous avez déjà un compte ?" linkText="Se connecter" href="/sign-in" />
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

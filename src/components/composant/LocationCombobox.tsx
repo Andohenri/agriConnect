@@ -57,10 +57,10 @@ export function LocationCombobox({ onSelectLocation }: LocationComboboxProps) {
   const fetchSuggestions = async (input: string) => {
     try {
       const response = await axios.get<LocationIQSuggestion[]>(
-        "https://api.locationiq.com/v1/autocomplete.php",
+        import.meta.env.VITE_LOCATION_URL,
         {
           params: {
-            key: "pk.9b6ea7aeaf1bcc4591142deadf064396",
+            key: import.meta.env.VITE_LOCATION_API_KEY,
             q: input,
             limit: 5,
           },
