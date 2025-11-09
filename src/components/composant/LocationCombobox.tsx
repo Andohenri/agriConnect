@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from "react";
 import axios from "axios";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -44,7 +45,6 @@ export function LocationCombobox({ onSelectLocation }: LocationComboboxProps) {
     []
   );
   const [searchInput, setSearchInput] = React.useState("");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [coordinates, setCoordinates] = React.useState<{
     lat: string | null;
     lon: string | null;
@@ -110,7 +110,7 @@ export function LocationCombobox({ onSelectLocation }: LocationComboboxProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-left font-normal h-auto min-h-[2.75rem] py-3"
+          className="w-full justify-between text-left font-normal h-auto min-h-11 py-3"
         >
           <span className="block truncate pr-2">
             {value || "Rechercher une adresse..."}
@@ -139,7 +139,7 @@ export function LocationCombobox({ onSelectLocation }: LocationComboboxProps) {
                     onSelect={() => handleSelect(suggestion)}
                     className="flex items-start"
                   >
-                    <span className="flex-1 break-words pr-2">
+                    <span className="flex-1 wrap-break-words pr-2">
                       {suggestion.display_name}
                     </span>
                     <Check

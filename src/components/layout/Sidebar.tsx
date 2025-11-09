@@ -6,7 +6,7 @@ import {
   MessageSquare,
   Map,
   BarChart3,
-  User,
+  // User,
   LogOut,
   X,
 } from "lucide-react";
