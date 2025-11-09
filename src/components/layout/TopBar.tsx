@@ -50,12 +50,12 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
         <Tooltip text="Profile">
           <Link to="/profile">
             <div className="p-2 bg-gray-100 rounded-full md:flex items-center cursor-pointer gap-2">
-              <UserAvatar fallback={user?.nom?.charAt(0) || "U"} />
+              <UserAvatar src={user?.avatar} fallback={user?.nom?.charAt(0) || "U"} />
               <div className="hidden md:block px-2">
                 <p className="font-semibold text-sm">
-                  Baba Code
+                  {user?.nom}
                 </p>
-                <p className="text-[10px] text-gray-500 capitalize">Collecteur</p>
+                <p className="text-[10px] text-gray-500 capitalize">{user?.role}</p>
               </div>
             </div>
           </Link>
