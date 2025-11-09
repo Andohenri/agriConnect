@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils'
 const InputField = ({ name, label, placeholder, type = 'text', register, error, disabled, validation, value }: FormInputProps) => {
   return (
     <div className='space-y-2'>
-      <Label htmlFor={name} className='form-label'>{label}</Label>
+      <Label htmlFor={name} className='form-label'>
+        {label}
+        {validation?.required && <span className="text-red-500 ml-1">*</span>}
+      </Label>
       <Input
         type={type}
         id={name}

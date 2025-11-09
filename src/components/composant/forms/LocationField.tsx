@@ -96,7 +96,7 @@ export function LocationField({
                       </Button>
                     </PopoverTrigger>
 
-                    <PopoverContent className="w-[400px] p-0">
+                    <PopoverContent className="sm:w-[350px] p-0">
                       <Command>
                         <CommandInput
                           placeholder="Saisir une adresse..."

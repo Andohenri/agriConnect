@@ -1,5 +1,3 @@
-import type { Role, Statut } from "@/types/enums";
-
 declare global {
   enum Statut {
     ACTIF = "actif",
@@ -38,6 +36,7 @@ declare global {
     email: string;
     telephone: string;
     mot_de_passe: string;
+    confirmation_mot_de_passe: string;
     role: Role;
     adresse?: string;
     localisation?: string;
@@ -48,7 +47,7 @@ declare global {
 
   interface SignInRequest {
     email: string;
-    password: string;
+    mot_de_passe: string;
   }
 
   interface UpdateUserRequest {
