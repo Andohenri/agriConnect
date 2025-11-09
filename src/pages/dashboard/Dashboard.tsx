@@ -1,24 +1,16 @@
 import { DollarSign, Package, ShoppingCart, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext';
 
+
 const Dashboard = () => {
   const { user } = useAuth();
   const userRole = user?.role;
+  console.log(userRole);
+  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-linear-to-br from-blue-500 to-blue-600 text-white p-4 md:p-6 rounded-2xl shadow-lg">
-          <div className="flex justify-between items-start mb-4">
-            <Package size={32} className="opacity-80" />
-            <span className="bg-blue-400 bg-opacity-30 px-3 py-1 rounded-full text-sm">+12%</span>
-          </div>
-          <p className="text-2xl md:text-3xl font-bold mb-1">
-            {userRole === 'farmer' ? '15' : '47'}
-          </p>
-          <p className="text-blue-100 text-sm">
-            {userRole === 'farmer' ? 'Produits actifs' : 'Produits trouvés'}
-          </p>
-        </div>
+       
 
         <div className="bg-linear-to-br from-green-500 to-green-600 text-white p-4 md:p-6 rounded-2xl shadow-lg">
           <div className="flex justify-between items-start mb-4">
@@ -36,7 +28,7 @@ const Dashboard = () => {
           </div>
           <p className="text-2xl md:text-3xl font-bold mb-1">450K Ar</p>
           <p className="text-yellow-100 text-sm">
-            {userRole === 'farmer' ? 'Revenus ce mois' : 'Dépenses ce mois'}
+            {/* {userRole === Role.PAYSAN? 'Revenus ce mois' : 'Dépenses ce mois'} */}
           </p>
         </div>
 

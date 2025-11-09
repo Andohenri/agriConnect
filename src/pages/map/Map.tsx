@@ -1,7 +1,9 @@
 // import { MessageSquare, Package, Phone, User, Map } from "lucide-react";
-import { MessageSquare, Phone } from "lucide-react";
+// import { MessageSquare, Phone } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MapView = () => {
   const products = [
@@ -52,6 +54,9 @@ const MapView = () => {
     },
   ];
 
+  const navigate = useNavigate();
+  const markerRefs = useRef<(L.Marker | null)[]>([]);
+
   const createEmojiIcon = (emoji: string) =>
     L.divIcon({
       html: `<div style="
@@ -72,75 +77,70 @@ const MapView = () => {
       popupAnchor: [0, -40],
     });
   return (
-    <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <MapContainer
-          center={[-18.8792, 47.5079]} // Antananarivo
-          zoom={7}
-          scrollWheelZoom={true}
-          className="w-full h-[600px]"
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <MapContainer
+        center={[-18.8792, 47.5079]}
+        zoom={7}
+        scrollWheelZoom={true}
+        className="w-full h-[600px]"
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          {products.map((product) => (
-            <Marker
-              key={product.id}
-              position={[product.lat, product.lng]}
-              icon={createEmojiIcon(product.image)}
-            >
-              <Popup>
-                <div className="space-y-1">
-                  <p className="font-bold text-lg">{product.name}</p>
-                  <p className="text-sm text-gray-600">{product.type}</p>
-                  <p className="text-green-600 font-semibold">
-                    {product.quantity} {product.unit} —{" "}
-                    {product.price.toLocaleString()} Ar
-                  </p>
-                  <p className="text-sm text-gray-500">📍 {product.location}</p>
-                  <p className="text-sm">👨‍🌾 {product.farmer}</p>
-                  <p className="text-sm">📞 {product.phone}</p>
-                  <p className="text-xs text-gray-400">🗓️ {product.date}</p>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MapContainer>
-      </div>
-
-      {/* Liste des producteurs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {products.map((product) => (
-          <div
+        {products.map((product, index) => (
+          <Marker
             key={product.id}
-            className="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition"
+            position={[product.lat, product.lng]}
+            icon={createEmojiIcon(product.image)}
+            ref={(ref) => {
+              markerRefs.current[index] = ref;
+            }}
+            eventHandlers={{
+              mouseover: () => markerRefs.current[index]?.openPopup(),
+              // mouseout supprimé
+            }}
           >
-            <div className="flex items-start gap-3">
-              <div className="text-4xl">{product.image}</div>
-              <div className="flex-1">
-                <h4 className="font-bold">{product.farmer}</h4>
-                <p className="text-sm text-gray-600">{product.location}</p>
-                <p className="text-xs text-green-600 mt-1">
-                  {product.name} - {product.quantity}
-                  {product.unit}
+            <Popup closeButton={true} closeOnClick={false}>
+              <div className="space-y-2">
+                <p className="font-bold text-lg">{product.name}</p>
+                <p className="text-sm text-gray-600">{product.type}</p>
+                <p className="text-green-600 font-semibold">
+                  {product.quantity} {product.unit} —{" "}
+                  {product.price.toLocaleString()} Ar
                 </p>
+                <p className="text-sm text-gray-500">📍 {product.location}</p>
+                <p className="text-sm">👨‍🌾 {product.farmer}</p>
+                <p className="text-sm">📞 {product.phone}</p>
+                <p className="text-xs text-gray-400">🗓️ {product.date}</p>
+
+                {/* Boutons */}
                 <div className="flex gap-2 mt-2">
-                  <button className="flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                    <Phone size={12} />
-                    Appeler
+                  <button
+                    onClick={() => alert(`Appeler ${product.farmer}`)}
+                    className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs cursor-pointer"
+                  >
+                    📞 Appeler
                   </button>
-                  <button className="flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                    <MessageSquare size={12} />
-                    Message
+                  <button
+                    onClick={() => alert(`Message à ${product.farmer}`)}
+                    className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs cursor-pointer"
+                  >
+                    ✉️ Message
+                  </button>
+                  <button
+                    onClick={() => navigate(`/profile/${product.id}`)}
+                    className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs cursor-pointer"
+                  >
+                    👤 Voir Profil
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
+            </Popup>
+          </Marker>
         ))}
-      </div>
+      </MapContainer>
     </div>
   );
 };

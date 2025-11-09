@@ -33,7 +33,7 @@ const Layout = () => {
         />
         
         {/* Zone de contenu dynamique */}
-        <main className="p-4 md:p-8">
+        <main className="min-h-[calc(100vh-64px)]">
           <Outlet />
         </main>
       </div>

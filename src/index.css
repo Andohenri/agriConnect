@@ -117,4 +117,8 @@
   body {
     @apply bg-background text-foreground;
   }
+    section {
+    @apply p-4 md:p-8;
+  }
 }
+
