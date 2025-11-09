@@ -18,6 +18,7 @@ import AddProduct from "@/pages/products/AddProduct";
 import Profile from "@/pages/profile/Profile";
 import OrderDetails from "@/pages/orders/OrderDetails";
 import AdminRoute from "./AdminRoute";
+import AdminDashboard from "@/pages/admin/dashboard/Dashbord";
 
 
 // ✅ Loader pour afficher le spinner pendant l’auth
@@ -89,7 +90,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: "dashboard", element: <Dashboard /> },
+      { path: "dashboard", element: <AdminDashboard /> },
       { path: "analytics", element: <Analytics /> },
 
       {

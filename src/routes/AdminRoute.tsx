@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Role } from "@/types/enums";
 
 const AdminRoute = ({ children }: { children: ReactNode }) => {
   const { loading, user } = useAuth();
@@ -13,9 +14,12 @@ const AdminRoute = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  // if (!user) {
-  //   return <Navigate to="/sign-in" replace />;
-  // }
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/sign-in" replace />;
+  }
+  if (user && user?.role !== Role.ADMIN) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return children;
 };
