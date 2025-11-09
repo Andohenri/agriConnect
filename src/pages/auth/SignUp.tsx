@@ -6,6 +6,7 @@ import FooterLink from "@/components/composant/forms/FooterLink";
 import SelectField from "@/components/composant/forms/SelectField";
 import { LocationField } from "@/components/composant/forms/LocationField";
 import { useAuth } from "@/contexts/AuthContext";
+import UserService from "@/service/user.service";
 
 const ROLES = [
   { value: 'paysan', label: 'Paysan' },
@@ -37,13 +38,13 @@ const SignUp = () => {
   const onSubmit = async (data: SignUpRequest) => {
     try {
       console.log("Form Data Submitted: ", data);
-      // const response = await UserService.signUp(data);
-      // login(response.access_token);
-      // if (response?.user?.role === "admin") {
-      //   navigate("/admin/dashboard");
-      // } else {
-      //   navigate("/dashboard");
-      // }
+      const response = await UserService.signUp(data);
+      login(response.access_token);
+      if (response?.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Error during sign up: ", error);
     }
@@ -162,13 +163,9 @@ const SignUp = () => {
               validation={{
                 required: 'Le mot de passe est requis',
                 minLength: {
-                  value: 8,
-                  message: 'Le mot de passe doit contenir au moins 8 caractères'
+                  value: 6,
+                  message: 'Le mot de passe doit contenir au moins 6 caractères'
                 },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                  message: 'Doit contenir majuscule, minuscule et chiffre'
-                }
               }}
             />
             {/* Confirmation mot de passe */}
@@ -182,13 +179,9 @@ const SignUp = () => {
               validation={{
                 required: 'Le mot de passe est requis',
                 minLength: {
-                  value: 8,
-                  message: 'Le mot de passe doit contenir au moins 8 caractères'
+                  value: 6,
+                  message: 'Le mot de passe doit contenir au moins 6 caractères'
                 },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                  message: 'Doit contenir majuscule, minuscule et chiffre'
-                }
               }}
             />
           </div>

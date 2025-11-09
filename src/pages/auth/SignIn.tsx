@@ -72,12 +72,8 @@ const SignIn = () => {
             validation={{
               required: 'Le mot de passe est requis',
               minLength: {
-                value: 8,
-                message: 'Le mot de passe doit contenir au moins 8 caractères'
-              },
-              pattern: {
-                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                message: 'Doit contenir majuscule, minuscule et chiffre'
+                value: 6,
+                message: 'Le mot de passe doit contenir au moins 6 caractères'
               }
             }}
           />
