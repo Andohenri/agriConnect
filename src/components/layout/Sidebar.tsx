@@ -6,7 +6,7 @@ import {
   MessageSquare,
   Map,
   BarChart3,
-  // User,
+  Users,
   LogOut,
   X,
 } from "lucide-react";
@@ -27,19 +27,28 @@ const Sidebar = ({ isOpen, onClose, isMobile }: SidebarProps) => {
     navigate("/login");
   };
 
-  const menuItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
-    { path: "/analytics", icon: BarChart3, label: "Statistiques" },
-    {
-      path: "/products",
-      icon: Package,
-      label: user?.role === "paysan" ? "Mes Produits" : "Produits",
-    },
-    { path: "/map", icon: Map, label: "Carte" },
-    { path: "/orders", icon: ShoppingCart, label: "Commandes" },
-    { path: "/messages", icon: MessageSquare, label: "Messages" },
-  ];
-
+ const menuItems =
+  user?.role === "admin"
+    ? [
+        { path: "/admin/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+        { path: "/admin/analytics", icon: BarChart3, label: "Statistiques" },
+        { path: "/admin/products", icon: Package, label: "Produits" },
+        { path: "/admin/map", icon: Map, label: "Carte" },
+        { path: "/admin/orders", icon: ShoppingCart, label: "Commandes" },
+        { path: "/admin/users", icon: Users, label: "Utilisateurs" },
+      ]
+    : [
+        { path: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+        { path: "/analytics", icon: BarChart3, label: "Statistiques" },
+        {
+          path: "/products",
+          icon: Package,
+          label: user?.role === "paysan" ? "Mes Produits" : "Produits",
+        },
+        { path: "/map", icon: Map, label: "Carte" },
+        { path: "/orders", icon: ShoppingCart, label: "Commandes" },
+        { path: "/messages", icon: MessageSquare, label: "Messages" },
+      ];
   return (
     <div
       className={`
@@ -57,10 +66,14 @@ const Sidebar = ({ isOpen, onClose, isMobile }: SidebarProps) => {
               <h1 className="text-2xl font-black flex items-center text-nowrap gap-2">
                 AgriConnect
               </h1>
-              <p className="text-green-200 text-[13px] ">
+              <p className="text-green-200 text-[13px]">
                 {user?.role === "paysan"
                   ? "Espace Paysan"
-                  : "Espace Collecteur"}
+                  : user?.role === "collecteur"
+                  ? "Espace Collecteur"
+                  : user?.role === "admin"
+                  ? "Espace Administrateur"
+                  : ""}
               </p>
             </div>
           </div>

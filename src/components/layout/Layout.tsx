@@ -26,7 +26,7 @@ const Layout = () => {
       />
       
       {/* Contenu principal */}
-      <div className={`${isMobile ? 'ml-0' : 'ml-64'} transition-all duration-300`}>
+      <div className={`${isMobile ? 'ml-0' : 'ml-64'} transition-all duration-300 overflow-hidden`}>
         <TopBar
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           isMobile={isMobile}

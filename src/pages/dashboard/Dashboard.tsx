@@ -1,5 +1,7 @@
 import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext';
+// import { Role } from "@/types/enums";
+
 
 
 const Dashboard = () => {

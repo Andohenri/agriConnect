@@ -1,6 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Star } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
+import { Role } from "@/types/enums";
+
 
 const Profile = () => {
   const { user } = useAuth();
@@ -187,7 +189,7 @@ const Profile = () => {
                 {userProfile.prenom} {userProfile.nom}
               </h3>
               <p className="text-gray-500 mb-4">
-                {userRole === "farmer" ? "Paysan" : "Collecteur"}
+                {userRole === Role.PAYSAN ? "Paysan" : "Collecteur"}
               </p>
               <button className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition font-semibold">
                 Changer la photo

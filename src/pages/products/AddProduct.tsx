@@ -32,7 +32,7 @@ export const UNITES = [
 
 const AddProduct = () => {
   const navigate = useNavigate();
-  const { product, isEditing, isAdding, resetProductState } = useProduct();
+  const { product, isEditing, resetProductState } = useProduct();
   const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
 
   const {

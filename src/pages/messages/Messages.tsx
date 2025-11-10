@@ -214,7 +214,7 @@ const Messages = () => {
     : [];
 
   return (
-    <section className="bg-gray-50 h-screen overflow-hidden">
+    <section className="bg-gray-50 overflow-hidden">
       <div className="max-w-7xl mx-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden h-full md:h-[calc(100vh-3rem)]">
         <div className="grid grid-cols-1 md:grid-cols-12 h-full overflow-hidden">
           {/* Sidebar - Liste des conversations */}
