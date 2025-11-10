@@ -1,10 +1,14 @@
-import { Calendar, Check, DollarSign, MessageSquare, X } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
+import {
+  Calendar,
+  Check,
+  DollarSign,
+  Eye,
+  MessageSquare,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-import { Role } from "@/types/enums";
 
-
-const Orders = () => {
+const AdminOrders = () => {
   const orders = [
     {
       id: 1,
@@ -12,6 +16,7 @@ const Orders = () => {
       quantity: 100,
       status: "pending",
       buyer: "Société AgriTrade",
+      seller: "Ferme Antananarivo",
       date: "2025-11-03",
     },
     {
@@ -20,18 +25,15 @@ const Orders = () => {
       quantity: 50,
       status: "accepted",
       buyer: "CoopéGrain",
+      seller: "Culture Bio SARL",
       date: "2025-11-02",
     },
   ];
-  const { user } = useAuth();
-  const userRole = user?.role;
 
   return (
     <section>
       <div className="space-y-6">
-        <h2 className="text-xl md:text-2xl font-bold">
-          {userRole === Role.PAYSAN ? "Commandes reçues" : "Mes Commandes"}
-        </h2>
+        <h2 className="text-xl md:text-2xl font-bold">Gestion des Commandes</h2>
 
         <div className="flex flex-col gap-4">
           {orders.map((order) => (
@@ -47,12 +49,13 @@ const Orders = () => {
                         {order.product}
                       </h3>
                       <p className="text-sm md:text-base text-gray-600">
-                        Quantité: {order.quantity} kg
+                        Quantité : {order.quantity} kg
                       </p>
                       <p className="text-xs md:text-sm text-gray-500 mt-1">
-                        {userRole === Role.PAYSAN
-                          ? `Acheteur: ${order.buyer}`
-                          : "Vendeur: Jean Rakoto"}
+                        Vendeur : {order.seller}
+                      </p>
+                      <p className="text-xs md:text-sm text-gray-500">
+                        Acheteur : {order.buyer}
                       </p>
                     </div>
                   </div>
@@ -62,6 +65,8 @@ const Orders = () => {
                         ? "bg-yellow-100 text-yellow-700"
                         : order.status === "accepted"
                         ? "bg-green-100 text-green-700"
+                        : order.status === "delivered"
+                        ? "bg-blue-100 text-blue-700"
                         : "bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -69,7 +74,9 @@ const Orders = () => {
                       ? "⏳ En attente"
                       : order.status === "accepted"
                       ? "✅ Acceptée"
-                      : "📦 Livrée"}
+                      : order.status === "delivered"
+                      ? "📦 Livrée"
+                      : "🕓 Inconnue"}
                   </span>
                 </div>
 
@@ -78,33 +85,41 @@ const Orders = () => {
                   <span>Commandé le {order.date}</span>
                 </div>
 
-                {userRole === Role.PAYSAN && order.status === "pending" && (
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-                    <button className="flex-1 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold">
-                      <Check size={20} />
-                      Accepter
-                    </button>
-                    <button className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 transition flex items-center justify-center gap-2 font-semibold">
-                      <X size={20} />
-                      Refuser
-                    </button>
-                  </div>
-                )}
+                {/* Actions Admin */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                  {order.status === "pending" && (
+                    <>
+                      <button className="flex-1 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold">
+                        <Check size={20} />
+                        Accepter
+                      </button>
+                      <button className="flex-1 bg-red-600 text-white px-4 py-3 rounded-xl hover:bg-red-700 transition flex items-center justify-center gap-2 font-semibold">
+                        <X size={20} />
+                        Refuser
+                      </button>
+                    </>
+                  )}
 
-                {order.status === "accepted" && (
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-                    <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2 font-semibold">
-                      <MessageSquare size={20} />
-                      Contacter
-                    </button>
-                    {userRole === Role.COLLECTEUR && (
+                  {order.status === "accepted" && (
+                    <>
+                      <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2 font-semibold">
+                        <MessageSquare size={20} />
+                        Contacter
+                      </button>
                       <button className="flex-1 bg-green-600 text-white px-4 py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold">
                         <DollarSign size={20} />
-                        Payer
+                        Marquer comme livrée
                       </button>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+
+                  {order.status === "delivered" && (
+                    <button className="flex-1 bg-gray-600 text-white px-4 py-3 rounded-xl hover:bg-gray-700 transition flex items-center justify-center gap-2 font-semibold">
+                      <Eye size={20} />
+                      Voir Détails
+                    </button>
+                  )}
+                </div>
               </div>
             </Link>
           ))}
@@ -114,4 +129,4 @@ const Orders = () => {
   );
 };
 
-export default Orders;
+export default AdminOrders;

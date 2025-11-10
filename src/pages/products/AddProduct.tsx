@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeft } from "lucide-react";
 import React, { useState } from "react";
 

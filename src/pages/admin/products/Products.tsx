@@ -1,11 +1,7 @@
 import { Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { Calendar, MapPin, Package, Plus, ShoppingCart } from "lucide-react";
-import { Role } from "@/types/enums";
+import { Ban, Calendar, CheckCircle, MapPin, Package, Trash2 } from "lucide-react";
 
-const Products = () => {
-  const { user } = useAuth();
-  const userRole = user?.role;
+const AdminProducts = () => {
 
   const products = [
     {
@@ -22,10 +18,12 @@ const Products = () => {
       latitude: -18.8792,
       longitude: 47.5079,
       paysan: "Jean Rakoto",
+      owner: "Jean Rakoto",
       telephone: "034 12 345 67",
       description: "Riz de qualité supérieure, cultivé biologiquement",
       certification: "Bio",
       statut: "disponible",
+      active: true,
     },
     {
       id: 2,
@@ -41,10 +39,12 @@ const Products = () => {
       latitude: -19.4,
       longitude: 46.95,
       paysan: "Marie Rasoa",
+      owner: "Marie Rasoa",
       telephone: "033 98 765 43",
       description: "Maïs frais et bio",
       certification: "Bio",
       statut: "disponible",
+      active: true,
     },
     {
       id: 3,
@@ -60,10 +60,12 @@ const Products = () => {
       latitude: -18.95,
       longitude: 47.52,
       paysan: "Paul Randria",
+      owner: "Paul Randria",
       telephone: "032 55 444 33",
       description: "Haricots secs de première qualité",
       certification: "",
       statut: "disponible",
+      active: true,
     },
   ];
 
@@ -72,26 +74,18 @@ const Products = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl md:text-2xl font-bold">
-            {userRole === Role.PAYSAN ? "Mes Produits" : "Produits Disponibles"}
+            Gestion des Produits
           </h2>
-          {userRole === Role.PAYSAN && (
-            <button className="w-full sm:w-auto bg-linear-to-r from-green-600 to-green-700 text-white px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition">
-              <Plus size={20} />
-              Ajouter un produit
-            </button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {products.map((product) => (
             <Link key={product.id} to={`/products/${product.id}`}>
-              <div
-                key={product.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition group"
-              >
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition group">
                 <div className="h-40 md:h-48 bg-linear-to-br from-green-100 to-green-200 flex items-center justify-center text-6xl md:text-8xl group-hover:scale-110 transition">
                   {product.image}
                 </div>
+
                 <div className="p-4 md:p-6 space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -101,9 +95,19 @@ const Products = () => {
                       <p className="text-xs md:text-sm text-gray-500">
                         {product.type}
                       </p>
+                      <p className="text-xs md:text-sm text-gray-500 mt-1">
+                        Créé par :{" "}
+                        <span className="font-semibold">{product.owner}</span>
+                      </p>
                     </div>
-                    <span className="bg-green-100 text-green-700 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
-                      Disponible
+                    <span
+                      className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold ${
+                        product.active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {product.active ? "Actif" : "Inactif"}
                     </span>
                   </div>
 
@@ -135,16 +139,31 @@ const Products = () => {
                       </p>
                       <p className="text-xs text-gray-500">par kg</p>
                     </div>
-                    {userRole === Role.COLLECTEUR ? (
-                      <button className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
-                        <ShoppingCart size={18} />
-                        Commander
+
+                    <div className="flex flex-wrap gap-2">
+                      <button className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700 transition text-sm flex items-center gap-2">
+                        <Trash2 size={16} />
+                        Supprimer
                       </button>
-                    ) : (
-                      <button className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        Modifier
+
+                      <button
+                        className={`${
+                          product.active
+                            ? "bg-gray-600 hover:bg-gray-700"
+                            : "bg-green-600 hover:bg-green-700"
+                        } text-white px-3 py-2 rounded-lg transition text-sm flex items-center gap-2`}
+                      >
+                        {product.active ? (
+                          <>
+                            <Ban size={16} /> Désactiver
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle size={16} /> Activer
+                          </>
+                        )}
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -156,4 +175,4 @@ const Products = () => {
   );
 };
 
-export default Products;
+export default AdminProducts;

@@ -39,7 +39,7 @@ interface ProductProps {
   statut: string;
 }
 
-const ProductDetail = ({ product }: { product: ProductProps }) => {
+const AdminProductDetail = ({ product }: { product: ProductProps }) => {
   const { user } = useAuth();
   const userRole = user?.role;
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -222,4 +222,4 @@ const ProductDetail = ({ product }: { product: ProductProps }) => {
   );
 };
 
-export default ProductDetail;
+export default AdminProductDetail;

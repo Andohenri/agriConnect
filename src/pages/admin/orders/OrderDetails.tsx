@@ -13,7 +13,7 @@ import {
 import { Role } from "@/types/enums";
 
 
-const OrderDetails = () => {
+const AdminOrderDetails = () => {
   const { user } = useAuth();
   const userRole = user?.role; // 'farmer' or 'collector'
   const orders = [
@@ -351,4 +351,4 @@ const OrderDetails = () => {
   );
 };
 
-export default OrderDetails;
+export default AdminOrderDetails;
