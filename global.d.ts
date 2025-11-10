@@ -73,6 +73,7 @@ declare global {
     label: string;
     placeholder: string;
     type?: string;
+    rows?: number;
     register: UseFormRegister;
     error?: FieldError;
     validation?: RegisterOptions;
@@ -103,6 +104,87 @@ declare global {
       longitude?: FieldError;
     };
   }
+
+  enum ProductType {
+    GRAIN = 'grain',
+    LEGUMINEUSE = 'legumineuse',
+    TUBERCULE = 'tubercule',
+    FRUIT = 'fruit',
+    LEGUME = 'legume',
+    EPICE = 'epice',
+    AUTRE = 'autre'
+  }
+
+  enum Unite {
+    KG = 'kg',
+    TONNE = 'tonne',
+    SAC = 'sac',
+    LITRE = 'litre'
+  }
+
+  enum ProductStatut {
+    DISPONIBLE = 'disponible',
+    RUPTURE = 'rupture',
+    ARCHIVE = 'archive'
+  }
+
+  type LocalisationInfo = {
+    adresse?: string;
+    latitude?: number;
+    longitude?: number;
+  }
+
+  type Product = {
+    id?: string;
+    nom: string;
+    type: ProductType;
+    sousType?: string | null;
+    description?: string | null;
+    quantiteDisponible: number | string;
+    unite?: Unite;
+    prixUnitaire: number | string;
+    dateRecolte: Date | string;
+    datePeremption?: Date | string | null;
+    imageUrl?: string;
+    statut?: ProductStatut;
+    conditionsStockage?: string | null;
+    localisation?: LocalisationInfo;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    paysan?: {
+      id?: string;
+      nom?: string;
+      prenom?: string;
+      telephone?: string;
+      email?: string;
+      role?: Role;
+    };
+  };
+
+  type ProductFormData = {
+    nom: string;
+    type: ProductType;
+    sousType?: string;
+    description?: string;
+    quantiteDisponible: number | string;
+    unite?: Unite;
+    prixUnitaire: number | string;
+    dateRecolte: string;
+    datePeremption?: string;
+    image?: FileList;
+    conditionsStockage?: string;
+    localisation?: string;
+    latitude?: number;
+    longitude?: number;
+  };
+
+  type ProductResponse = {
+    data: Product[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalItems: number;
+  };
 }
 
 export { };

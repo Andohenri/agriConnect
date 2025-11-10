@@ -52,7 +52,7 @@ export function LocationField({
     } else {
       setSuggestions([]);
     }
-  }, 500);
+  }, 300);
 
   const handleSearchChange = (search: string) => {
     setSearchInput(search);
@@ -114,7 +114,6 @@ export function LocationField({
                                   key={index}
                                   value={suggestion.display_name}
                                   onSelect={() => {
-                                    // ✅ Met à jour les 3 champs séparément
                                     localisationField.onChange(suggestion.display_name);
                                     latitudeField.onChange(parseFloat(suggestion.lat));
                                     longitudeField.onChange(parseFloat(suggestion.lon));

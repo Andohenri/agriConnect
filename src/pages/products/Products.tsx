@@ -1,154 +1,96 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Calendar, MapPin, Package, Plus, ShoppingCart } from "lucide-react";
+import { Role } from '@/types/enums';
+import { Button } from "@/components/ui/button";
+import { ProductCard, ProductCardSkeleton } from "@/components/composant/ProductCard";
+import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useProduct } from "@/contexts/ProductContext";
+import { ProductService } from "@/service/product.service";
 
 const Products = () => {
   const { user } = useAuth();
-  const userRole = user?.role;
+  const navigate = useNavigate();
+  const { setIsEditing, setIsAdding, setProduct } = useProduct();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const products = [
-    {
-      id: 1,
-      nom: "Riz Premium",
-      type: "Grain",
-      sous_type: "Bio",
-      quantite_disponible: 500,
-      unite: "kg",
-      prix_unitaire: 2500,
-      date_recolte: "2025-01-15",
-      image: "🌾",
-      localisation: "Analamanga",
-      latitude: -18.8792,
-      longitude: 47.5079,
-      paysan: "Jean Rakoto",
-      telephone: "034 12 345 67",
-      description: "Riz de qualité supérieure, cultivé biologiquement",
-      certification: "Bio",
-      statut: "disponible",
-    },
-    {
-      id: 2,
-      nom: "Maïs Bio",
-      type: "Grain",
-      sous_type: "Frais",
-      quantite_disponible: 300,
-      unite: "kg",
-      prix_unitaire: 1800,
-      date_recolte: "2025-01-20",
-      image: "🌽",
-      localisation: "Vakinankaratra",
-      latitude: -19.4,
-      longitude: 46.95,
-      paysan: "Marie Rasoa",
-      telephone: "033 98 765 43",
-      description: "Maïs frais et bio",
-      certification: "Bio",
-      statut: "disponible",
-    },
-    {
-      id: 3,
-      nom: "Haricots Secs",
-      type: "Légumineuse",
-      sous_type: "Sec",
-      quantite_disponible: 200,
-      unite: "kg",
-      prix_unitaire: 3200,
-      date_recolte: "2025-01-18",
-      image: "🫘",
-      localisation: "Analamanga",
-      latitude: -18.95,
-      longitude: 47.52,
-      paysan: "Paul Randria",
-      telephone: "032 55 444 33",
-      description: "Haricots secs de première qualité",
-      certification: "",
-      statut: "disponible",
-    },
-  ];
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await ProductService.getAllProducts();
+      if (response?.data) {
+        setProducts(response.data);
+      } else {
+        console.warn("Unexpected products response:", response);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCommand = (productId: string) => {
+    console.log('Commander produit:', productId);
+    // Ouvrir une modale de commande ou rediriger
+  };
+
+  const handleAddProduct = () => {
+    setProduct(null);
+    setIsAdding(true);
+    setIsEditing(false);
+    navigate('/products/add');
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setProduct(product);
+    setIsEditing(true);
+    setIsAdding(false);
+    navigate('/products/add');
+  };
 
   return (
     <section>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl md:text-2xl font-bold">
-            {userRole === "farmer" ? "Mes Produits" : "Produits Disponibles"}
+            {user?.role === Role.PAYSAN ? "Mes Produits" : "Produits Disponibles"}
           </h2>
-          {userRole === "farmer" && (
-            <button className="w-full sm:w-auto bg-linear-to-r from-green-600 to-green-700 text-white px-4 md:px-6 py-3 rounded-xl flex items-center justify-center gap-2 hover:shadow-lg transition">
-              <Plus size={20} />
+          {user?.role === Role.PAYSAN && (
+            <Button onClick={handleAddProduct} className="btn-primary flex items-center gap-2">
+              <Plus size={24} />
               Ajouter un produit
-            </button>
+            </Button>
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {products.map((product) => (
-            <Link key={product.id} to={`/products/${product.id}`}>
-              <div
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {isLoading ? (
+            // Afficher les skeletons pendant le chargement
+            Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))
+          ) : products.length === 0 ? (
+            // Message si aucun produit
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-500 text-lg">Aucun produit disponible</p>
+            </div>
+          ) : (
+            products.map((product) => (
+              <ProductCard
                 key={product.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition group"
-              >
-                <div className="h-40 md:h-48 bg-linear-to-br from-green-100 to-green-200 flex items-center justify-center text-6xl md:text-8xl group-hover:scale-110 transition">
-                  {product.image}
-                </div>
-                <div className="p-4 md:p-6 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg md:text-xl font-bold">
-                        {product.nom}
-                      </h3>
-                      <p className="text-xs md:text-sm text-gray-500">
-                        {product.type}
-                      </p>
-                    </div>
-                    <span className="bg-green-100 text-green-700 px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold">
-                      Disponible
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Package size={14} className="shrink-0" />
-                      <span className="text-xs md:text-sm">
-                        {product.quantite_disponible} {product.unite}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <MapPin size={14} className="shrink-0" />
-                      <span className="text-xs md:text-sm">
-                        {product.localisation}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={14} className="shrink-0" />
-                      <span className="text-xs md:text-sm">
-                        Récolté le {product.date_recolte}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                      <p className="text-xl md:text-2xl font-bold text-green-600">
-                        {product.prix_unitaire.toLocaleString()} Ar
-                      </p>
-                      <p className="text-xs text-gray-500">par kg</p>
-                    </div>
-                    {userRole === "collector" ? (
-                      <button className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2">
-                        <ShoppingCart size={18} />
-                        Commander
-                      </button>
-                    ) : (
-                      <button className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        Modifier
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+                product={product}
+                userRole={user?.role}
+                onCommand={handleCommand}
+                onEdit={() => handleEditProduct(product)}
+              />
+            ))
+          )}
         </div>
       </div>
     </section>

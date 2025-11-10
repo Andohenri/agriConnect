@@ -9,7 +9,7 @@ const Layout = () => {
   const isMobile = useMediaQuery({ query: '(max-width: 767px)' });
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="">
       {/* Overlay pour mobile */}
       {sidebarOpen && isMobile && (
         <div 

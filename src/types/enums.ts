@@ -10,3 +10,26 @@ export const Role = {
   COLLECTEUR: "collecteur",
   ADMIN: "admin",
 } as const;
+
+export const ProductType = {
+    GRAIN: 'grain',
+    LEGUMINEUSE: 'legumineuse',
+    TUBERCULE: 'tubercule',
+    FRUIT: 'fruit',
+    LEGUME: 'legume',
+    EPICE: 'epice',
+    AUTRE: 'autre'
+  } as const;
+  
+  export const Unite = {
+    KG: 'kg',
+    TONNE: 'tonne',
+    SAC: 'sac',
+    LITRE: 'litre'
+  } as const;
+
+  export const ProductStatut = {
+    DISPONIBLE: 'disponible',
+    RUPTURE: 'rupture',
+    ARCHIVE: 'archive'
+  } as const;

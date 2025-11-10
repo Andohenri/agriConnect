@@ -19,11 +19,12 @@ const SelectField = ({ name, label, placeholder, options, control, error, requir
       <Controller
         name={name}
         control={control}
+        defaultValue={""}
         rules={{
           required: required ? `Veuillez sélectionner ${label.toLocaleLowerCase()}` : false,
         }}
         render={({ field }) => (
-          <Select value={field.value} onValueChange={field.onChange}>
+          <Select value={field.value ?? ""} onValueChange={field.onChange}>
             <SelectTrigger className="select-trigger">
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
