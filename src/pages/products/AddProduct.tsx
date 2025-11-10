@@ -103,6 +103,7 @@ const AddProduct = () => {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      console.log('Submitting form data:', data);
       const formData = new FormData();
 
       formData.append('nom', data.nom);

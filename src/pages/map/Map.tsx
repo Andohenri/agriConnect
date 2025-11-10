@@ -77,12 +77,12 @@ const MapView = () => {
       popupAnchor: [0, -40],
     });
   return (
-    <div className="bg-white shadow-lg overflow-hidden mt-[4rem]">
+    <div className="bg-white shadow-lg overflow-hidden mt-16 z-10">
       <MapContainer
         center={[-18.8792, 47.5079]}
         zoom={7}
         scrollWheelZoom={true}
-        className="w-full min-h-[calc(100vh-64px)]"
+        className="w-full min-h-[calc(100vh-64px)] z-0"
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'

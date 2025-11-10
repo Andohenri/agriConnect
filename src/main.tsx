@@ -13,8 +13,8 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <ProductProvider>
-      <AppRouter />
-      <Toaster />
+        <AppRouter />
+        <Toaster />
       </ProductProvider>
     </AuthProvider>
   </StrictMode>

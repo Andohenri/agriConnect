@@ -3,13 +3,14 @@ import { Outlet } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import { Toaster } from 'sonner';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMobile = useMediaQuery({ query: '(max-width: 767px)' });
 
   return (
-    <div className="">
+    <div className="min-h-screen">
       {/* Overlay pour mobile */}
       {sidebarOpen && isMobile && (
         <div 
