@@ -8,9 +8,11 @@ import {
   BarChart3,
   Users,
   LogOut,
-  X,
+  ChevronLeft,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 type SidebarProps = {
   isOpen: boolean;
@@ -58,7 +60,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }: SidebarProps) => {
     `}
     >
       {/* Header */}
-      <div className="px-5 py-4 ">
+      <div className="px-5 py-4 realtive">
         <div className="flex justify-between items-center">
           <div className="flex gap-2 items-center">
             <div className="text-4xl">🌾</div>
@@ -78,9 +80,9 @@ const Sidebar = ({ isOpen, onClose, isMobile }: SidebarProps) => {
             </div>
           </div>
           {isMobile && (
-            <button onClick={onClose} className="text-white">
-              <X size={24} />
-            </button>
+            <Button variant={'default'} onClick={onClose} className={cn('absolute bg-green-700 top-4 text-white font-bold', isOpen ? '-right-4': 'right-0')}>
+              <ChevronLeft className="font-bold" size={24} />
+            </Button>
           )}
         </div>
       </div>

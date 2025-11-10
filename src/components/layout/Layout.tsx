@@ -3,10 +3,9 @@ import { Outlet } from 'react-router-dom';
 import { useMediaQuery } from 'react-responsive';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
-import { Toaster } from 'sonner';
 
 const Layout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useMediaQuery({ query: '(max-width: 767px)' });
 
   return (

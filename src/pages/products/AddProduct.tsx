@@ -45,11 +45,11 @@ const AddProduct = () => {
   } = useForm<ProductFormData>({
     defaultValues: {
       nom: '',
-      type: undefined,
+      type: product?.type || '',
       sousType: '',
       description: '',
       quantiteDisponible: '',
-      unite: undefined,
+      unite: product?.unite || '',
       prixUnitaire: '',
       dateRecolte: '',
       datePeremption: '',
@@ -72,16 +72,17 @@ const AddProduct = () => {
       return () => URL.revokeObjectURL(previewUrl);
     }
   }, [watchImage]);
+  
   // Charger les données du produit si en mode édition
   useEffect(() => {
     if (isEditing && product) {
       reset({
         nom: product.nom,
-        type: (product.type as any) ?? '',
+        type: product.type,
         sousType: product.sousType || '',
         description: product.description || '',
         quantiteDisponible: product.quantiteDisponible,
-        unite: (product.unite as any) ?? '',
+        unite: product.unite,
         prixUnitaire: product.prixUnitaire,
         dateRecolte: product.dateRecolte
           ? typeof product.dateRecolte === 'string'
@@ -94,9 +95,9 @@ const AddProduct = () => {
             : new Date(product.datePeremption).toISOString().split('T')[0]
           : '',
         conditionsStockage: product.conditionsStockage || '',
-        localisation: (product.paysan as any)?.localisation || '',
-        latitude: (product.paysan as any)?.latitude,
-        longitude: (product.paysan as any)?.longitude,
+        localisation: product.localisation?.adresse || '',
+        latitude: product.localisation?.latitude,
+        longitude: product.localisation?.longitude,
       });
     }
   }, [isEditing, product, reset]);
@@ -126,7 +127,7 @@ const AddProduct = () => {
       }
 
       if (isEditing && product?.id) {
-        await ProductService.updateProduct(product.id, formData);
+        await ProductService.updateProduct(product.id, formData);        
         toast.success('Produit mis à jour avec succès !');
       } else {
         await ProductService.createProduct(formData);
