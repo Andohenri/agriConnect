@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Package, MapPin, Calendar, ShoppingCart, Edit, AlertCircle } from 'lucide-react';
+import { Package, Calendar, ShoppingCart, Edit, AlertCircle } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { formatDate, formatPrice, formatQuantity, PRODUCT_STATUT_CONFIG, PRODUCT_TYPE_ICONS, PRODUCT_TYPE_LABELS, UNITE_LABELS } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 import { Role, ProductStatut } from '@/types/enums';
-import { use } from 'react';
 import { useProduct } from '@/contexts/ProductContext';
 
 interface ProductCardProps {

@@ -29,26 +29,6 @@ import Users from "@/pages/admin/users/Users";
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
-const product = {
-  id: 3,
-  nom: "Haricots Secs",
-  type: "Légumineuse",
-  sous_type: "Sec",
-  quantite_disponible: 200,
-  unite: "kg",
-  prix_unitaire: 3200,
-  date_recolte: "2025-01-18",
-  image: "🫘",
-  localisation: "Analamanga",
-  latitude: -18.95,
-  longitude: 47.52,
-  paysan: "Paul Randria",
-  telephone: "032 55 444 33",
-  description: "Haricots secs de première qualité",
-  certification: "",
-  statut: "disponible",
-};
-
 const router = createBrowserRouter([
   // ✅ Routes publiques
   {
@@ -84,7 +64,7 @@ const router = createBrowserRouter([
         path: "products",
         children: [
           { index: true, element: <Products /> },
-          { path: ":id", element: <ProductDetail product={product} /> },
+          { path: ":id", element: <ProductDetail/> },
           { path: "add", element: <AddProduct /> },
           { path: "edit/:id", element: <AddProduct /> },
         ],
@@ -120,7 +100,7 @@ const router = createBrowserRouter([
         path: "products",
         children: [
           { index: true, element: <AdminProducts/> },
-          { path: ":id", element: <AdminProductDetail product={product} /> },
+          { path: ":id", element: <AdminProductDetail /> },
         ],
       },
 
