@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   enum Statut {
     ACTIF = "actif",
@@ -184,6 +185,30 @@ declare global {
     limit: number;
     totalPages: number;
     totalItems: number;
+  };
+
+
+  type Zone = {
+    id?: string;
+    nom: string;
+    description?: string;
+    // Polygone représentant la zone : tableau de points (latitude, longitude)
+    coordinates: { lat: number; lng: number }[];
+    // Point central ou adresse associée
+    centre?: {
+      latitude: number;
+      longitude: number;
+      adresse?: string;
+    };
+    // Optionnel : qui a créé cette zone (utile pour filtrer par collecteur/admin)
+    createdBy?: {
+      id: string;
+      nom: string;
+      prenom: string;
+      role: Role;
+    };
+    createdAt?: string;
+    updatedAt?: string;
   };
 }
 
