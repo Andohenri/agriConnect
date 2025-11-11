@@ -17,8 +17,8 @@ export const ProductService = {
     return response.data;
   },
   async updateProduct(productId: string, productData: FormData): Promise<Product> {
-    const response = await Axios.patch(`${this.BASE_PATH}/${productId}`, productData, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const response = await Axios.put(`${this.BASE_PATH}/${productId}`, productData, {  
+      headers: { "Content-Type": "multipart/form-data" },  
     });
     return response.data;
   },

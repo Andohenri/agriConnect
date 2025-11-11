@@ -4,9 +4,6 @@ import axios, { type AxiosInstance } from "axios";
 const Axios: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api", // URL backend
   timeout: 10000, // délai maximum (10s)
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // ✅ Intercepteur pour ajouter le token d'authentification si présent
