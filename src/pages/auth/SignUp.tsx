@@ -37,7 +37,6 @@ const SignUp = () => {
 
   const onSubmit = async (data: SignUpRequest) => {
     try {
-      console.log("Form Data Submitted: ", data);
       const response = await UserService.signUp(data);
       login(response.access_token);
       if (response?.user?.role === "admin") {

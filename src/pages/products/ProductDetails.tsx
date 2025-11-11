@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { formatDate, formatPrice, formatQuantity, PRODUCT_STATUT_CONFIG, PRODUCT_TYPE_LABELS, UNITE_LABELS } from "@/lib/utils";
 import { Role, ProductStatut, ProductType } from "@/types/enums";
 import { ProductService } from "@/service/product.service";
+import { OrderModal } from "@/components/composant/OrderModal";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -86,11 +87,6 @@ const ProductDetail = () => {
     } finally {
       setIsDeleting(false);
     }
-  };
-
-  const handleCommand = () => {
-    // Logique de commande
-    toast.info('Fonctionnalité de commande à venir');
   };
 
   const handleContact = () => {
@@ -343,13 +339,14 @@ const ProductDetail = () => {
               <div className="space-y-3 pt-4 border-t">
                 {isCollector && isAvailable && (
                   <>
-                    <Button
-                      onClick={handleCommand}
-                      className="w-full bg-green-600 hover:bg-green-700 h-12"
+                    <OrderModal
+                      product={product}
+                      disableTrigger={!isAvailable}
+                      classTrigger="w-full bg-green-600 hover:bg-green-700 h-12 cursor-pointer"
                     >
                       <ShoppingCart size={20} />
                       Commander
-                    </Button>
+                    </OrderModal>
                     <Button
                       onClick={handleContact}
                       variant="outline"

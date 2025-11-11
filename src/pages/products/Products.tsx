@@ -35,11 +35,6 @@ const Products = () => {
     }
   };
 
-  const handleCommand = (productId: string) => {
-    console.log('Commander produit:', productId);
-    // Ouvrir une modale de commande ou rediriger
-  };
-
   const handleAddProduct = () => {
     setProduct(null);
     setIsAdding(true);
@@ -86,7 +81,6 @@ const Products = () => {
                 key={product.id}
                 product={product}
                 userRole={user?.role}
-                onCommand={handleCommand}
                 onEdit={() => handleEditProduct(product)}
               />
             ))

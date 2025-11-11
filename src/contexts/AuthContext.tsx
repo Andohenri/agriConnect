@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // ✅ Login : on ne reçoit QUE le token
   const login = async (newToken: string, remember = true) => {
     setToken(newToken);
-    console.log("token login",newToken);
     
     if (remember) localStorage.setItem(STORAGE_TOKEN_KEY, newToken);
     else sessionStorage.setItem(STORAGE_TOKEN_KEY, newToken);

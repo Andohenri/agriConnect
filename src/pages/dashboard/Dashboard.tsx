@@ -7,7 +7,6 @@ import { useAuth } from '../../contexts/AuthContext';
 const Dashboard = () => {
   const { user } = useAuth();
   const userRole = user?.role;
-  console.log(userRole);
   
   return (
     <section className="space-y-6">

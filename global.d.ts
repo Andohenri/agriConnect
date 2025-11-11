@@ -142,7 +142,7 @@ declare global {
     description?: string | null;
     quantiteDisponible: number | string;
     unite?: Unite;
-    prixUnitaire: number | string;
+    prixUnitaire: number;
     dateRecolte: Date | string;
     datePeremption?: Date | string | null;
     imageUrl?: string;
