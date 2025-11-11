@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, MapPin, Calendar, Package, TrendingUp, Heart, MessageCircle, Phone, Mail, Edit, Settings, Shield, BarChart3, Clock, CheckCircle, XCircle, ChevronRight, User, Eye } from 'lucide-react';
+import { Star, MapPin, Calendar, Package, TrendingUp, Heart, MessageCircle, Phone, Mail, Edit, Settings, Shield, BarChart3, Clock, CheckCircle, User, Eye } from 'lucide-react';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('apercu');
@@ -98,7 +98,7 @@ const Profile = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         
         {/* Toggle pour tester les deux vues */}
@@ -115,8 +115,8 @@ const Profile = () => {
         {/* Header Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-6 border border-gray-100">
           <div className="relative">
-            {/* Gradient Background */}
-            <div className="h-32 md:h-40 bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 relative overflow-hidden">
+            {/* linear Background */}
+            <div className="h-32 md:h-40 bg-linear-to-r from-emerald-500 via-green-500 to-teal-500 relative overflow-hidden">
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
@@ -128,7 +128,7 @@ const Profile = () => {
               <div className="flex flex-col md:flex-row gap-6 -mt-16 md:-mt-20">
                 {/* Avatar */}
                 <div className="relative">
-                  <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl flex items-center justify-center text-6xl md:text-7xl border-4 border-white shadow-2xl">
+                  <div className="w-32 h-32 md:w-40 md:h-40 bg-linear-to-br from-green-400 to-emerald-600 rounded-3xl flex items-center justify-center text-6xl md:text-7xl border-4 border-white shadow-2xl">
                     {userProfile.photo_profil}
                   </div>
                   <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg">
@@ -140,11 +140,11 @@ const Profile = () => {
                 <div className="flex-1 pt-4 md:pt-6">
                   <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                      <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                         {userProfile.prenom} {userProfile.nom}
                       </h1>
                       <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
+                        <span className="bg-linear-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
                           {userProfile.role}
                         </span>
                         <span className="flex items-center gap-1.5 text-gray-600 text-sm">
@@ -163,7 +163,7 @@ const Profile = () => {
                     <div className="flex flex-col gap-2 min-w-fit">
                       {isOwnProfile ? (
                         <>
-                          <button className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
+                          <button className="px-6 py-2.5 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
                             <Edit size={18} />
                             Modifier
                           </button>
@@ -174,7 +174,7 @@ const Profile = () => {
                         </>
                       ) : (
                         <>
-                          <button className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
+                          <button className="px-6 py-2.5 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
                             <MessageCircle size={18} />
                             Contacter
                           </button>
@@ -190,22 +190,22 @@ const Profile = () => {
                   {/* Quick Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
                     <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{produits.length}</div>
+                      <div className="text-2xl font-bold bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{produits.length}</div>
                       <div className="text-xs text-gray-500 font-medium">Produits actifs</div>
                     </div>
                     <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{userProfile.stats.transactions}</div>
+                      <div className="text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{userProfile.stats.transactions}</div>
                       <div className="text-xs text-gray-500 font-medium">Transactions</div>
                     </div>
                     <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-1">
+                      <div className="text-2xl font-bold bg-linear-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-1">
                         {userProfile.stats.note}
                         <Star size={16} fill="#f59e0b" className="text-amber-500" />
                       </div>
                       <div className="text-xs text-gray-500 font-medium">Note moyenne</div>
                     </div>
                     <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{userProfile.stats.taux_reussite}%</div>
+                      <div className="text-2xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{userProfile.stats.taux_reussite}%</div>
                       <div className="text-xs text-gray-500 font-medium">Fiabilité</div>
                     </div>
                   </div>
@@ -249,7 +249,7 @@ const Profile = () => {
             {activeTab === 'apercu' && (
               <>
                 {isOwnProfile && (
-                  <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl">
+                  <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl">
                     <h3 className="text-2xl font-bold mb-6">📊 Vos performances ce mois-ci</h3>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
@@ -278,7 +278,7 @@ const Profile = () => {
                     {produits.slice(0, 4).map(p => (
                       <div key={p.id} className="group border-2 border-gray-100 rounded-2xl p-4 hover:border-green-200 hover:shadow-md transition-all cursor-pointer">
                         <div className="flex gap-4">
-                          <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-4xl flex-shrink-0">
+                          <div className="w-20 h-20 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-4xl shrink-0">
                             {p.image}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -308,7 +308,7 @@ const Profile = () => {
                   <div key={p.id} className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all group">
                     <div className="p-6">
                       <div className="flex gap-6">
-                        <div className="w-32 h-32 bg-gradient-to-br from-orange-100 via-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center text-6xl flex-shrink-0 group-hover:scale-105 transition-transform">
+                        <div className="w-32 h-32 bg-linear-to-br from-orange-100 via-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center text-6xl shrink-0 group-hover:scale-105 transition-transform">
                           {p.image}
                         </div>
                         <div className="flex-1">
@@ -331,7 +331,7 @@ const Profile = () => {
                               <div className="text-xs text-gray-500 mb-1">Quantité</div>
                               <div className="font-bold">{p.quantite} {p.unite}</div>
                             </div>
-                            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3">
+                            <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-3">
                               <div className="text-xs text-gray-500 mb-1">Prix unitaire</div>
                               <div className="font-bold text-green-600">{p.prix.toLocaleString()} Ar</div>
                             </div>
@@ -381,8 +381,8 @@ const Profile = () => {
                 <h3 className="text-xl font-bold mb-6">Historique des transactions</h3>
                 <div className="space-y-3">
                   {transactions.map(t => (
-                    <div key={t.id} className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition">
-                      <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div key={t.id} className="flex items-center gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition">
+                      <div className="w-12 h-12 bg-linear-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center shrink-0">
                         <CheckCircle className="text-green-600" size={24} />
                       </div>
                       <div className="flex-1">
@@ -407,7 +407,7 @@ const Profile = () => {
                 <div className="space-y-3">
                   {activities.map((a, i) => (
                     <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                         a.type === 'produit' ? 'bg-blue-100' : 'bg-green-100'
                       }`}>
                         {a.type === 'produit' ? <Package size={18} className="text-blue-600" /> : <TrendingUp size={18} className="text-green-600" />}
@@ -428,7 +428,7 @@ const Profile = () => {
               <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
                 <h3 className="text-xl font-bold mb-6">Informations de contact</h3>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl">
+                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-blue-50 to-cyan-50 rounded-2xl">
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                       <Mail className="text-blue-600" size={20} />
                     </div>
@@ -437,7 +437,7 @@ const Profile = () => {
                       <div className="font-semibold">{userProfile.email}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl">
+                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl">
                     <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                       <Phone className="text-green-600" size={20} />
                     </div>
@@ -446,7 +446,7 @@ const Profile = () => {
                       <div className="font-semibold">{userProfile.telephone}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl">
+                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-purple-50 to-pink-50 rounded-2xl">
                     <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                       <MapPin className="text-purple-600" size={20} />
                     </div>
@@ -458,7 +458,7 @@ const Profile = () => {
                 </div>
                 
                 {!isOwnProfile && (
-                  <button className="w-full mt-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all font-bold">
+                  <button className="w-full mt-6 py-4 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all font-bold">
                     Envoyer un message
                   </button>
                 )}
@@ -471,7 +471,7 @@ const Profile = () => {
             
             {/* Performance Card (Own Profile) */}
             {isOwnProfile && (
-              <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-xl">
+              <div className="bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-xl">
                 <div className="flex items-center gap-2 mb-4">
                   <Shield size={24} />
                   <h3 className="font-bold text-lg">Votre Score</h3>
