@@ -21,13 +21,15 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 interface PropositionFormData {
-  quantite: number;
-  date_livraison_prevue: string;
-  lieu_livraison: string;
+  paysanId?: string;
+  produitId?: string;
+  quantiteAccordee: number;
+  prixUnitaire: number;
+  dateLivraisonPrevue: string;
+  adresseLivraison: string;
   latitude?: number;
   longitude?: number;
   messageCollecteur: string;
-  prixPropose: number;
 }
 
 interface OrderModalProps {
@@ -49,18 +51,20 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
     watch,
   } = useForm<PropositionFormData>({
     defaultValues: {
-      quantite: undefined,
-      date_livraison_prevue: "",
-      lieu_livraison: "",
+      paysanId: product?.paysan?.id,
+      produitId: product?.id,
+      quantiteAccordee: undefined,
+      prixUnitaire: product?.prixUnitaire || undefined,
+      dateLivraisonPrevue: "",
+      adresseLivraison: "",
       latitude: undefined,
       longitude: undefined,
       messageCollecteur: "",
-      prixPropose: product?.prixUnitaire || undefined,
     },
   });
 
-  const watchQuantite = watch("quantite");
-  const watchPrixPropose = watch("prixPropose");
+  const watchQuantite = watch("quantiteAccordee");
+  const watchPrixPropose = watch("prixUnitaire");
 
   const total = watchQuantite && watchPrixPropose
     ? watchQuantite * watchPrixPropose
@@ -160,12 +164,12 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
             {/* Quantité et Prix sur la même ligne */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                name="quantite"
+                name="quantiteAccordee"
                 label={`Quantité souhaitée (${product?.unite ? UNITE_LABELS[product.unite] : 'unité'})`}
                 type="number"
                 placeholder="Ex: 200"
                 register={register}
-                error={errors.quantite}
+                error={errors.quantiteAccordee}
                 validation={{
                   required: "La quantité est requise",
                   min: { value: 1, message: "Minimum 1" },
@@ -177,12 +181,12 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
               />
 
               <InputField
-                name="prixPropose"
+                name="prixUnitaire"
                 label={`Prix proposé (Ar/${product?.unite ? UNITE_LABELS[product.unite] : 'unité'})`}
                 type="number"
                 placeholder="Ex: 2500"
                 register={register}
-                error={errors.prixPropose}
+                error={errors.prixUnitaire}
                 validation={{
                   required: "Le prix proposé est requis",
                   min: { value: 1, message: "Le prix doit être supérieur à 0" },
@@ -206,11 +210,11 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
                 placeholder=""
-                name="date_livraison_prevue"
+                name="dateLivraisonPrevue"
                 label="Date de livraison souhaitée"
                 type="date"
                 register={register}
-                error={errors.date_livraison_prevue}
+                error={errors.dateLivraisonPrevue}
                 validation={{
                   required: "La date de livraison est requise",
                   validate: (value: any) => {
@@ -224,13 +228,13 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
 
               <LocationField
                 control={control}
-                localisationName="lieu_livraison"
+                localisationName="adresseLivraison"
                 latitudeName="latitude"
                 longitudeName="longitude"
                 label="Lieu de livraison"
                 required
                 errors={{
-                  localisation: errors.lieu_livraison,
+                  localisation: errors.adresseLivraison,
                   latitude: errors.latitude,
                   longitude: errors.longitude,
                 }}
