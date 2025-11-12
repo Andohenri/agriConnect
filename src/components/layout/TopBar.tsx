@@ -49,7 +49,7 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
         </Tooltip>
         <Tooltip text="Profile">
           <Link to="/profile">
-            <div className="p-2 bg-gray-100 rounded-full md:flex items-center cursor-pointer gap-2">
+            <div className="px-2 py-1.5 bg-gray-100 rounded-full md:flex items-center cursor-pointer gap-2">
               <UserAvatar src={user?.avatar} fallback={user?.nom?.charAt(0) || "U"} />
               <div className="hidden md:block px-2">
                 <p className="font-semibold text-sm">
