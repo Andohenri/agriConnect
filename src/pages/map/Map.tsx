@@ -112,26 +112,6 @@ const MapView = () => {
     }
   };
 
-  // const fetchProducts = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const data = await ProductService.getAllProducts();
-  //     const availableProducts = data.filter(
-  //       (product: { statut: string; localisation: { latitude: any; longitude: any; }; }) =>
-  //         product.statut === ProductStatut.DISPONIBLE &&
-  //         product.localisation?.latitude &&
-  //         product.localisation?.longitude
-  //     );
-  //     setProducts(availableProducts);
-  //     setFilteredProducts(availableProducts);
-  //   } catch (error) {
-  //     console.error("Erreur lors du chargement des produits:", error);
-  //     toast.error("Erreur lors du chargement de la carte");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   // Calculer la distance entre deux points (formule de Haversine)
   const calculateDistance = (
     lat1: number,

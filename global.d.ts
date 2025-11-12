@@ -254,7 +254,33 @@ declare global {
     ANNULEE = "annulee",
   }
 
+  type OrderResponse = {
+    data: Order[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalItems: number;
+  };
 
+  export type OrderFormData = {
+    produitRecherche: string;
+    quantiteTotal: number | string;
+    unite: Unite;
+    prixUnitaire: number | string;
+    statut?: OrderStatut; 
+    messageCollecteur?: string;
+
+    adresseLivraison?: string;
+    dateLivraisonPrevue?: string;
+    dateLivraison?: string;
+
+    territoire?: string;
+    latitude?: number;
+    longitude?: number;
+    rayon?: number;
+
+    collecteurId: string;
+  };
 }
 
 export { };

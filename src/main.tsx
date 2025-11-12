@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
       <OrderProvider>
         <ProductProvider>
           <AppRouter />
-          <Toaster />
+          <Toaster position="top-right" richColors />
         </ProductProvider>
       </OrderProvider>
     </AuthProvider>
