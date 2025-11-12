@@ -1,10 +1,23 @@
-import { Calendar, Check, DollarSign, MessageSquare, X } from "lucide-react";
+import { Calendar, Check, DollarSign, MessageSquare, Plus, X } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Role } from "@/types/enums";
-
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useOrder } from "@/contexts/OrderContext";
 
 const Orders = () => {
+  const navigate = useNavigate();
+  const { setIsEditing, setIsAdding, setOrder } = useOrder();
+
+  const handlePublishOrder = () => {
+    setOrder(null);
+    setIsAdding(true);
+    setIsEditing(false);
+    navigate('/orders/ask');
+  };
+
+
   const orders = [
     {
       id: 1,
@@ -29,9 +42,20 @@ const Orders = () => {
   return (
     <section>
       <div className="space-y-6">
-        <h2 className="text-xl md:text-2xl font-bold">
-          {userRole === Role.PAYSAN ? "Commandes reçues" : "Mes Commandes"}
-        </h2>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl md:text-2xl font-bold">
+            {userRole === Role.PAYSAN ? "Commandes reçues" : "Mes Commandes"}
+          </h2>
+          {user?.role === Role.COLLECTEUR && (
+            <Button
+              onClick={handlePublishOrder}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Plus size={24} />
+              Demander un produit
+            </Button>
+          )}
+        </div>
 
         <div className="flex flex-col gap-4">
           {orders.map((order) => (

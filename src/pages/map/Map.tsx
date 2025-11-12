@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
   MapContainer,
@@ -45,6 +44,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { OrderModal } from "@/components/composant/OrderModal";
+import { ProductStatut } from "@/types/enums";
 
 // Composant pour recentrer la carte
 function ChangeMapView({
@@ -375,12 +376,6 @@ const MapView = () => {
   const handleViewProduct = (productId?: string) => {
     if (productId) {
       navigate(`/products/${productId}`);
-    }
-  };
-
-  const handleCommand = (productId?: string) => {
-    if (productId) {
-      toast.info("Fonctionnalité de commande à venir");
     }
   };
 
@@ -745,6 +740,7 @@ const MapView = () => {
           {filteredProducts.map((product, index) => {
             const lat = product.localisation?.latitude;
             const lng = product.localisation?.longitude;
+            const isAvailable = product.statut === ProductStatut.DISPONIBLE;
 
             if (!lat || !lng) return null;
 
@@ -807,13 +803,15 @@ const MapView = () => {
 
                       {isCollector && (
                         <>
-                          <button
-                            onClick={() => handleCommand(product.id)}
-                            className="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-green-200 transition flex items-center gap-1"
+                         
+                          <OrderModal
+                            product={product}
+                            disableTrigger={!isAvailable}
+                            classTrigger="w-full sm:w-auto bg-green-600 hover:bg-green-700 cursor-pointer"
                           >
-                            <ShoppingCart size={14} />
+                            <ShoppingCart size={18} />
                             Commander
-                          </button>
+                          </OrderModal>
 
                           {product.paysan?.telephone && (
                             <button

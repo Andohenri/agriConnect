@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   enum Statut {
     ACTIF = "actif",
@@ -210,6 +209,52 @@ declare global {
     createdAt?: string;
     updatedAt?: string;
   };
+
+
+  type Order = {
+    id?: string;
+    produitRecherche?: string | null;
+    quantiteTotal?: number | string | null;
+    unite?: Unite;
+    prixUnitaire?: number | string | null;
+    statut?: CommandeStatut;
+    messageCollecteur?: string | null;
+
+    adresseLivraison?: string | null;
+    dateLivraisonPrevue?: Date | string | null;
+    dateLivraison?: Date | string | null;
+
+    territoire?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    rayon?: number | null;
+
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+
+    collecteurId: string;
+    collecteur?: {
+      id?: string;
+      nom?: string;
+      prenom?: string;
+      telephone?: string;
+      email?: string;
+      role?: Role;
+    };
+
+  };
+
+  enum OrderStatut {
+    EN_ATTENTE = "en_attente",
+    OUVERTE = "ouverte",
+    PARTIELLEMENT_FOURNIE = "partiellement_fournie",
+    COMPLETE = "complete",
+    ACCEPTEE = "acceptee",
+    LIVREE = "livree",
+    ANNULEE = "annulee",
+  }
+
+
 }
 
 export { };

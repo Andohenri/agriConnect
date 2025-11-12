@@ -26,6 +26,7 @@ import AdminOrderDetails from "@/pages/admin/orders/OrderDetails";
 import AdminProducts from "@/pages/admin/products/Products";
 import AdminProductDetail from "@/pages/admin/products/ProductDetails";
 import Users from "@/pages/admin/users/Users";
+import OrderPublish from "@/pages/orders/OrderPublish";
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
@@ -64,7 +65,7 @@ const router = createBrowserRouter([
         path: "products",
         children: [
           { index: true, element: <Products /> },
-          { path: ":id", element: <ProductDetail/> },
+          { path: ":id", element: <ProductDetail /> },
           { path: "add", element: <AddProduct /> },
           { path: "edit/:id", element: <AddProduct /> },
         ],
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Orders /> },
           { path: ":id", element: <OrderDetails /> },
+          { path: "ask", element: <OrderPublish /> },
         ],
       },
 
@@ -94,12 +96,12 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: "dashboard", element: <AdminDashboard /> },
-      { path: "analytics", element: <AdminAnalytics/> },
+      { path: "analytics", element: <AdminAnalytics /> },
 
       {
         path: "products",
         children: [
-          { index: true, element: <AdminProducts/> },
+          { index: true, element: <AdminProducts /> },
           { path: ":id", element: <AdminProductDetail /> },
         ],
       },
@@ -107,8 +109,8 @@ const router = createBrowserRouter([
       {
         path: "orders",
         children: [
-          { index: true, element: <AdminOrders/> },
-          { path: ":id", element: <AdminOrderDetails/> },
+          { index: true, element: <AdminOrders /> },
+          { path: ":id", element: <AdminOrderDetails /> },
         ],
       },
 

@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import InputField from "@/components/composant/forms/InputField";
 import { LocationField } from "@/components/composant/forms/LocationField";
 import SelectField from "@/components/composant/forms/SelectField";
