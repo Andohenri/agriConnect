@@ -1,14 +1,18 @@
 import Axios from "@/lib/axiosInstance";
 
 export const OrderService = {
-    BASE_PATH: "/orders",
+    BASE_PATH: "/commandes",
     async getAllOrders(): Promise<OrderResponse> {
         const response = await Axios.get(`${this.BASE_PATH}?page=1&limit=10`);
         return response.data;
     },
-    async createOrder(orderData: FormData): Promise<Order> {
+    async createOrder(orderData: OrderPublishReq): Promise<Order> {
         const response = await Axios.post(this.BASE_PATH, orderData, {
-            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    },
+    async demmandeOrder(orderData: OrderPublishReq): Promise<Order> {
+        const response = await Axios.post(`${this.BASE_PATH}/demander`, orderData, {
         });
         return response.data;
     },
@@ -16,9 +20,8 @@ export const OrderService = {
         const response = await Axios.get(`${this.BASE_PATH}/${orderId}`);
         return response.data;
     },
-    async updateOrder(orderId: string, orderData: FormData): Promise<Order> {
+    async updateOrder(orderId: string, orderData: OrderPublishReq): Promise<Order> {
         const response = await Axios.put(`${this.BASE_PATH}/${orderId}`, orderData, {
-            headers: { "Content-Type": "multipart/form-data" },
         });
         return response.data;
     },

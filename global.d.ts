@@ -267,7 +267,7 @@ declare global {
     quantiteTotal: number | string;
     unite: Unite;
     prixUnitaire: number | string;
-    statut?: OrderStatut; 
+    statut?: OrderStatut;
     messageCollecteur?: string;
 
     adresseLivraison?: string;
@@ -281,6 +281,24 @@ declare global {
 
     collecteurId: string;
   };
+
+  export interface OrderPublishReq {
+    produitRecherche: string;
+    quantiteTotal: number | string;
+    unite: Unite;
+    prixUnitaire: number | string;
+    messageCollecteur?: string;
+
+    adresseLivraison?: string;
+    dateLivraisonPrevue?: string;
+
+    territoire?: string;
+    latitude?: number;
+    longitude?: number;
+    rayon?: number;
+
+    collecteurId: string;
+  }
 }
 
 export { };
