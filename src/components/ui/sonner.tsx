@@ -1,5 +1,4 @@
 import {
-  BellRing,
   CircleCheckIcon,
   InfoIcon,
   Loader2Icon,
@@ -15,7 +14,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group text-shadow-amber-400"
+      className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
