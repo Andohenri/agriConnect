@@ -6,6 +6,10 @@ export const OrderService = {
         const response = await Axios.get(`${this.BASE_PATH}?page=1&limit=10`);
         return response.data;
     },
+    async getAllOrdersCollecteur(collecteurId: string): Promise<OrderResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/collecteur/${collecteurId}?page=1&limit=10`);
+        return response.data;
+    },
     async createOrder(orderData: OrderPublishReq): Promise<Order> {
         const response = await Axios.post(this.BASE_PATH, orderData, {
         });

@@ -25,7 +25,7 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
           <span className="absolute left-3 top-1/2 z-20 -translate-y-1/2 text-gray-400 pointer-events-none">
             <Search size={16} />
           </span>
-          <SearchCommand className="pl-10" placeholder={isMobile ? "" : "Rechercher des produits, paysans, collecteurs..."}
+          <SearchCommand className="pl-10" placeholder={isMobile ? "" : "Rechercher..."}
           />
         </div>
       </div>

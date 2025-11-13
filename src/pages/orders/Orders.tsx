@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShoppingCart, Target } from "lucide-react";
+import { Plus, ShoppingCart, Target } from "lucide-react";
 import { toast } from "sonner";
 import { Role, CommandeStatut, StatutCommandeLigne, Unite, ProductType } from "@/types/enums";
 import { useNavigate } from "react-router-dom";
 import OrderRequestCard from "@/components/composant/OrderRequestCard";
 import DirectOrderCard from "@/components/composant/DirectOrderCard";
 import { useOrder } from "@/contexts/OrderContext";
+import { Button } from "@/components/ui/button";
+import { OrderService } from "@/service/order.service";
+import Tooltip from "../../components/composant/Tooltip";
 
 const Orders = () => {
   const { user } = useAuth();
@@ -90,6 +93,35 @@ const Orders = () => {
       ],
     },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      let response;
+      if (userRole === Role.PAYSAN) {
+        response = await OrderService.getAllOrders();
+      }
+      else {
+        response = await OrderService.getAllOrdersCollecteur(user?.id || "");
+      }
+      if (response?.data) {
+        setOrders(response.data);
+      } else {
+        console.warn("Unexpected products response:", response);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
 
   // Séparer commandes directes et demandes
   const directOrders = orders.filter(
@@ -195,6 +227,10 @@ const Orders = () => {
     navigate(`/orders/${orderId}`);
   };
 
+  const handleAPublishOrder = () => {
+    navigate('/orders/ask');
+  };
+
   return (
     <section>
       <div className="space-y-6">
@@ -208,6 +244,12 @@ const Orders = () => {
               {orders.length} commande(s) au total
             </p>
           </div>
+          {user?.role === Role.COLLECTEUR && (
+            <Button onClick={handleAPublishOrder} className="btn-primary flex items-center gap-2">
+              <Plus size={24} />
+              Publier une demande de commande
+            </Button>
+          )}
         </div>
 
         {/* Tabs pour séparer commandes directes et demandes */}
@@ -215,18 +257,22 @@ const Orders = () => {
           <TabsList>
             <TabsTrigger value="direct" className="flex items-center gap-2">
               <ShoppingCart size={16} />
-              Commandes Directes
-              <Badge variant="secondary">{directOrders.length}</Badge>
+              <span className="hidden sm:block">Commandes Directes</span>
+              <Tooltip text="Commandes directes reçues">
+                <Badge variant="secondary">{directOrders.length}</Badge>
+              </Tooltip>
             </TabsTrigger>
             <TabsTrigger value="requests" className="flex items-center gap-2">
               <Target size={16} />
-              Demandes
-              <Badge variant="secondary">{orderRequests.length}</Badge>
+              <span className="hidden sm:block">Demandes</span>
+              <Tooltip text="Demandes de matières premières reçues">
+                <Badge variant="secondary">{orderRequests.length}</Badge>
+              </Tooltip>
             </TabsTrigger>
           </TabsList>
 
           {/* Commandes Directes */}
-          <TabsContent value="direct" className="space-y-4 mt-6 grid xl:grid-cols-3 3xl:grid-cols-4 gap-4">
+          <TabsContent value="direct" className="space-y-4 mt-6 grid xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {directOrders.length === 0 ? (
               <Card className="p-12 text-center">
                 <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
@@ -249,7 +295,7 @@ const Orders = () => {
           </TabsContent>
 
           {/* Demandes de Commande */}
-          <TabsContent value="requests" className="space-y-4 mt-6 grid xl:grid-cols-3 3xl:grid-cols-4 gap-4">
+          <TabsContent value="requests" className="space-y-4 mt-6 grid xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {orderRequests.length === 0 ? (
               <Card className="p-12 text-center">
                 <Target size={48} className="mx-auto text-gray-400 mb-4" />

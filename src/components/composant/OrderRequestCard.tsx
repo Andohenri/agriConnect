@@ -112,7 +112,7 @@ const OrderRequestCard = ({
                     </DropdownMenuItem>
 
                     {/* Contacter le collecteur */}
-                    {order.collecteur && (
+                    {order.collecteur && userRole === Role.PAYSAN && (
                       <DropdownMenuItem onClick={() => onContact(order.collecteurId)}>
                         <MessageSquare size={16} className="mr-2" />
                         Contacter le collecteur
@@ -188,7 +188,7 @@ const OrderRequestCard = ({
 
         {/* Résumé des propositions */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="flex flex-col items-center p-3 bg-green-50 rounded-lg border border-green-200">
+          <div className="flex flex-col items-center p-2 bg-green-50 rounded-lg border border-green-200">
             <div className="flex items-center gap-1 mb-1">
               <CheckCircle size={14} className="text-green-600" />
               <span className="text-xs text-gray-600">Acceptées</span>
@@ -196,15 +196,15 @@ const OrderRequestCard = ({
             <span className="text-2xl font-bold text-green-600">{nbAcceptees}</span>
           </div>
 
-          <div className="flex flex-col items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div className="flex flex-col items-center p-2 bg-yellow-50 rounded-lg border border-yellow-200">
             <div className="flex items-center gap-1 mb-1">
               <Clock size={14} className="text-yellow-600" />
-              <span className="text-xs text-gray-600">En attente</span>
+              <span className="text-xs whitespace-nowrap text-gray-600">En attente</span>
             </div>
             <span className="text-2xl font-bold text-yellow-600">{nbEnAttente}</span>
           </div>
 
-          <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex flex-col items-center p-2 bg-gray-50 rounded-lg border border-gray-200">
             <div className="flex items-center gap-1 mb-1">
               <ShoppingCart size={14} className="text-gray-600" />
               <span className="text-xs text-gray-600">Total</span>

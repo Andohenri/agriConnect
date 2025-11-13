@@ -28,6 +28,7 @@ import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
 import { useNavigate } from "react-router-dom";
 import { formatDate, formatPrice, formatQuantity, ORDER_STATUT_CONFIG, UNITE_LABELS } from "@/lib/utils";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 const OrderDetails = () => {
   const { user } = useAuth();
@@ -286,10 +287,10 @@ const OrderDetails = () => {
                             {totalAccepted} / {order.quantiteTotal} {order.unite && UNITE_LABELS[order.unite]}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div
-                            className="bg-linear-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min(progress, 100)}%` }}
+                        <div className="w-full bg-gray-200 rounded-full">
+                          <Progress
+                            value={progress}
+                            className={"h-2.5 rounded-full"}
                           />
                         </div>
                         <p className="text-xs text-gray-500">{progress.toFixed(0)}% complété</p>
@@ -347,19 +348,6 @@ const OrderDetails = () => {
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Message du collecteur */}
-          {order.messageCollecteur && (
-            <Card className="bg-blue-50 border-2 border-blue-200">
-              <CardContent className="pt-6">
-                <h4 className="font-bold mb-2 flex items-center gap-2">
-                  <MessageSquare className="text-blue-600" size={20} />
-                  Message du collecteur
-                </h4>
-                <p className="text-gray-700">{order.messageCollecteur}</p>
               </CardContent>
             </Card>
           )}
@@ -422,6 +410,19 @@ const OrderDetails = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Message du collecteur */}
+          {order.messageCollecteur && (
+            <Card className="bg-blue-50 border-2 border-blue-200">
+              <CardContent>
+                <h4 className="font-bold mb-2 flex items-center gap-2">
+                  <MessageSquare className="text-blue-600" size={20} />
+                  Message du collecteur
+                </h4>
+                <p className="text-gray-700">{order.messageCollecteur}</p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Actions selon rôle et statut */}
           {userRole === Role.PAYSAN && order.statut === CommandeStatut.EN_ATTENTE && isDirectOrder && (
@@ -512,7 +513,7 @@ const TimelineStep = ({ icon, title, date, completed }: TimelineStepProps) => {
         className={`w-8 h-8 ${completed ? 'bg-green-500' : 'bg-gray-300'
           } rounded-full flex items-center justify-center text-white font-bold z-10 shrink-0`}
       >
-        {completed ? <CheckCircle size={16} /> : <Clock size={16} />}
+        {completed ? icon : <Clock size={16} />}
       </div>
       <div>
         <p className="font-semibold">{title}</p>

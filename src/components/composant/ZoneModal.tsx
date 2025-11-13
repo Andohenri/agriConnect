@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
@@ -206,6 +205,8 @@ const ZoneModal = ({ isOpen, onClose, onZoneSelected }: ZoneModalProps) => {
         className="sm:max-w-4xl max-h-[95vh] overflow-hidden p-0"
         onInteractOutside={(e) => e.preventDefault()}
       >
+        <DialogTitle className="hidden">Définir la Zone de Collecte</DialogTitle>
+        <DialogDescription className="hidden">Sélectionnez un territoire et précisez le rayon de recherche.</DialogDescription>
         {/* Container principal avec scroll */}
         <div className="overflow-y-auto max-h-[calc(95vh-180px)] scrollbar-hide-default">
           {/* Carte interactive */}

@@ -308,6 +308,14 @@ declare global {
 
     collecteurId: string;
   }
+
+  type OrderResponse = {
+    data: Order[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalItems: number;
+  };
 }
 
 export { };

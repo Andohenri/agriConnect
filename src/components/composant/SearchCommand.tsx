@@ -82,9 +82,9 @@ export default function SearchCommand({ placeholder, className }: { placeholder?
           <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
         </kbd>
       </Button>
-      <CommandDialog open={open} onOpenChange={setOpen} className="lg:min-w-[800px] border-gray-200 fixed top-10 left-1/2 -translate-x-1/2 translate-y-10">
+      <CommandDialog open={open} onOpenChange={setOpen} className="lg:min-w-[400px] border-gray-200 fixed top-10 left-1/2 -translate-x-1/2 translate-y-10">
         <div className="border-b border-gray-200 relative">
-          <CommandInput className='border-0 text-gray-400 placeholder:text-gray-500 focus:ring-0 text-base h-14 pr-10' placeholder="Search stocks..." value={searchTerm} onValueChange={setSearchTerm} />
+          <CommandInput className='border-0 text-gray-400 placeholder:text-gray-500 focus:ring-0 text-base h-14 pr-10' placeholder="Rechercher..." value={searchTerm} onValueChange={setSearchTerm} />
           {loading && <Loader2 className='absolute right-12 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 animate-spin' />}
         </div>
         <CommandList className='max-h-[400px]'>

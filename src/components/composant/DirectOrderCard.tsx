@@ -209,7 +209,7 @@ const DirectOrderCard = ({
             </span>
             <span className="text-gray-400">×</span>
             <span className="text-gray-600">
-              {formatPrice(order.prixUnitaire!)} Ar
+              {formatPrice(order.prixUnitaire!)} Ar ({formatPrice(produit?.prixUnitaire!)} Ar unité)
             </span>
           </div>
 

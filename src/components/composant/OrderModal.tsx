@@ -100,7 +100,7 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
       </DialogTrigger>
 
       <DialogContent
-        className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto"
+        className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto scrollbar-hide-default"
         onInteractOutside={(e) => e.preventDefault()}
       >
         <form onSubmit={handleSubmit(onSubmit)}>

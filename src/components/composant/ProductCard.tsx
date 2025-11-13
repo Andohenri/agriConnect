@@ -49,7 +49,7 @@ export function ProductCard({ product, userRole, onEdit }: ProductCardProps) {
 
   return (
     <div className='block group'>
-      <Card className="overflow-hidden p-0! gap-2! hover:shadow-xl transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col">
+      <Card className="overflow-hidden p-0! gap-2! hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col">
         <Link
           to={`/products/${product.id}`}
           onClick={() => handleSelectedProduct()}
