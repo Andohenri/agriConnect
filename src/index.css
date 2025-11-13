@@ -228,4 +228,5 @@
 
 section[aria-label="Notifications alt+T"] {
   position: absolute;
+  top: 0;
 }

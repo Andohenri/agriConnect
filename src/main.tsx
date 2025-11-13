@@ -27,7 +27,9 @@ createRoot(document.getElementById("root")!).render(
     <AuthProvider>
       <OrderProvider>
         <ProductProvider>
-          <RootApp />
+          <div className="overflow-hidden">
+            <RootApp />
+          </div>
         </ProductProvider>
       </OrderProvider>
     </AuthProvider>

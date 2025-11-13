@@ -214,9 +214,9 @@ const Messages = () => {
     : [];
 
   return (
-    <section className="bg-gray-50 overflow-hidden">
-      <div className="max-w-7xl mx-auto bg-white md:rounded-2xl md:shadow-xl overflow-hidden h-full md:h-[calc(100vh-3rem)]">
-        <div className="grid grid-cols-1 md:grid-cols-12 h-full overflow-hidden">
+    <section className="bg-gray-50 overflow-hidden p-0 pt-2">
+      <div className="max-w-7xl mx-auto bg-white md:rounded-2xl h-[calc(100vh-64px)] ">
+        <div className="grid grid-cols-1 md:grid-cols-12 h-full ">
           {/* Sidebar - Liste des conversations */}
           <div
             className={`${
@@ -225,24 +225,24 @@ const Messages = () => {
           >
             {/* Header */}
             <div className="bg-green-600 md:bg-gray-50 text-white md:text-gray-900 p-4 border-b border-green-700 md:border-gray-200 shrink-0">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between  gap-10">
                 <h1 className="text-xl font-bold">Messages</h1>
-                <button className="hover:bg-green-700 md:hover:bg-gray-200 p-2 rounded-full transition">
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={18}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 md:border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm text-gray-900"
+                  />
+                </div>
+                {/* <button className="hover:bg-green-700 md:hover:bg-gray-200  rounded-full transition">
                   <MoreVertical size={20} />
-                </button>
-              </div>
-              <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={18}
-                />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 md:border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm text-gray-900"
-                />
+                </button> */}
               </div>
             </div>
 
@@ -309,7 +309,7 @@ const Messages = () => {
             {selectedChat ? (
               <>
                 {/* Header conversation */}
-                <div className="bg-green-600 md:bg-white text-white md:text-gray-900 p-3 md:p-4 border-b md:border-gray-200 flex items-center justify-between shadow-sm shrink-0">
+                <div className="bg-green-600 md:bg-white text-white md:text-gray-900 p-3 md:p-3 border-b md:border-gray-200 flex items-center justify-between shadow-sm shrink-0">
                   <div className="flex items-center gap-3 md:gap-4">
                     <button
                       onClick={() => setSelectedChat(null)}
