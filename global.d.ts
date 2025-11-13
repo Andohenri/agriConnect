@@ -271,6 +271,43 @@ declare global {
   }
 
 
+  export type OrderFormData = {
+    produitRecherche: string;
+    quantiteTotal: number | string;
+    unite: Unite;
+    prixUnitaire: number | string;
+    statut?: OrderStatut;
+    messageCollecteur?: string;
+
+    adresseLivraison?: string;
+    dateLivraisonPrevue?: string;
+    dateLivraison?: string;
+
+    territoire?: string;
+    latitude?: number;
+    longitude?: number;
+    rayon?: number;
+
+    collecteurId: string;
+  };
+
+  export interface OrderPublishReq {
+    produitRecherche: string;
+    quantiteTotal: number | string;
+    unite: Unite;
+    prixUnitaire: number | string;
+    messageCollecteur?: string;
+
+    adresseLivraison?: string;
+    dateLivraisonPrevue?: string;
+
+    territoire?: string;
+    latitude?: number;
+    longitude?: number;
+    rayon?: number;
+
+    collecteurId: string;
+  }
 }
 
 export { };

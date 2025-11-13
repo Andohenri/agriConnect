@@ -224,3 +224,8 @@
 .scrollbar-hide-default::-webkit-scrollbar-thumb:hover {
   background-color: #9095A1;
 }
+
+
+section[aria-label="Notifications alt+T"] {
+  position: absolute;
+}

@@ -5,33 +5,21 @@ import TextareaField from "@/components/composant/forms/TextareaField";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Calendar } from "lucide-react";
-import { useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { UNITES } from "../products/AddProduct";
 import { LocationField } from "@/components/composant/forms/LocationField";
 import ZoneModal from "@/components/composant/ZoneModal";
+import { OrderService } from "@/service/order.service";
+import { useOrder } from "@/contexts/OrderContext";
 
-interface OrderPublishFormData {
-  produitRecherche: string;
-  quantiteTotal: number | string;
-  unite?: Unite;
-  prixUnitaire?: number | string;
-  messageCollecteur?: string;
-  adresseLivraison?: string;
-  latitudeLivraison?: number;
-  longitudeLivraison?: number;
-  dateLivraisonPrevue?: string;
-  territoire?: string;
-  latitude?: number;
-  longitude?: number;
-  rayon?: number;
-}
 
 const OrderPublish = () => {
   const navigate = useNavigate();
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
+  const { order, isEditing, resetOrderState } = useOrder();
   const [selectedZone, setSelectedZone] = useState<{
     territoire: string;
     latitude: number;
@@ -43,9 +31,10 @@ const OrderPublish = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
     control,
     setValue,
-  } = useForm<OrderPublishFormData>({
+  } = useForm<OrderPublishReq>({
     defaultValues: {
       produitRecherche: "",
       quantiteTotal: "",
@@ -53,8 +42,6 @@ const OrderPublish = () => {
       prixUnitaire: "",
       messageCollecteur: "",
       adresseLivraison: "",
-      latitudeLivraison: undefined,
-      longitudeLivraison: undefined,
       dateLivraisonPrevue: "",
       territoire: "",
       latitude: undefined,
@@ -78,34 +65,52 @@ const OrderPublish = () => {
     toast.success("Zone de collecte définie");
   };
 
-  const onSubmit: SubmitHandler<OrderPublishFormData> = async (data) => {
+  useEffect(() => {
+    if (isEditing && order) {
+      // Pré-remplir le formulaire avec les données de la demande existante
+      reset({
+        produitRecherche: order.produitRecherche || "",
+        quantiteTotal: order.quantiteTotal ? String(order.quantiteTotal) : "",
+        unite: order.unite || undefined,
+        prixUnitaire: order.prixUnitaire ? String(order.prixUnitaire) : "",
+        messageCollecteur: order.messageCollecteur || "",
+        adresseLivraison: order.adresseLivraison || "",
+        dateLivraisonPrevue: order.dateLivraisonPrevue
+          ? new Date(order.dateLivraisonPrevue).toISOString().split("T")[0]
+          : "",
+        territoire: order.territoire || "",
+        latitude: order.latitude || 0,
+        longitude: order.longitude || 0,
+        rayon: order.rayon || 0,
+      });
+      setSelectedZone({
+        territoire: order.territoire ?? "",
+        latitude: order.latitude ?? 0,
+        longitude: order.longitude ?? 0,
+        rayon: order.rayon ?? 0,
+      });
+    }
+  }, [isEditing, order, reset]);
+
+  const onSubmit = async (data: OrderPublishReq) => {
     try {
       // Validation de la zone
       if (!selectedZone) {
         toast.error("Veuillez définir une zone de collecte");
         return;
       }
-
-      const orderData = {
-        produitRecherche: data.produitRecherche,
-        quantiteTotal: Number(data.quantiteTotal),
-        unite: data.unite,
-        prixUnitaire: data.prixUnitaire ? Number(data.prixUnitaire) : null,
-        messageCollecteur: data.messageCollecteur || null,
-        adresseLivraison: data.adresseLivraison || null,
-        dateLivraisonPrevue: data.dateLivraisonPrevue || null,
-        territoire: selectedZone.territoire,
-        latitude: selectedZone.latitude,
-        longitude: selectedZone.longitude,
-        rayon: selectedZone.rayon,
-        statut: "en_attente", // Statut initial
-      };
-
-      // Appel à l'API
-      // await OrderService.publishOrder(orderData);
-
-      console.log("Demande de produit:", orderData);
-      toast.success("Demande de produit publiée avec succès !");
+      if (isEditing && order?.id) {
+        // Mise à jour de la demande existanteisEdi
+        await OrderService.updateOrder(order.id, data);
+        console.log("Demande de produit:", data);
+        toast.success("Demande de produit mise à jour avec succès !");
+      } else {
+        // Création d'une nouvelle demande
+        await OrderService.demmandeOrder(data);
+        console.log("Demande de produit:", data);
+        toast.success("Demande de produit publiée avec succès !");
+      }
+      resetOrderState();
       navigate("/orders");
     } catch (error) {
       console.error("Error submitting order:", error);
@@ -114,6 +119,7 @@ const OrderPublish = () => {
   };
 
   const handleCancel = () => {
+    resetOrderState();
     navigate("/orders");
   };
 
@@ -247,8 +253,6 @@ const OrderPublish = () => {
                 required
                 errors={{
                   localisation: errors.adresseLivraison,
-                  latitude: errors.latitudeLivraison,
-                  longitude: errors.longitudeLivraison,
                 }}
               />
 
