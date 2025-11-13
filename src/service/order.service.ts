@@ -3,7 +3,7 @@ import Axios from "@/lib/axiosInstance";
 export const OrderService = {
     BASE_PATH: "/commandes",
     async getAllOrders(): Promise<OrderResponse> {
-        const response = await Axios.get(`${this.BASE_PATH}?page=1&limit=10`);
+        const response = await Axios.get(`${this.BASE_PATH}/paysan?page=1&limit=10`);
         return response.data;
     },
     async getAllOrdersCollecteur(collecteurId: string): Promise<OrderResponse> {
