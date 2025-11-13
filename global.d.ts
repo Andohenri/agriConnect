@@ -219,19 +219,15 @@ declare global {
     prixUnitaire?: number | string | null;
     statut?: CommandeStatut;
     messageCollecteur?: string | null;
-
     adresseLivraison?: string | null;
     dateLivraisonPrevue?: Date | string | null;
     dateLivraison?: Date | string | null;
-
     territoire?: string | null;
     latitude?: number | null;
     longitude?: number | null;
     rayon?: number | null;
-
     createdAt?: Date | string;
     updatedAt?: Date | string;
-
     collecteurId: string;
     collecteur?: {
       id?: string;
@@ -241,17 +237,37 @@ declare global {
       email?: string;
       role?: Role;
     };
-
+    lignes?: OrderLine[];
   };
 
-  enum OrderStatut {
-    EN_ATTENTE = "en_attente",
+  type OrderLine = {
+    id?: string;
+    produitId: string;
+    quantiteFournie: number | string;
+    prixUnitaire: number | string;
+    sousTotal?: number | string;
+    statutLigne?: StatutCommandeLigne;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    produit?: Product;
+  };
+
+  enum CommandeStatut {
     OUVERTE = "ouverte",
     PARTIELLEMENT_FOURNIE = "partiellement_fournie",
+
+    EN_ATTENTE = "en_attente",
     COMPLETE = "complete",
     ACCEPTEE = "acceptee",
+    PAYE = "paye",
     LIVREE = "livree",
     ANNULEE = "annulee",
+  }
+
+  enum StatutCommandeLigne {
+    EN_ATTENTE = "en_attente",
+    ACCEPTEE = "acceptee",
+    REJETEE = "rejetee",
   }
 
 
