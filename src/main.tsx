@@ -5,18 +5,33 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
 
 import AppRouter from "./routes/AppRouter.tsx";
-import { AuthProvider } from "./contexts/AuthContext.tsx";
+import { AuthProvider, useAuth } from "./contexts/AuthContext.tsx";
 import { ProductProvider } from "./contexts/ProductContext.tsx";
-import { Toaster } from "sonner";
 import { OrderProvider } from "./contexts/OrderContext.tsx";
+import { NotificationProvider } from "./contexts/NotificationContext.tsx";
+import { Toaster } from "./components/ui/sonner.tsx";
+
+
+
+function RootApp() {
+  const { user } = useAuth();
+
+  return (
+    <NotificationProvider userId={user?.id || "invite"}>
+      <AppRouter />
+         <Toaster richColors />
+    </NotificationProvider>
+  );
+}
+
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <OrderProvider>
         <ProductProvider>
-          <AppRouter />
-          <Toaster position="top-right" richColors />
+          <RootApp />
         </ProductProvider>
       </OrderProvider>
     </AuthProvider>
