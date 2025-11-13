@@ -15,6 +15,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Role, ProductStatut } from '@/types/enums';
 import { useProduct } from '@/contexts/ProductContext';
 import { OrderModal } from './OrderModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProductCardProps {
   product: Product;
@@ -23,6 +24,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, userRole, onEdit }: ProductCardProps) {
+  const { user } = useAuth();
   const statutConfig = PRODUCT_STATUT_CONFIG[product.statut || ProductStatut.DISPONIBLE];
   const productIcon = product.imageUrl || PRODUCT_TYPE_ICONS[product.type];
   const isAvailable = product.statut === ProductStatut.DISPONIBLE;
@@ -31,6 +33,7 @@ export function ProductCard({ product, userRole, onEdit }: ProductCardProps) {
     : product.quantiteDisponible;
   const isLowStock = quantityNum < 50; // Seuil configurable
 
+  const isAdmin = user?.role === Role.ADMIN;
   const { setProduct } = useProduct();
 
   const handleAction = (e: React.MouseEvent) => {
@@ -51,7 +54,7 @@ export function ProductCard({ product, userRole, onEdit }: ProductCardProps) {
     <div className='block group'>
       <Card className="overflow-hidden p-0! gap-2! hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] h-full flex flex-col">
         <Link
-          to={`/products/${product.id}`}
+          to={isAdmin ? `/admin/products/${product.id}` : `/products/${product.id}`}
           onClick={() => handleSelectedProduct()}
           className='space-y-2'
           aria-label={`Voir les détails de ${product.nom}`}

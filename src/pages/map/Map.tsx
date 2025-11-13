@@ -88,7 +88,9 @@ const EnhancedMapView = () => {
   // États pour la recherche de zone (Collecteur)
   const [searchAddress, setSearchAddress] = useState("");
   const [searchRadius, setSearchRadius] = useState(10);
-  const [searchCenter, setSearchCenter] = useState<[number, number] | null>(null);
+  const [searchCenter, setSearchCenter] = useState<[number, number] | null>(
+    null
+  );
   const [isSearching, setIsSearching] = useState(false);
 
   // Gestion des zones sauvegardées
@@ -100,7 +102,7 @@ const EnhancedMapView = () => {
   // Filtres pour paysans
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
+  const [regionFilter, setRegionFilter] = useState<string>("all");
 
   // Mobile panel collapse
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -132,7 +134,7 @@ const EnhancedMapView = () => {
     searchRadius,
     statusFilter,
     typeFilter,
-    priceRange,
+    regionFilter,
   ]);
 
   const fetchProducts = async () => {
@@ -169,6 +171,18 @@ const EnhancedMapView = () => {
       enRupture,
       avgPrice: Math.round(avgPrice),
     });
+  };
+
+  const getUniqueRegions = () => {
+    const regions = new Set(
+      products
+        .map((p) => {
+          const addr = p.localisation?.adresse || "";
+          return addr.split(",")[0].trim();
+        })
+        .filter(Boolean)
+    );
+    return Array.from(regions).sort();
   };
 
   const calculateDistance = (
@@ -220,12 +234,12 @@ const EnhancedMapView = () => {
       filtered = filtered.filter((p) => p.type === typeFilter);
     }
 
-    // Filtre par prix (paysan)
-    if (isFarmer) {
-      filtered = filtered.filter(
-        (p) =>
-          (p.prixUnitaire || 0) >= priceRange[0] &&
-          (p.prixUnitaire || 0) <= priceRange[1]
+        // Filtre par région (basé sur l'adresse)
+    if (regionFilter !== "all") {
+      filtered = filtered.filter((p) =>
+        p.localisation?.adresse
+          ?.toLowerCase()
+          .includes(regionFilter.toLowerCase())
       );
     }
 
@@ -272,7 +286,7 @@ const EnhancedMapView = () => {
   const handleResetFilters = () => {
     setStatusFilter("all");
     setTypeFilter("all");
-    setPriceRange([0, 100000]);
+    setRegionFilter("all");
   };
 
   const loadSavedZones = () => {
@@ -469,7 +483,13 @@ const EnhancedMapView = () => {
   return (
     <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
       {/* Carte - Affichée en premier sur mobile */}
-      <div className={`relative ${(isCollector || isFarmer) ? "flex-1 order-1 md:order-2" : "w-full h-full"}`}>
+      <div
+        className={`relative ${
+          isCollector || isFarmer
+            ? "flex-1 order-1 md:order-2"
+            : "w-full h-full"
+        }`}
+      >
         {isLoading && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-1000 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
             <Loader2 className="animate-spin" size={20} />
@@ -682,7 +702,9 @@ const EnhancedMapView = () => {
       {(isCollector || isFarmer) && (
         <div
           className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${
-            isPanelCollapsed ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6" : "h-auto"
+            isPanelCollapsed
+              ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
+              : "h-auto"
           }`}
         >
           {/* Header avec statistiques */}
@@ -724,7 +746,10 @@ const EnhancedMapView = () => {
             <>
               <Card className="p-4 space-y-4">
                 <div>
-                  <Label htmlFor="address" className="flex items-center gap-2 mb-2">
+                  <Label
+                    htmlFor="address"
+                    className="flex items-center gap-2 mb-2"
+                  >
                     <MapPin size={16} className="text-green-600" />
                     Adresse ou Localité
                   </Label>
@@ -796,7 +821,10 @@ const EnhancedMapView = () => {
                       onOpenChange={setIsSaveDialogOpen}
                     >
                       <DialogTrigger asChild>
-                        <Button className="flex-1 bg-green-600 hover:bg-green-700" size="sm">
+                        <Button
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          size="sm"
+                        >
                           <Save size={16} className="mr-1" />
                           Sauvegarder
                         </Button>
@@ -917,8 +945,7 @@ const EnhancedMapView = () => {
                 </h3>
                 {(statusFilter !== "all" ||
                   typeFilter !== "all" ||
-                  priceRange[0] !== 0 ||
-                  priceRange[1] !== 100000) && (
+                  regionFilter !== "all") && (
                   <Button
                     onClick={handleResetFilters}
                     variant="ghost"
@@ -973,29 +1000,24 @@ const EnhancedMapView = () => {
                 </Select>
               </div>
 
+              {/* Filtre par région */}
               <div>
-                <Label className="flex items-center justify-between mb-2">
-                  <span>Fourchette de prix</span>
-                  <span className="text-green-600 font-bold text-sm">
-                    {priceRange[0].toLocaleString()} -{" "}
-                    {priceRange[1].toLocaleString()} Ar
-                  </span>
+                <Label htmlFor="region-filter" className="mb-2 block">
+                  Région
                 </Label>
-                <Slider
-                  value={priceRange}
-                  onValueChange={(value) =>
-                    setPriceRange(value as [number, number])
-                  }
-                  min={0}
-                  max={100000}
-                  step={1000}
-                  className="w-full"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>0 Ar</span>
-                  <span>50k Ar</span>
-                  <span>100k Ar</span>
-                </div>
+                <Select value={regionFilter} onValueChange={setRegionFilter}>
+                  <SelectTrigger id="region-filter">
+                    <SelectValue placeholder="Toutes les régions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les régions</SelectItem>
+                    {getUniqueRegions().map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </Card>
           )}
@@ -1079,9 +1101,7 @@ const EnhancedMapView = () => {
               {filteredProducts.length === 0 ? (
                 <div className="text-center py-8">
                   <Package size={48} className="mx-auto text-gray-300 mb-2" />
-                  <p className="text-sm text-gray-500">
-                    Aucun produit trouvé
-                  </p>
+                  <p className="text-sm text-gray-500">Aucun produit trouvé</p>
                   <p className="text-xs text-gray-400 mt-1">
                     Essayez de modifier vos filtres
                   </p>
