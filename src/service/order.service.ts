@@ -11,6 +11,10 @@ export const OrderService = {
         const response = await Axios.get(`${this.BASE_PATH}/collecteur/${collecteurId}?page=1&limit=10`);
         return response.data;
     },
+    async getAllOrdersAdmin(): Promise<OrderResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/admin/all?page=1&limit=10`);
+        return response.data;
+    },
     async createOrder(orderData: PropositionFormData): Promise<Order> {
         const response = await Axios.post(this.BASE_PATH, orderData);
         return response.data;

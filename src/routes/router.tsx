@@ -27,6 +27,7 @@ import AdminProducts from "@/pages/admin/products/Products";
 import AdminProductDetail from "@/pages/admin/products/ProductDetails";
 import Users from "@/pages/admin/users/Users";
 import OrderPublish from "@/pages/orders/OrderPublish";
+import EditProfile from "@/pages/profile/EditProfile";
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
@@ -83,6 +84,7 @@ const router = createBrowserRouter([
       { path: "map", element: <MapView /> },
       { path: "messages", element: <Messages /> },
       { path: "profile", element: <Profile /> },
+      { path: "profile/:userId", element: <EditProfile /> },
     ],
   },
   // ✅ Routes privées admin avec Layout

@@ -43,7 +43,7 @@ const AdminOrders = () => {
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
-      const response = await OrderService.getAllOrders();
+      const response = await OrderService.getAllOrdersAdmin();
       console.log("Orders response:", response.data);
       if (response?.data) {
         setOrders(response.data);
@@ -367,7 +367,7 @@ const AdminOrders = () => {
                 return (
                   <Card
                     key={order.id}
-                    className="p-6 hover:shadow-xl transition cursor-pointer"
+                    className="p-6 hover:shadow-md transition cursor-pointer"
                     onClick={() => handleViewDetails(order.id)}
                   >
                     <div className="flex flex-col lg:flex-row gap-4">
@@ -524,7 +524,7 @@ const AdminOrders = () => {
                 return (
                   <Card
                     key={order.id}
-                    className="p-6 hover:shadow-xl transition cursor-pointer"
+                    className="p-6 hover:shadow-md transition cursor-pointer"
                     onClick={() => handleViewDetails(order.id)}
                   >
                     <div className="flex flex-col lg:flex-row gap-4 justify-between">
@@ -607,7 +607,7 @@ const AdminOrders = () => {
                 return (
                   <Card
                     key={order.id}
-                    className="p-6 hover:shadow-xl transition cursor-pointer"
+                    className="p-6 hover:shadow-md transition cursor-pointer"
                     onClick={() => handleViewDetails(order.id)}
                   >
                     <div className="flex flex-col lg:flex-row gap-4 justify-between">

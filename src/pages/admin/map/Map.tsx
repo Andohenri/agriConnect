@@ -7,8 +7,6 @@ import { ProductService } from "@/service/product.service";
 import { formatDate, formatPrice, PRODUCT_TYPE_ICONS } from "@/lib/utils";
 import { toast } from "sonner";
 import {
-  Phone,
-  MessageSquare,
   User,
   Eye,
   Loader2,
@@ -245,22 +243,6 @@ const AdminMapView = () => {
       iconAnchor: [22, 45],
       popupAnchor: [0, -40],
     });
-  };
-
-  const handleCall = (phone?: string) => {
-    if (phone) {
-      window.location.href = `tel:${phone}`;
-    } else {
-      toast.error("Numéro de téléphone non disponible");
-    }
-  };
-
-  const handleMessage = (email?: string) => {
-    if (email) {
-      window.location.href = `mailto:${email}`;
-    } else {
-      toast.info("Email non disponible");
-    }
   };
 
   const handleViewProfile = (farmerId?: string) => {

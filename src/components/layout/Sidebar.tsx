@@ -56,7 +56,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }: SidebarProps) => {
       className={`
       ${isOpen || !isMobile ? "translate-x-0" : "-translate-x-full"}
       ${isMobile ? "fixed z-100" : "fixed"}
-      w-64 bg-linear-to-b from-green-800 to-green-900 text-white h-screen left-0 top-0 shadow-xl transition-transform duration-300
+      w-64 bg-linear-to-b from-green-800 to-green-900 text-white h-screen left-0 top-0 shadow-md transition-transform duration-300
     `}
     >
       {/* Header */}

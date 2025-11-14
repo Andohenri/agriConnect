@@ -239,7 +239,7 @@ const AdminUsers = () => {
             filteredUsers.map((user) => (
               <Card
                 key={user.id}
-                className="p-4 md:p-6 hover:shadow-xl transition group"
+                className="p-4 md:p-6 hover:shadow-md transition group"
               >
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 md:w-16 md:h-16 bg-linear-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center text-2xl md:text-3xl shrink-0">
