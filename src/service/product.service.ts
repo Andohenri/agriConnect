@@ -6,6 +6,10 @@ export const ProductService = {
     const response = await Axios.get(`${this.BASE_PATH}?page=1&limit=10`);
     return response.data;
   },
+  async getAllProductsPaysan(): Promise<ProductResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/paysan?page=1&limit=10`);
+    return response.data;
+  },
   async createProduct(productData: FormData): Promise<Product> {
     const response = await Axios.post(this.BASE_PATH, productData, {
       headers: { "Content-Type": "multipart/form-data" },
