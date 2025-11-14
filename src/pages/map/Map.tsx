@@ -141,9 +141,16 @@ const EnhancedMapView = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await ProductService.getAllProducts();
-      if (response?.data) {
-        setProducts(response.data);
+      if (isFarmer) {
+        const response = await ProductService.getAllProductsPaysan();
+        if (response?.data) {
+          setProducts(response.data);
+        }
+      } else {
+        const response = await ProductService.getAllProducts();
+        if (response?.data) {
+          setProducts(response.data);
+        }
       }
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);

@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { Role } from '@/types/enums';
+import { Role } from "@/types/enums";
 import { Button } from "@/components/ui/button";
-import { ProductCard, ProductCardSkeleton } from "@/components/composant/ProductCard";
+import {
+  ProductCard,
+  ProductCardSkeleton,
+} from "@/components/composant/ProductCard";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProduct } from "@/contexts/ProductContext";
@@ -22,11 +25,20 @@ const Products = () => {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await ProductService.getAllProducts();
-      if (response?.data) {
-        setProducts(response.data);
+      if (user?.role === Role.PAYSAN) {
+        const response = await ProductService.getAllProductsPaysan();
+        if (response?.data) {
+          setProducts(response.data);
+        } else {
+          console.warn("Unexpected products response:", response);
+        }
       } else {
-        console.warn("Unexpected products response:", response);
+        const response = await ProductService.getAllProducts();
+        if (response?.data) {
+          setProducts(response.data);
+        } else {
+          console.warn("Unexpected products response:", response);
+        }
       }
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);
@@ -39,14 +51,14 @@ const Products = () => {
     setProduct(null);
     setIsAdding(true);
     setIsEditing(false);
-    navigate('/products/add');
+    navigate("/products/add");
   };
 
   const handleEditProduct = (product: Product) => {
     setProduct(product);
     setIsEditing(true);
     setIsAdding(false);
-    navigate('/products/add');
+    navigate("/products/add");
   };
 
   return (
@@ -54,10 +66,15 @@ const Products = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl md:text-2xl font-bold">
-            {user?.role === Role.PAYSAN ? "Mes Produits" : "Produits Disponibles"}
+            {user?.role === Role.PAYSAN
+              ? "Mes Produits"
+              : "Produits Disponibles"}
           </h2>
           {user?.role === Role.PAYSAN && (
-            <Button onClick={handleAddProduct} className="btn-primary flex items-center gap-2">
+            <Button
+              onClick={handleAddProduct}
+              className="btn-primary flex items-center gap-2"
+            >
               <Plus size={24} />
               Ajouter un produit
             </Button>
