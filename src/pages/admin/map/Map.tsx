@@ -272,7 +272,10 @@ const AdminMapView = () => {
 
   const handleViewProduct = (productId?: string) => {
     if (productId) {
-      navigate(`/products/${productId}`);
+      navigate(`/admin/products/${productId}`);
+    }
+    else {
+      toast.error("Produit non disponible");
     }
   };
 
@@ -347,82 +350,107 @@ const AdminMapView = () => {
                 }}
               >
                 <Popup closeButton={true} closeOnClick={false}>
-                  <div className="space-y-2 min-w-[250px]">
-                    <p className="font-bold text-lg text-green-700">
-                      {product.nom}
-                    </p>
-                    <p className="text-sm text-gray-600">{product.type}</p>
+                  <div className="min-w-[260px] p-4 rounded-xl bg-white shadow-xl border border-gray-100 space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-lg text-gray-800">
+                          {product.nom}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-700 rounded-full inline-block mt-1">
+                          {product.type}
+                        </p>
+                      </div>
+                    </div>
 
+                    {/* Stock & Price */}
                     <div
-                      className={`p-2 rounded ${
+                      className={`p-3 rounded-lg border ${
                         product.statut === ProductStatut.DISPONIBLE
-                          ? "bg-green-50"
-                          : "bg-red-50"
+                          ? "bg-green-50 border-green-100"
+                          : "bg-red-50 border-red-100"
                       }`}
                     >
                       <p
-                        className={`font-semibold ${
+                        className={`font-semibold text-sm ${
                           product.statut === ProductStatut.DISPONIBLE
-                            ? "text-green-600"
-                            : "text-red-600"
+                            ? "text-green-700"
+                            : "text-red-700"
                         }`}
                       >
                         {product.statut} — {product.quantiteDisponible}{" "}
                         {product.unite}
                       </p>
-                      <p className="text-sm text-gray-700">
-                        {product.prixUnitaire?.toLocaleString()} Ar
+                      <p className="text-sm text-gray-700 mt-1">
+                        💰 {product.prixUnitaire?.toLocaleString()} Ar
                       </p>
                     </div>
 
-                    <p className="text-sm text-gray-500">
-                      📍 {product.localisation?.adresse || "Localisation"}
-                    </p>
-
-                    <p className="text-sm">👨‍🌾 {farmerName}</p>
-
-                    {product.paysan?.telephone && (
-                      <p className="text-sm">📞 {product.paysan.telephone}</p>
-                    )}
-
-                    {product.dateRecolte && (
-                      <p className="text-xs text-gray-400">
-                        🗓️ Récolté le{" "}
-                        {new Date(product.dateRecolte).toLocaleDateString()}
+                    {/* Informations */}
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-600">
+                        📍{" "}
+                        {product.localisation?.adresse ||
+                          "Localisation inconnue"}
                       </p>
-                    )}
+                      <p className="text-gray-600">👨‍🌾 {farmerName}</p>
 
-                    <div className="flex flex-wrap gap-2 mt-3 pt-2 border-t">
+                      {product.paysan?.telephone && (
+                        <p className="text-gray-600">
+                          📞 {product.paysan.telephone}
+                        </p>
+                      )}
+
+                      {product.dateRecolte && (
+                        <p className="text-xs text-gray-400">
+                          🗓️ Récolté le{" "}
+                          {new Date(product.dateRecolte).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="border-t pt-4 flex flex-wrap gap-2">
+                      {/* Voir détails */}
                       <button
                         onClick={() => handleViewProduct(product.id)}
-                        className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-blue-200 transition flex items-center gap-1"
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg 
+                   bg-blue-600 text-white hover:bg-blue-700 transition"
                       >
                         <Eye size={14} />
                         Voir détails
                       </button>
 
+                      {/* Appeler */}
                       {product.paysan?.telephone && (
                         <button
                           onClick={() => handleCall(product.paysan?.telephone)}
-                          className="bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-orange-200 transition flex items-center gap-1"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg 
+                     bg-orange-500 text-white hover:bg-orange-600 transition"
                         >
                           <Phone size={14} />
                           Appeler
                         </button>
                       )}
 
+                      {/* Message */}
                       <button
                         onClick={() => handleMessage(product.paysan?.email)}
-                        className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-purple-200 transition flex items-center gap-1"
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg 
+                   bg-purple-600 text-white hover:bg-purple-700 transition"
                       >
                         <MessageSquare size={14} />
                         Message
                       </button>
 
+                      {/* Profil */}
                       {product.paysan?.id && (
                         <button
                           onClick={() => handleViewProfile(product.paysan?.id)}
-                          className="bg-gray-100 text-gray-800 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-gray-200 transition flex items-center gap-1"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg 
+                     bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
                         >
                           <User size={14} />
                           Profil

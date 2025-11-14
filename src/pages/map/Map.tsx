@@ -234,7 +234,7 @@ const EnhancedMapView = () => {
       filtered = filtered.filter((p) => p.type === typeFilter);
     }
 
-        // Filtre par région (basé sur l'adresse)
+    // Filtre par région (basé sur l'adresse)
     if (regionFilter !== "all") {
       filtered = filtered.filter((p) =>
         p.localisation?.adresse
@@ -592,40 +592,57 @@ const EnhancedMapView = () => {
                 }}
               >
                 <Popup closeButton={true} closeOnClick={false}>
-                  <div className="space-y-2 min-w-[250px]">
-                    <p className="font-bold text-lg text-green-700">
-                      {product.nom}
-                    </p>
-                    <p className="text-sm text-gray-600">{product.type}</p>
+                  <div className="min-w-[260px] p-4 rounded-xl bg-white shadow-xl border border-gray-100 space-y-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-lg text-gray-800">
+                          {product.nom}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-700 rounded-full inline-block mt-1">
+                          {product.type}
+                        </p>
+                      </div>
+                    </div>
 
-                    <div className="bg-green-50 p-2 rounded">
-                      <p className="text-green-600 font-semibold">
+                    {/* Price & Stock */}
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                      <p className="text-green-700 font-semibold text-sm">
                         {product.quantiteDisponible} {product.unite} —{" "}
                         {product.prixUnitaire?.toLocaleString()} Ar
                       </p>
                     </div>
 
-                    <p className="text-sm text-gray-500">
-                      📍 {product.localisation?.adresse || "Localisation"}
-                    </p>
-
-                    <p className="text-sm">👨‍🌾 {farmerName}</p>
-
-                    {product.paysan?.telephone && (
-                      <p className="text-sm">📞 {product.paysan.telephone}</p>
-                    )}
-
-                    {product.dateRecolte && (
-                      <p className="text-xs text-gray-400">
-                        🗓️ Récolté le{" "}
-                        {new Date(product.dateRecolte).toLocaleDateString()}
+                    {/* Info section */}
+                    <div className="space-y-1 text-sm">
+                      <p className="text-gray-600">
+                        📍{" "}
+                        {product.localisation?.adresse ||
+                          "Localisation inconnue"}
                       </p>
-                    )}
+                      <p className="text-gray-600">👨‍🌾 {farmerName}</p>
 
-                    <div className="flex flex-wrap gap-2 mt-3 pt-2 border-t">
+                      {product.paysan?.telephone && (
+                        <p className="text-gray-600">
+                          📞 {product.paysan.telephone}
+                        </p>
+                      )}
+
+                      {product.dateRecolte && (
+                        <p className="text-xs text-gray-400">
+                          🗓️ Récolté le{" "}
+                          {new Date(product.dateRecolte).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border-t pt-4 flex flex-wrap gap-2">
+                      {/* Détails */}
                       <button
                         onClick={() => handleViewProduct(product.id)}
-                        className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-blue-200 transition flex items-center gap-1"
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
                       >
                         <Eye size={14} />
                         Voir détails
@@ -633,30 +650,33 @@ const EnhancedMapView = () => {
 
                       {isCollector && (
                         <>
+                          {/* Commander */}
                           <OrderModal
                             product={product}
                             disableTrigger={!isAvailable}
-                            classTrigger="w-full sm:w-auto bg-green-600 hover:bg-green-700 cursor-pointer"
+                            classTrigger="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
                           >
-                            <ShoppingCart size={18} />
+                            <ShoppingCart size={16} />
                             Commander
                           </OrderModal>
 
+                          {/* Appeler */}
                           {product.paysan?.telephone && (
                             <button
                               onClick={() =>
                                 handleCall(product.paysan?.telephone)
                               }
-                              className="bg-orange-100 text-orange-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-orange-200 transition flex items-center gap-1"
+                              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition"
                             >
                               <Phone size={14} />
                               Appeler
                             </button>
                           )}
 
+                          {/* Message */}
                           <button
                             onClick={() => handleMessage(product.paysan?.email)}
-                            className="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-purple-200 transition flex items-center gap-1"
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition"
                           >
                             <MessageSquare size={14} />
                             Message
@@ -664,10 +684,11 @@ const EnhancedMapView = () => {
                         </>
                       )}
 
+                      {/* Profil */}
                       {product.paysan?.id && (
                         <button
                           onClick={() => handleViewProfile(product.paysan?.id)}
-                          className="bg-gray-100 text-gray-800 px-3 py-1.5 rounded-lg text-xs cursor-pointer hover:bg-gray-200 transition flex items-center gap-1"
+                          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
                         >
                           <User size={14} />
                           Profil
