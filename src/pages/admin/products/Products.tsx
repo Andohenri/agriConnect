@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { ProductCard, ProductCardSkeleton } from "@/components/composant/ProductCard";
-import { Search, Filter, Trash2 } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProduct } from "@/contexts/ProductContext";
 import { ProductService } from "@/service/product.service";
@@ -69,22 +68,6 @@ const AdminProduit = () => {
     navigate('/admin/products/' + product.id);
   };
 
-  const handleDeleteProduct = async (productId?: string) => {
-    if (!productId) {
-      console.warn("Product id is missing, cannot delete.");
-      return;
-    }
-
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-      try {
-        await ProductService.deleteProduct(productId);
-        await fetchProducts();
-      } catch (error) {
-        console.error("Erreur lors de la suppression:", error);
-      }
-    }
-  };
-
   return (
     <section>
       <div className="space-y-6">
@@ -149,21 +132,6 @@ const AdminProduit = () => {
                   userRole={undefined}
                   onEdit={() => handleEditProduct(product)}
                 />
-                
-                {/* Bouton de suppression en overlay */}
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDeleteProduct(product.id);
-                  }}
-                  aria-label={`Supprimer ${product.nom}`}
-                >
-                  <Trash2 size={18} />
-                </Button>
               </div>
             ))
           )}

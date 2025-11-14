@@ -1,11 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +19,8 @@ import {
   ShoppingBag,
   Filter,
   Download,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -65,6 +61,9 @@ const AdminMapView = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string>("all");
+
+  // Mobile panel collapse
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   // Statistiques
   const [stats, setStats] = useState({
@@ -116,11 +115,10 @@ const AdminMapView = () => {
 
     // Filtre par région (basé sur l'adresse)
     if (regionFilter !== "all") {
-      filtered = filtered.filter(
-        (p) =>
-          p.localisation?.adresse
-            ?.toLowerCase()
-            .includes(regionFilter.toLowerCase())
+      filtered = filtered.filter((p) =>
+        p.localisation?.adresse
+          ?.toLowerCase()
+          .includes(regionFilter.toLowerCase())
       );
     }
 
@@ -281,222 +279,9 @@ const AdminMapView = () => {
   const defaultCenter: [number, number] = [-18.8792, 47.5079];
 
   return (
-    <div className="flex bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
-      {/* Panel administrateur */}
-      <div className="w-full md:w-96 bg-white border-r overflow-y-auto p-6 space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-green-700 mb-2">
-            Vue Administrateur
-          </h2>
-          <p className="text-sm text-gray-600">
-            Gestion et statistiques des produits
-          </p>
-        </div>
-
-        {/* Statistiques */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Package className="text-green-600" size={18} />
-              <span className="text-xs text-gray-600">Total</span>
-            </div>
-            <p className="text-2xl font-bold text-green-700">{stats.total}</p>
-          </Card>
-
-          <Card className="p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="text-blue-600" size={18} />
-              <span className="text-xs text-gray-600">Disponibles</span>
-            </div>
-            <p className="text-2xl font-bold text-blue-700">
-              {stats.disponibles}
-            </p>
-          </Card>
-
-          <Card className="p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="text-purple-600" size={18} />
-              <span className="text-xs text-gray-600">Producteurs</span>
-            </div>
-            <p className="text-2xl font-bold text-purple-700">
-              {stats.farmers}
-            </p>
-          </Card>
-
-          <Card className="p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <MapPin className="text-orange-600" size={18} />
-              <span className="text-xs text-gray-600">Régions</span>
-            </div>
-            <p className="text-2xl font-bold text-orange-700">
-              {stats.regions}
-            </p>
-          </Card>
-        </div>
-
-        {/* Filtres */}
-        <Card className="p-4 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Filter className="text-green-600" size={18} />
-            <h3 className="font-bold">Filtres</h3>
-          </div>
-
-          {/* Filtre par statut */}
-          <div>
-            <Label htmlFor="status-filter" className="mb-2 block">
-              Statut
-            </Label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger id="status-filter">
-                <SelectValue placeholder="Tous les statuts" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value={ProductStatut.DISPONIBLE}>
-                  Disponible
-                </SelectItem>
-                <SelectItem value={ProductStatut.RUPTURE}>
-                  Rupture de stock
-                </SelectItem>
-                <SelectItem value={ProductStatut.ARCHIVE}>
-                  Archivé
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Filtre par type */}
-          <div>
-            <Label htmlFor="type-filter" className="mb-2 block">
-              Type de produit
-            </Label>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger id="type-filter">
-                <SelectValue placeholder="Tous les types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les types</SelectItem>
-                {Object.values(ProductType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Filtre par région */}
-          <div>
-            <Label htmlFor="region-filter" className="mb-2 block">
-              Région
-            </Label>
-            <Select value={regionFilter} onValueChange={setRegionFilter}>
-              <SelectTrigger id="region-filter">
-                <SelectValue placeholder="Toutes les régions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les régions</SelectItem>
-                {getUniqueRegions().map((region) => (
-                  <SelectItem key={region} value={region}>
-                    {region}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            onClick={() => {
-              setStatusFilter("all");
-              setTypeFilter("all");
-              setRegionFilter("all");
-            }}
-            variant="outline"
-            className="w-full"
-          >
-            Réinitialiser les filtres
-          </Button>
-        </Card>
-
-        {/* Actions */}
-        <Card className="p-4 space-y-3">
-          <h3 className="font-bold flex items-center gap-2">
-            <ShoppingBag className="text-green-600" size={18} />
-            Actions
-          </h3>
-          <Button
-            onClick={handleExportData}
-            className="w-full bg-green-600 hover:bg-green-700"
-          >
-            <Download size={16} className="mr-2" />
-            Exporter les données (CSV)
-          </Button>
-        </Card>
-
-        {/* Liste des produits filtrés */}
-        <div className="space-y-3">
-          <h3 className="font-bold text-sm text-gray-700">
-            Produits ({filteredProducts.length})
-          </h3>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {filteredProducts.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-4">
-                Aucun produit trouvé
-              </p>
-            ) : (
-              filteredProducts.map((product) => (
-                <Card
-                  key={product.id}
-                  className="p-3 hover:shadow-md transition cursor-pointer"
-                  onClick={() => handleViewProduct(product.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-gray-100">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.nom}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-2xl">
-                          {PRODUCT_TYPE_ICONS[product.type] || "📦"}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm truncate">
-                        {product.nom}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {product.localisation?.adresse}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded ${
-                            product.statut === ProductStatut.DISPONIBLE
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {product.statut}
-                        </span>
-                        <p className="text-xs text-green-600 font-semibold">
-                          {product.prixUnitaire?.toLocaleString()} Ar
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
+    <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
       {/* Carte */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 order-1 md:order-2">
         {isLoading && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-1000 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
             <Loader2 className="animate-spin" size={20} />
@@ -505,6 +290,24 @@ const AdminMapView = () => {
             </span>
           </div>
         )}
+
+        {/* Bouton de collapse pour mobile */}
+        <button
+          onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
+          className="md:hidden absolute top-4 left-4 z-1000 bg-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-50 transition"
+        >
+          {isPanelCollapsed ? (
+            <>
+              <ChevronDown size={18} />
+              Afficher le panneau
+            </>
+          ) : (
+            <>
+              <ChevronUp size={18} />
+              Masquer le panneau
+            </>
+          )}
+        </button>
 
         <MapContainer
           center={defaultCenter}
@@ -650,6 +453,223 @@ const AdminMapView = () => {
               <span className="font-bold">{filteredProducts.length}</span> /{" "}
               {products.length}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Panel administrateur */}
+      <div
+        className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${
+          isPanelCollapsed
+            ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
+            : "h-auto"
+        }`}
+      >
+        <div>
+          <h2 className="text-2xl font-bold text-green-700 mb-2">
+            Vue Administrateur
+          </h2>
+          <p className="text-sm text-gray-600">
+            Gestion et statistiques des produits
+          </p>
+        </div>
+
+        {/* Statistiques */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Package className="text-green-600" size={18} />
+              <span className="text-xs text-gray-600">Total</span>
+            </div>
+            <p className="text-2xl font-bold text-green-700">{stats.total}</p>
+          </Card>
+
+          <Card className="p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="text-blue-600" size={18} />
+              <span className="text-xs text-gray-600">Disponibles</span>
+            </div>
+            <p className="text-2xl font-bold text-blue-700">
+              {stats.disponibles}
+            </p>
+          </Card>
+
+          <Card className="p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="text-purple-600" size={18} />
+              <span className="text-xs text-gray-600">Producteurs</span>
+            </div>
+            <p className="text-2xl font-bold text-purple-700">
+              {stats.farmers}
+            </p>
+          </Card>
+
+          <Card className="p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <MapPin className="text-orange-600" size={18} />
+              <span className="text-xs text-gray-600">Régions</span>
+            </div>
+            <p className="text-2xl font-bold text-orange-700">
+              {stats.regions}
+            </p>
+          </Card>
+        </div>
+
+        {/* Filtres */}
+        <Card className="p-4 space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Filter className="text-green-600" size={18} />
+            <h3 className="font-bold">Filtres</h3>
+          </div>
+
+          {/* Filtre par statut */}
+          <div>
+            <Label htmlFor="status-filter" className="mb-2 block">
+              Statut
+            </Label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger id="status-filter">
+                <SelectValue placeholder="Tous les statuts" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value={ProductStatut.DISPONIBLE}>
+                  Disponible
+                </SelectItem>
+                <SelectItem value={ProductStatut.RUPTURE}>
+                  Rupture de stock
+                </SelectItem>
+                <SelectItem value={ProductStatut.ARCHIVE}>Archivé</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtre par type */}
+          <div>
+            <Label htmlFor="type-filter" className="mb-2 block">
+              Type de produit
+            </Label>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger id="type-filter">
+                <SelectValue placeholder="Tous les types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les types</SelectItem>
+                {Object.values(ProductType).map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Filtre par région */}
+          <div>
+            <Label htmlFor="region-filter" className="mb-2 block">
+              Région
+            </Label>
+            <Select value={regionFilter} onValueChange={setRegionFilter}>
+              <SelectTrigger id="region-filter">
+                <SelectValue placeholder="Toutes les régions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les régions</SelectItem>
+                {getUniqueRegions().map((region) => (
+                  <SelectItem key={region} value={region}>
+                    {region}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button
+            onClick={() => {
+              setStatusFilter("all");
+              setTypeFilter("all");
+              setRegionFilter("all");
+            }}
+            variant="outline"
+            className="w-full"
+          >
+            Réinitialiser les filtres
+          </Button>
+        </Card>
+
+        {/* Actions */}
+        <Card className="p-4 space-y-3">
+          <h3 className="font-bold flex items-center gap-2">
+            <ShoppingBag className="text-green-600" size={18} />
+            Actions
+          </h3>
+          <Button
+            onClick={handleExportData}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            <Download size={16} className="mr-2" />
+            Exporter les données (CSV)
+          </Button>
+        </Card>
+
+        {/* Liste des produits filtrés */}
+        <div className="space-y-3">
+          <h3 className="font-bold text-sm text-gray-700">
+            Produits ({filteredProducts.length})
+          </h3>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {filteredProducts.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-4">
+                Aucun produit trouvé
+              </p>
+            ) : (
+              filteredProducts.map((product) => (
+                <Card
+                  key={product.id}
+                  className="p-3 hover:shadow-md transition cursor-pointer"
+                  onClick={() => handleViewProduct(product.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 flex items-center justify-center rounded-full overflow-hidden bg-gray-100">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.nom}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl">
+                          {PRODUCT_TYPE_ICONS[product.type] || "📦"}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm truncate">
+                        {product.nom}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {product.localisation?.adresse}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded ${
+                            product.statut === ProductStatut.DISPONIBLE
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {product.statut}
+                        </span>
+                        <p className="text-xs text-green-600 font-semibold">
+                          {product.prixUnitaire?.toLocaleString()} Ar
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>

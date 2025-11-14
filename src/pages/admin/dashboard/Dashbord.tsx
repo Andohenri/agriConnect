@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 import { UserService } from "@/service/user.service";
 import { ProductService } from "@/service/product.service";
 import { OrderService } from "@/service/order.service";
-import { Role } from "@/types/enums";
+import { Role, Statut, ProductStatut } from "@/types/enums";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
