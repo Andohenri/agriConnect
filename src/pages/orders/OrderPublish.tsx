@@ -120,7 +120,7 @@ const OrderPublish = () => {
 
   const handleCancel = () => {
     resetOrderState();
-    navigate("/orders");
+    navigate(-1);
   };
 
   return (

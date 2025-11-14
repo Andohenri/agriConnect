@@ -147,7 +147,7 @@ const AddProduct = () => {
 
   const handleCancel = () => {
     resetProductState();
-    navigate('/products');
+    navigate(-1);
   };
 
   // Déstructurer pour séparer ref et autres props

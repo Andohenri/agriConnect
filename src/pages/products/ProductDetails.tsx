@@ -98,7 +98,7 @@ const ProductDetail = () => {
 
   const handleBack = () => {
     setProduct(null);
-    navigate('/products');
+    navigate(-1);
   };
 
   if (isLoading) {
