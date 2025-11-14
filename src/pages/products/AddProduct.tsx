@@ -5,7 +5,7 @@ import SelectField from "@/components/composant/forms/SelectField";
 import { Button } from "@/components/ui/button";
 import { useProduct } from "@/contexts/ProductContext";
 import { ArrowLeft, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { ProductType, Unite } from "@/types/enums";
 import { Card } from "@/components/ui/card";
 import TextareaField from "@/components/composant/forms/TextareaField";
 import { ProductService } from "@/service/product.service";
+import { Input } from "@/components/ui/input";
 
 export const PRODUCT_TYPES = [
   { value: ProductType.GRAIN, label: 'Grain' },
@@ -34,6 +35,7 @@ export const UNITES = [
 const AddProduct = () => {
   const navigate = useNavigate();
   const { product, isEditing, resetProductState } = useProduct();
+  const imageRef = useRef<HTMLInputElement | null>(null);
   const [imagePreview, setImagePreview] = useState<string | undefined>(undefined);
 
   const {
@@ -43,6 +45,7 @@ const AddProduct = () => {
     reset,
     control,
     watch,
+    setValue
   } = useForm<ProductFormData>({
     defaultValues: {
       nom: '',
@@ -73,7 +76,7 @@ const AddProduct = () => {
       return () => URL.revokeObjectURL(previewUrl);
     }
   }, [watchImage]);
-  
+
   // Charger les données du produit si en mode édition
   useEffect(() => {
     if (isEditing && product) {
@@ -127,7 +130,7 @@ const AddProduct = () => {
       }
 
       if (isEditing && product?.id) {
-        await ProductService.updateProduct(product.id, formData);        
+        await ProductService.updateProduct(product.id, formData);
         toast.success('Produit mis à jour avec succès !');
       } else {
         await ProductService.createProduct(formData);
@@ -145,6 +148,50 @@ const AddProduct = () => {
   const handleCancel = () => {
     resetProductState();
     navigate('/products');
+  };
+
+  // Déstructurer pour séparer ref et autres props
+  const { ref: hookFormRef, ...registerProps } = register("image", {
+    required: "L'image est requise",
+    validate: (files) => {
+      const file = files?.[0];
+      if (!file) return "Veuillez sélectionner une image";
+      if (!file.type.startsWith("image/")) return "Le fichier doit être une image";
+      if (file.size > 5 * 1024 * 1024) return "L'image ne doit pas dépasser 5 Mo";
+      return true;
+    },
+    onChange: (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+
+  // Combiner les refs avec useCallback
+  const combinedRef = useCallback(
+    (element: HTMLInputElement) => {
+      hookFormRef(element);
+      imageRef.current = element;
+    },
+    [hookFormRef]
+  );
+
+  const handleModify = () => {
+    console.log('Modify image clicked', imageRef?.current);
+    imageRef.current?.click();
+  };
+
+  const handleDelete = () => {
+    setImagePreview(undefined);
+    setValue("image", undefined);
+    if (imageRef.current) {
+      imageRef.current.value = "";
+    }
   };
 
   return (
@@ -357,17 +404,34 @@ const AddProduct = () => {
                   alt="Preview"
                   className="w-full h-64 object-cover rounded-xl"
                 />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => {
-                    setImagePreview(undefined);
-                  }}
-                >
-                  Supprimer
-                </Button>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={combinedRef}
+                  {...registerProps}
+                />
+                <div className="absolute top-2 right-2 flex space-x-2">
+                  {isEditing ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleModify}
+                    >
+                      Modifier
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDelete}
+                    >
+                      Supprimer
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : (
               <label className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-500 transition cursor-pointer block">
@@ -378,20 +442,12 @@ const AddProduct = () => {
                 <p className="text-xs text-gray-400">
                   PNG, JPG jusqu'à 5MB
                 </p>
-                <input
+                <Input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  {...register("image", {
-                    required: "L'image est requise",
-                    validate: (files) => {
-                      const file = files?.[0];
-                      if (!file) return "Veuillez sélectionner une image";
-                      if (!file.type.startsWith("image/")) return "Le fichier doit être une image";
-                      if (file.size > 5 * 1024 * 1024) return "L'image ne doit pas dépasser 5 Mo";
-                      return true;
-                    },
-                  })}
+                  ref={combinedRef}
+                  {...registerProps}
                 />
               </label>
             )}
@@ -412,7 +468,7 @@ const AddProduct = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full cursor-pointer"
+              className="btn-primary h-12 w-full cursor-pointer"
             >
               {isSubmitting
                 ? 'En cours...'
