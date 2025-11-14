@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProductService } from "@/service/product.service";
 import { Role } from "@/types/enums";
-import { PRODUCT_TYPE_ICONS } from "@/lib/utils";
+import { formatDate, formatPrice, PRODUCT_TYPE_ICONS } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   Phone,
@@ -36,6 +36,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,7 +163,7 @@ const EnhancedMapView = () => {
     const avgPrice =
       filteredProducts.length > 0
         ? filteredProducts.reduce((sum, p) => sum + (p.prixUnitaire || 0), 0) /
-          filteredProducts.length
+        filteredProducts.length
         : 0;
 
     setStats({
@@ -197,9 +198,9 @@ const EnhancedMapView = () => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -318,11 +319,11 @@ const EnhancedMapView = () => {
       },
       createdBy: user
         ? {
-            id: user.id || "",
-            nom: user.nom,
-            prenom: user.prenom,
-            role: user.role,
-          }
+          id: user.id || "",
+          nom: user.nom,
+          prenom: user.prenom,
+          role: user.role,
+        }
         : undefined,
       createdAt: new Date().toISOString(),
     };
@@ -484,11 +485,10 @@ const EnhancedMapView = () => {
     <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
       {/* Carte - Affichée en premier sur mobile */}
       <div
-        className={`relative ${
-          isCollector || isFarmer
-            ? "flex-1 order-1 md:order-2"
-            : "w-full h-full"
-        }`}
+        className={`relative ${isCollector || isFarmer
+          ? "flex-1 order-1 md:order-2"
+          : "w-full h-full"
+          }`}
       >
         {isLoading && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-1000 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
@@ -592,61 +592,67 @@ const EnhancedMapView = () => {
                 }}
               >
                 <Popup closeButton={true} closeOnClick={false}>
-                  <div className="min-w-[260px] p-4 rounded-xl bg-white shadow-xl border border-gray-100 space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-lg text-gray-800">
-                          {product.nom}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium px-2 py-0.5 bg-green-100 text-green-700 rounded-full inline-block mt-1">
-                          {product.type}
-                        </p>
-                      </div>
+                  {/* Header avec gradient */}
+                  <div className="bg-linear-to-r from-green-500 to-emerald-600 p-4 text-white">
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-2xl font-bold tracking-tight">{product.nom}</h3>
+                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
+                        {product.type}
+                      </span>
                     </div>
 
-                    {/* Price & Stock */}
-                    <div className="bg-green-50 p-3 rounded-lg border border-green-100">
-                      <p className="text-green-700 font-semibold text-sm">
-                        {product.quantiteDisponible} {product.unite} —{" "}
-                        {product.prixUnitaire?.toLocaleString()} Ar
-                      </p>
+                    {/* Prix & Stock - Design moderne */}
+                    <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
+                      <div className="flex items-center gap-2">
+                        <Package className="w-5 h-5" />
+                        <span className="font-semibold">{product.quantiteDisponible} {product.unite}</span>
+                      </div>
+                      <div className="text-right flex flex-col">
+                        <span className="text-2xl font-bold">{formatPrice(product.prixUnitaire)}</span>
+                        <span className="text-xs opacity-90">Ariary</span>
+                      </div>
                     </div>
+                  </div>
+                  <div className="space-y-4 p-4 bg-white">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <MapPin className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {product.localisation?.adresse || "Localisation inconnue"}
+                          </span>
+                        </div>
+                      </div>
 
-                    {/* Info section */}
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-600">
-                        📍{" "}
-                        {product.localisation?.adresse ||
-                          "Localisation inconnue"}
-                      </p>
-                      <p className="text-gray-600">👨‍🌾 {farmerName}</p>
-
-                      {product.paysan?.telephone && (
-                        <p className="text-gray-600">
-                          📞 {product.paysan.telephone}
-                        </p>
-                      )}
+                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <User className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">{farmerName}</span>
+                          {product.paysan?.telephone && (
+                            <span className="text-xs text-gray-600 mt-1">{product.paysan.telephone}</span>
+                          )}
+                        </div>
+                      </div>
 
                       {product.dateRecolte && (
-                        <p className="text-xs text-gray-400">
-                          🗓️ Récolté le{" "}
-                          {new Date(product.dateRecolte).toLocaleDateString()}
-                        </p>
+                        <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                          <Calendar className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">
+                            Récolté le {formatDate(product.dateRecolte)}
+                          </span>
+                        </div>
                       )}
                     </div>
 
-                    <div className="border-t pt-4 flex flex-wrap gap-2">
-                      {/* Détails */}
-                      <button
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Voir détails */}
+                      <Button
                         onClick={() => handleViewProduct(product.id)}
-                        className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+                        className={`flex ${isFarmer ? 'col-span-2' : ''} items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium`}
                       >
-                        <Eye size={14} />
-                        Voir détails
-                      </button>
+                        <Eye className="w-4 h-4" />
+                        <span className="text-sm">Détails</span>
+                      </Button>
 
                       {isCollector && (
                         <>
@@ -654,45 +660,58 @@ const EnhancedMapView = () => {
                           <OrderModal
                             product={product}
                             disableTrigger={!isAvailable}
-                            classTrigger="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 transition"
+                            classTrigger="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white hover:bg-green-700 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium"
                           >
-                            <ShoppingCart size={16} />
-                            Commander
+                            <ShoppingCart className="w-4 h-4" />
+                            <span className="text-sm">Commander</span>
                           </OrderModal>
 
                           {/* Appeler */}
                           {product.paysan?.telephone && (
-                            <button
-                              onClick={() =>
-                                handleCall(product.paysan?.telephone)
-                              }
-                              className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition"
+                            <Button
+                              onClick={() => handleCall(product.paysan?.telephone)}
+                              className="flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white hover:bg-orange-600 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium"
                             >
-                              <Phone size={14} />
-                              Appeler
-                            </button>
+                              <Phone className="w-4 h-4" />
+                              <span className="text-sm">Appeler</span>
+                            </Button>
                           )}
 
                           {/* Message */}
-                          <button
+                          <Button
                             onClick={() => handleMessage(product.paysan?.email)}
-                            className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition"
+                            className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white hover:bg-purple-700 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium"
                           >
-                            <MessageSquare size={14} />
-                            Message
-                          </button>
+                            <MessageSquare className="w-4 h-4" />
+                            <span className="text-sm">Message</span>
+                          </Button>
                         </>
                       )}
 
-                      {/* Profil */}
+                      {/* Profil - Pleine largeur */}
                       {product.paysan?.id && (
-                        <button
+                        <Button
+                          variant={'outline'}
                           onClick={() => handleViewProfile(product.paysan?.id)}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                          className="col-span-2 flex items-center justify-center gap-2 active:scale-95 transition-all font-medium border-2"
                         >
-                          <User size={14} />
-                          Profil
-                        </button>
+                          <User className="w-4 h-4" />
+                          <span className="text-sm">Voir le profil de l'agriculteur</span>
+                        </Button>
+                      )}
+                    </div>
+                    {/* Badge de disponibilité */}
+                    <div className="flex items-center justify-center pt-2">
+                      {isAvailable ? (
+                        <span className="flex items-center gap-2 text-xs text-green-600 font-medium">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                          Disponible maintenant
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2 text-xs text-red-600 font-medium">
+                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                          Stock épuisé
+                        </span>
                       )}
                     </div>
                   </div>
@@ -722,11 +741,10 @@ const EnhancedMapView = () => {
       {/* Panel de filtrage - Affichée en second sur mobile */}
       {(isCollector || isFarmer) && (
         <div
-          className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${
-            isPanelCollapsed
-              ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
-              : "h-auto"
-          }`}
+          className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${isPanelCollapsed
+            ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
+            : "h-auto"
+            }`}
         >
           {/* Header avec statistiques */}
           <div className="bg-linear-to-r from-green-50 to-blue-50 rounded-xl p-4 shadow-sm">
@@ -967,16 +985,16 @@ const EnhancedMapView = () => {
                 {(statusFilter !== "all" ||
                   typeFilter !== "all" ||
                   regionFilter !== "all") && (
-                  <Button
-                    onClick={handleResetFilters}
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs"
-                  >
-                    <X size={14} className="mr-1" />
-                    Réinitialiser
-                  </Button>
-                )}
+                    <Button
+                      onClick={handleResetFilters}
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <X size={14} className="mr-1" />
+                      Réinitialiser
+                    </Button>
+                  )}
               </div>
 
               <div>
@@ -1161,11 +1179,10 @@ const EnhancedMapView = () => {
                             {product.nom}
                           </p>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
-                              product.statut === ProductStatut.DISPONIBLE
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
+                            className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${product.statut === ProductStatut.DISPONIBLE
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
+                              }`}
                           >
                             {product.statut === ProductStatut.DISPONIBLE
                               ? "✅"
