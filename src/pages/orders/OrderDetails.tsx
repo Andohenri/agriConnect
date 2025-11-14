@@ -48,7 +48,7 @@ const OrderDetails = () => {
     );
   }
 
-  const isDirectOrder = !order.produitRecherche && !order.territoire;
+  const isDirectOrder = !order.territoire;
   const isOrderRequest = order.produitRecherche && order.territoire;
 
   const statutConfig = ORDER_STATUT_CONFIG[order.statut || CommandeStatut.EN_ATTENTE];

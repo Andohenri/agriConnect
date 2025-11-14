@@ -71,7 +71,7 @@ export function formatDate(date: Date | string): string {
 // Formater le prix
 export function formatPrice(price: number | string): string {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return numPrice.toLocaleString('fr-FR', {
+  return numPrice?.toLocaleString('fr-FR', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   });

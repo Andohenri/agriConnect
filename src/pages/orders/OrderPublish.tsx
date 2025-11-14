@@ -355,7 +355,7 @@ const OrderPublish = () => {
             <Button
               type="submit"
               disabled={isSubmitting || !selectedZone}
-              className="btn-primary w-full"
+              className="btn-primary h-12 w-full"
             >
               {isSubmitting ? "Publication..." : "Publier la Demande"}
             </Button>

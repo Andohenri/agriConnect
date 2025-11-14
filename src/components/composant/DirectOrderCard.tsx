@@ -65,7 +65,7 @@ const DirectOrderCard = ({
             <div className="w-16 h-16 bg-linear-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-4xl shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
               {produit?.imageUrl ? (
                 <img
-                  src={produit.imageUrl}
+                  src={`${import.meta.env.VITE_UPLOAD_URL}${produit.imageUrl}`}
                   alt={produit.nom}
                   className="w-full h-full object-cover"
                 />

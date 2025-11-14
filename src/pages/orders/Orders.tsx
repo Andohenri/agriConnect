@@ -56,7 +56,7 @@ const Orders = () => {
 
   // Séparer commandes directes et demandes
   const directOrders = orders.filter(
-    (order) => !order.produitRecherche && !order.territoire
+    (order) => !order.territoire
   );
   const orderRequests = orders.filter(
     (order) => order.produitRecherche && order.territoire
