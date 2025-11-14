@@ -286,7 +286,6 @@ const Profile = () => {
               <Badge variant="secondary">{stats.totalOrders}</Badge>
             </Tooltip>
           </TabsTrigger>
-
         </TabsList>
 
         {/* Overview Tab */}
@@ -405,7 +404,15 @@ const Profile = () => {
                   >
                     <div className="flex items-center gap-4 mb-4">
                       <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl">
-                        {product.imageUrl || "📦"}
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.nom}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          "📦"
+                        )}
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold truncate">{product.nom}</h4>
