@@ -1,548 +1,540 @@
-import { useState } from 'react';
-import { Star, MapPin, Calendar, Package, TrendingUp, Heart, MessageCircle, Phone, Mail, Edit, Settings, Shield, BarChart3, Clock, CheckCircle, User, Eye } from 'lucide-react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  User,
+  Package,
+  ShoppingCart,
+  MapPin,
+  Phone,
+  Mail,
+  Calendar,
+  Edit,
+  Star,
+  TrendingUp,
+  Eye,
+  Loader2,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { UserService } from "@/service/user.service";
+import { ProductService } from "@/service/product.service";
+import { OrderService } from "@/service/order.service";
+import { Role, ProductStatut, CommandeStatut } from "@/types/enums";
+import { toast } from "sonner";
+import Tooltip from "@/components/composant/Tooltip";
 
 const Profile = () => {
-  const [activeTab, setActiveTab] = useState('apercu');
-  const [isOwnProfile, setIsOwnProfile] = useState(true); // Toggle pour tester les deux vues
-  
-  const userProfile = {
-    nom: "Rakoto",
-    prenom: "Jean",
-    email: "jean.rakoto@gmail.com",
-    telephone: "034 12 345 67",
-    localisation: "Analamanga",
-    adresse: "Antananarivo, Madagascar",
-    photo_profil: "👨‍🌾",
-    role: "Paysan",
-    bio: "Agriculteur passionné spécialisé en agriculture biologique",
-    stats: {
-      membre_depuis: "Jan 2024",
-      transactions: 45,
-      note: 4.8,
-      taux_reussite: 96,
-      total_ventes: "2.5T",
-      revenus: "5.2M"
+  const { id } = useParams<{ id: string }>();
+  const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const isOwnProfile = !id || id === currentUser?.id;
+  const displayUser = isOwnProfile ? currentUser : profileUser;
+
+  useEffect(() => {
+    loadProfileData();
+  }, [id]);
+
+  const loadProfileData = async () => {
+    setIsLoading(true);
+    try {
+      // Charger les données de l'utilisateur si ce n'est pas son propre profil
+      if (!isOwnProfile && id) {
+        const userData = await UserService.getUserById(id);
+        setProfileUser(userData);
+      }
+
+      // Charger les produits de l'utilisateur (si paysan)
+      if (displayUser?.role === Role.PAYSAN) {
+        const productsData = await ProductService.getAllProductsPaysan();
+        setProducts(productsData.data || []);
+      }
+
+      // Charger les commandes
+      if (isOwnProfile) {
+        if (currentUser?.role === Role.PAYSAN) {
+          const ordersData = await OrderService.getAllOrdersPaysan();
+          setOrders(ordersData.data || []);
+        } else if (currentUser?.role === Role.COLLECTEUR) {
+          const ordersData = await OrderService.getAllOrdersCollecteur(
+            currentUser?.id || ""
+          );
+          setOrders(ordersData.data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement du profil:", error);
+      toast.error("Erreur lors du chargement du profil");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const produits = [
-    {
-      id: 1,
-      nom: "Riz Vary Gasy Premium",
-      type: "grain",
-      quantite: 500,
-      unite: "kg",
-      prix: 2500,
-      image: "🌾",
-      date: "2024-11-09",
-      localisation: "Antananarivo",
-      vues: 142,
-      interesses: 24,
-      status: "disponible"
-    },
-    {
-      id: 2,
-      nom: "Tomates Bio",
-      type: "legume",
-      quantite: 150,
-      unite: "kg",
-      prix: 3000,
-      image: "🍅",
-      date: "2024-11-06",
-      localisation: "Analamanga",
-      vues: 98,
-      interesses: 18,
-      status: "disponible"
-    },
-    {
-      id: 3,
-      nom: "Haricots Verts",
-      type: "legume",
-      quantite: 80,
-      unite: "kg",
-      prix: 4500,
-      image: "🫘",
-      date: "2024-11-04",
-      localisation: "Antananarivo",
-      vues: 203,
-      interesses: 31,
-      status: "vendu"
-    },
-    {
-      id: 4,
-      nom: "Maïs Jaune",
-      type: "grain",
-      quantite: 300,
-      unite: "kg",
-      prix: 2000,
-      image: "🌽",
-      date: "2024-11-08",
-      localisation: "Antananarivo",
-      vues: 167,
-      interesses: 29,
-      status: "disponible"
+  // Calculer les statistiques
+  const stats = {
+    totalProducts: products.length,
+    availableProducts: products.filter(
+      (p) => p.statut === ProductStatut.DISPONIBLE
+    ).length,
+    totalOrders: orders.length,
+    completedOrders: orders.filter((o) => o.statut === CommandeStatut.COMPLETE)
+      .length,
+    pendingOrders: orders.filter((o) => o.statut === CommandeStatut.EN_ATTENTE)
+      .length,
+    totalRevenue: orders.reduce((sum, order) => {
+      if (!order.lignes || order.lignes.length === 0) return sum;
+      return (
+        sum +
+        order.lignes.reduce((lineSum, line) => {
+          const sousTotal =
+            typeof line.sousTotal === "string"
+              ? parseFloat(line.sousTotal)
+              : line.sousTotal || 0;
+          return lineSum + sousTotal;
+        }, 0)
+      );
+    }, 0),
+  };
+
+  const handleEditProfile = () => {
+    navigate(`/profile/${displayUser?.id}`);
+  };
+
+  const handleContact = () => {
+    toast.info("Fonctionnalité de messagerie à venir");
+  };
+
+  const handleViewProduct = (productId?: string) => {
+    if (productId) {
+      navigate(`/products/${productId}`);
     }
-  ];
+  };
 
-  const transactions = [
-    { id: 1, produit: "Riz Vary Gasy", quantite: 200, montant: 500000, acheteur: "Marie R.", date: "2024-11-08", statut: "complété" },
-    { id: 2, produit: "Maïs", quantite: 100, montant: 180000, acheteur: "Paul R.", date: "2024-11-04", statut: "complété" },
-    { id: 3, produit: "Tomates", quantite: 50, montant: 150000, acheteur: "Sophie M.", date: "2024-11-01", statut: "complété" }
-  ];
+  if (isLoading) {
+    return (
+      <section className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto text-green-600 mb-4" />
+          <p className="text-gray-600">Chargement du profil...</p>
+        </div>
+      </section>
+    );
+  }
 
-  const activities = [
-    { type: "produit", action: "Nouveau produit ajouté", details: "Riz Vary Gasy Premium", date: "Il y a 2 jours" },
-    { type: "vente", action: "Vente réalisée", details: "200kg de Riz à Marie R.", date: "Il y a 3 jours" },
-    { type: "produit", action: "Produit modifié", details: "Tomates Bio - Prix mis à jour", date: "Il y a 5 jours" },
-    { type: "vente", action: "Vente réalisée", details: "100kg de Maïs à Paul R.", date: "Il y a 1 semaine" }
-  ];
+  if (!displayUser) {
+    return (
+      <section className="flex items-center justify-center min-h-screen">
+        <Card className="p-12 text-center">
+          <User size={48} className="mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-600">Utilisateur introuvable</p>
+          <Button onClick={() => navigate("/")} className="mt-4">
+            Retour à l'accueil
+          </Button>
+        </Card>
+      </section>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-green-50/30 to-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Toggle pour tester les deux vues */}
-        <div className="mb-6 flex justify-end">
-          <button 
-            onClick={() => setIsOwnProfile(!isOwnProfile)}
-            className="text-xs bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:bg-gray-50 transition flex items-center gap-2"
-          >
-            {isOwnProfile ? <User size={14} /> : <Eye size={14} />}
-            {isOwnProfile ? "Voir en tant que visiteur" : "Voir mon profil"}
-          </button>
-        </div>
+    <section className="space-y-6">
+      {/* Header Card */}
+      <Card className="p-0! overflow-hidden">
+        {/* Banner */}
 
-        {/* Header Card */}
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-6 border border-gray-100">
-          <div className="relative">
-            {/* linear Background */}
-            <div className="h-32 md:h-40 bg-linear-to-r from-emerald-500 via-green-500 to-teal-500 relative overflow-hidden">
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-48 translate-y-48"></div>
+        {/* Profile Content */}
+        <div className="px-6 py-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Avatar */}
+            <div className="relative">
+              <div className="w-32 h-32 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
+                {displayUser.avatar || "👤"}
               </div>
+              {displayUser.role === Role.PAYSAN && (
+                <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg">
+                  <Star size={16} fill="white" />
+                </div>
+              )}
             </div>
 
-            {/* Profile Content */}
-            <div className="px-6 md:px-10 pb-8">
-              <div className="flex flex-col md:flex-row gap-6 -mt-16 md:-mt-20">
-                {/* Avatar */}
-                <div className="relative">
-                  <div className="w-32 h-32 md:w-40 md:h-40 bg-linear-to-br from-green-400 to-emerald-600 rounded-3xl flex items-center justify-center text-6xl md:text-7xl border-4 border-white shadow-2xl">
-                    {userProfile.photo_profil}
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg">
-                    <Star size={20} fill="white" />
+            {/* Info */}
+            <div className="flex-1 pt-4">
+              <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold mb-2">
+                    {displayUser.prenom} {displayUser.nom}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <Badge className="bg-green-600">
+                      {displayUser.role === Role.PAYSAN
+                        ? "🌾 Paysan"
+                        : displayUser.role === Role.COLLECTEUR
+                        ? "🚚 Collecteur"
+                        : "🛡️ Admin"}
+                    </Badge>
+                    {displayUser.localisation && (
+                      <span className="flex items-center gap-1 text-sm text-gray-600">
+                        <MapPin size={14} className="text-green-600" />
+                        {displayUser.localisation}
+                      </span>
+                    )}
+                    {displayUser.createdAt && (
+                      <span className="flex items-center gap-1 text-sm text-gray-600">
+                        <Calendar size={14} className="text-green-600" />
+                        Membre depuis{" "}
+                        {new Date(displayUser.createdAt).toLocaleDateString(
+                          "fr-FR"
+                        )}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Info & Actions */}
-                <div className="flex-1 pt-4 md:pt-6">
-                  <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
+                {/* Actions */}
+                <div className="flex gap-2">
+                  {isOwnProfile ? (
+                    <Button
+                      onClick={handleEditProfile}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Edit size={18} className="mr-2" />
+                      Modifier
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleContact}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <Mail size={18} className="mr-2" />
+                      Contacter
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+                {displayUser.role === Role.PAYSAN && (
+                  <>
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                        {userProfile.prenom} {userProfile.nom}
-                      </h1>
-                      <div className="flex flex-wrap items-center gap-3 mb-3">
-                        <span className="bg-linear-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
-                          {userProfile.role}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-gray-600 text-sm">
-                          <MapPin size={16} className="text-green-600" />
-                          {userProfile.localisation}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-gray-600 text-sm">
-                          <Calendar size={16} className="text-green-600" />
-                          {userProfile.stats.membre_depuis}
-                        </span>
+                      <div className="text-2xl font-bold text-green-600">
+                        {stats.totalProducts}
                       </div>
-                      <p className="text-gray-600 max-w-2xl">{userProfile.bio}</p>
+                      <div className="text-xs text-gray-600">Produits</div>
                     </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-2 min-w-fit">
-                      {isOwnProfile ? (
-                        <>
-                          <button className="px-6 py-2.5 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
-                            <Edit size={18} />
-                            Modifier
-                          </button>
-                          <button className="px-6 py-2.5 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition flex items-center gap-2 font-semibold">
-                            <Settings size={18} />
-                            Paramètres
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button className="px-6 py-2.5 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg transition-all flex items-center gap-2 font-semibold">
-                            <MessageCircle size={18} />
-                            Contacter
-                          </button>
-                          <button className="px-6 py-2.5 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition flex items-center gap-2 font-semibold">
-                            <Heart size={18} />
-                            Suivre
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-100">
-                    <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-linear-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{produits.length}</div>
-                      <div className="text-xs text-gray-500 font-medium">Produits actifs</div>
-                    </div>
-                    <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-linear-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">{userProfile.stats.transactions}</div>
-                      <div className="text-xs text-gray-500 font-medium">Transactions</div>
-                    </div>
-                    <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-linear-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent flex items-center justify-center md:justify-start gap-1">
-                        {userProfile.stats.note}
-                        <Star size={16} fill="#f59e0b" className="text-amber-500" />
+                    <div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {stats.availableProducts}
                       </div>
-                      <div className="text-xs text-gray-500 font-medium">Note moyenne</div>
+                      <div className="text-xs text-gray-600">Disponibles</div>
                     </div>
-                    <div className="text-center md:text-left">
-                      <div className="text-2xl font-bold bg-linear-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{userProfile.stats.taux_reussite}%</div>
-                      <div className="text-xs text-gray-500 font-medium">Fiabilité</div>
-                    </div>
+                  </>
+                )}
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {stats.totalOrders}
                   </div>
+                  <div className="text-xs text-gray-600">Commandes</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-orange-600">
+                    {stats.completedOrders}
+                  </div>
+                  <div className="text-xs text-gray-600">Complétées</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </Card>
 
-        {/* Navigation Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-          {[
-            { id: 'apercu', label: 'Aperçu', icon: BarChart3 },
-            { id: 'produits', label: 'Produits', icon: Package },
-            { id: 'transactions', label: 'Transactions', icon: TrendingUp },
-            ...(isOwnProfile ? [{ id: 'activite', label: 'Activité', icon: Clock }] : []),
-            { id: 'contact', label: 'Contact', icon: Phone }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3 rounded-2xl font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-white shadow-lg text-green-600 border-2 border-green-100'
-                  : 'bg-white/60 text-gray-600 hover:bg-white hover:shadow-md border-2 border-transparent'
-              }`}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="border-b mb-5">
+          <TabsTrigger value="overview" className="flex items-center gap-2">
+            <User size={16} />
+            Aperçu
+          </TabsTrigger>
+          {displayUser.role === Role.PAYSAN && (
+            <TabsTrigger value="products" className="flex items-center gap-2">
+              <Package size={16} />
+              <span className="hidden sm:block">Produits publiés</span>
+              <Tooltip text="Produits publiés">
+                <Badge variant="secondary">{stats.totalProducts}</Badge>
+              </Tooltip>
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="orders" className="flex items-center gap-2">
+            <ShoppingCart size={16} />
+            {displayUser.role === Role.PAYSAN ? (
+              <span className="hidden sm:block">Commandes reçues</span>
+            ) : (
+              <span className="hidden sm:block">Commandes passées</span>
+            )}
+            <Tooltip text="Commandes">
+              <Badge variant="secondary">{stats.totalOrders}</Badge>
+            </Tooltip>
+          </TabsTrigger>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Aperçu Tab */}
-            {activeTab === 'apercu' && (
-              <>
-                {isOwnProfile && (
-                  <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-3xl p-8 text-white shadow-xl">
-                    <h3 className="text-2xl font-bold mb-6">📊 Vos performances ce mois-ci</h3>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
-                        <div className="text-3xl font-bold mb-1">{userProfile.stats.total_ventes}</div>
-                        <div className="text-sm text-green-100">Ventes totales</div>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
-                        <div className="text-3xl font-bold mb-1">{userProfile.stats.revenus} Ar</div>
-                        <div className="text-sm text-green-100">Revenus générés</div>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
-                        <div className="text-3xl font-bold mb-1">+23%</div>
-                        <div className="text-sm text-green-100">vs mois dernier</div>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
-                        <div className="text-3xl font-bold mb-1">12</div>
-                        <div className="text-sm text-green-100">Nouveaux clients</div>
-                      </div>
-                    </div>
+        </TabsList>
+
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Stats Cards */}
+          {isOwnProfile && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="p-6 bg-linear-to-br from-green-50 to-emerald-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <TrendingUp className="text-green-600" size={24} />
                   </div>
-                )}
-
-                <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-                  <h3 className="text-xl font-bold mb-4">🌾 Produits en vedette</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {produits.slice(0, 4).map(p => (
-                      <div key={p.id} className="group border-2 border-gray-100 rounded-2xl p-4 hover:border-green-200 hover:shadow-md transition-all cursor-pointer">
-                        <div className="flex gap-4">
-                          <div className="w-20 h-20 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-4xl shrink-0">
-                            {p.image}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-sm mb-1 truncate">{p.nom}</h4>
-                            <p className="text-xs text-gray-500 mb-2">{p.quantite} {p.unite} disponibles</p>
-                            <div className="flex items-center justify-between">
-                              <span className="text-lg font-bold text-green-600">{p.prix.toLocaleString()} Ar</span>
-                              <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                                p.status === 'disponible' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {p.status === 'disponible' ? '✓' : '✗'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div>
+                    <p className="text-sm text-gray-600">Revenus Totaux</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {Math.round(stats.totalRevenue).toLocaleString()} Ar
+                    </p>
                   </div>
                 </div>
-              </>
-            )}
+              </Card>
 
-            {/* Produits Tab */}
-            {activeTab === 'produits' && (
-              <div className="space-y-4">
-                {produits.map(p => (
-                  <div key={p.id} className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all group">
-                    <div className="p-6">
-                      <div className="flex gap-6">
-                        <div className="w-32 h-32 bg-linear-to-br from-orange-100 via-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center text-6xl shrink-0 group-hover:scale-105 transition-transform">
-                          {p.image}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="text-xl font-bold mb-1">{p.nom}</h3>
-                              <p className="text-sm text-gray-500 capitalize">Type: {p.type}</p>
-                            </div>
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${
-                              p.status === 'disponible' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-gray-100 text-gray-600'
-                            }`}>
-                              {p.status === 'disponible' ? '✓ Disponible' : '✗ Épuisé'}
-                            </span>
-                          </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                            <div className="bg-gray-50 rounded-xl p-3">
-                              <div className="text-xs text-gray-500 mb-1">Quantité</div>
-                              <div className="font-bold">{p.quantite} {p.unite}</div>
-                            </div>
-                            <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-xl p-3">
-                              <div className="text-xs text-gray-500 mb-1">Prix unitaire</div>
-                              <div className="font-bold text-green-600">{p.prix.toLocaleString()} Ar</div>
-                            </div>
-                            <div className="bg-gray-50 rounded-xl p-3">
-                              <div className="text-xs text-gray-500 mb-1">Vues</div>
-                              <div className="font-bold flex items-center gap-1">
-                                <Eye size={14} className="text-gray-400" />
-                                {p.vues}
-                              </div>
-                            </div>
-                            <div className="bg-gray-50 rounded-xl p-3">
-                              <div className="text-xs text-gray-500 mb-1">Intéressés</div>
-                              <div className="font-bold flex items-center gap-1">
-                                <Heart size={14} className="text-red-400" />
-                                {p.interesses}
-                              </div>
-                            </div>
-                          </div>
+              <Card className="p-6 bg-linear-to-br from-blue-50 to-cyan-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <ShoppingCart className="text-blue-600" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Commandes</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {stats.totalOrders}
+                    </p>
+                  </div>
+                </div>
+              </Card>
 
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                            <span className="text-sm text-gray-500 flex items-center gap-1">
-                              <MapPin size={14} />
-                              {p.localisation}
-                            </span>
-                            {isOwnProfile ? (
-                              <button className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm font-semibold flex items-center gap-2">
-                                <Edit size={14} />
-                                Modifier
-                              </button>
-                            ) : (
-                              <button className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-sm font-semibold">
-                                Contacter le vendeur
-                              </button>
-                            )}
-                          </div>
-                        </div>
+              <Card className="p-6 bg-linear-to-br from-yellow-50 to-orange-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <Clock className="text-yellow-600" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">En Attente</p>
+                    <p className="text-2xl font-bold text-yellow-600">
+                      {stats.pendingOrders}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-linear-to-br from-purple-50 to-pink-50">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <CheckCircle className="text-purple-600" size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Complétées</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {stats.completedOrders}
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Contact Info */}
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">
+              Informations de Contact
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Mail className="text-blue-600" size={20} />
+                <div>
+                  <p className="text-sm text-gray-600">Email</p>
+                  <p className="font-semibold">{displayUser.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Phone className="text-green-600" size={20} />
+                <div>
+                  <p className="text-sm text-gray-600">Téléphone</p>
+                  <p className="font-semibold">{displayUser.telephone}</p>
+                </div>
+              </div>
+
+              {displayUser.adresse && (
+                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg md:col-span-2">
+                  <MapPin className="text-purple-600" size={20} />
+                  <div>
+                    <p className="text-sm text-gray-600">Adresse</p>
+                    <p className="font-semibold">{displayUser.adresse}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Products Tab */}
+        {displayUser.role === Role.PAYSAN && (
+          <TabsContent value="products" className="space-y-4">
+            {products.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Package size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Aucun produit disponible</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {products.map((product) => (
+                  <Card
+                    key={product.id}
+                    className="p-6 hover:shadow-md transition cursor-pointer"
+                    onClick={() => handleViewProduct(product.id)}
+                  >
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl">
+                        {product.imageUrl || "📦"}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold truncate">{product.nom}</h4>
+                        <p className="text-sm text-gray-600">{product.type}</p>
+                      </div>
+                      <Badge
+                        className={
+                          product.statut === ProductStatut.DISPONIBLE
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }
+                      >
+                        {product.statut === ProductStatut.DISPONIBLE
+                          ? "Disponible"
+                          : "Épuisé"}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-xs text-gray-600">Quantité</p>
+                        <p className="font-bold">
+                          {product.quantiteDisponible} {product.unite}
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-3">
+                        <p className="text-xs text-gray-600">Prix</p>
+                        <p className="font-bold text-green-600">
+                          {product.prixUnitaire.toLocaleString()} Ar
+                        </p>
                       </div>
                     </div>
-                  </div>
+
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <MapPin size={12} />
+                        {product.localisation?.adresse || "Localisation"}
+                      </span>
+                      <Button size="sm" variant="ghost">
+                        <Eye size={14} className="mr-1" />
+                        Voir
+                      </Button>
+                    </div>
+                  </Card>
                 ))}
               </div>
             )}
+          </TabsContent>
+        )}
 
-            {/* Transactions Tab */}
-            {activeTab === 'transactions' && (
-              <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-xl font-bold mb-6">Historique des transactions</h3>
-                <div className="space-y-3">
-                  {transactions.map(t => (
-                    <div key={t.id} className="flex items-center gap-4 p-4 bg-linear-to-r from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-md transition">
-                      <div className="w-12 h-12 bg-linear-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center shrink-0">
-                        <CheckCircle className="text-green-600" size={24} />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold mb-1">{t.produit}</h4>
-                        <p className="text-sm text-gray-600">{isOwnProfile ? `Vendu à ${t.acheteur}` : `Acheté auprès de ${userProfile.prenom}`} · {t.quantite} kg</p>
-                        <p className="text-xs text-gray-400 mt-1">{t.date}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-green-600">{t.montant.toLocaleString()} Ar</div>
-                        <span className="text-xs text-gray-500">{t.statut}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* Orders Tab */}
+        <TabsContent value="orders" className="space-y-4">
+          {orders.length === 0 ? (
+            <Card className="p-12 text-center">
+              <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Aucune commande</p>
+            </Card>
+          ) : (
+            orders.slice(0, 5).map((order) => {
+              const getStatusConfig = (status?: CommandeStatut) => {
+                const defaultConfig = {
+                  label: "En attente",
+                  color: "bg-yellow-100 text-yellow-700",
+                };
 
-            {/* Activité Tab (Own Profile Only) */}
-            {activeTab === 'activite' && isOwnProfile && (
-              <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-xl font-bold mb-6">Activité récente</h3>
-                <div className="space-y-3">
-                  {activities.map((a, i) => (
-                    <div key={i} className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                        a.type === 'produit' ? 'bg-blue-100' : 'bg-green-100'
-                      }`}>
-                        {a.type === 'produit' ? <Package size={18} className="text-blue-600" /> : <TrendingUp size={18} className="text-green-600" />}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-sm mb-1">{a.action}</p>
-                        <p className="text-sm text-gray-600">{a.details}</p>
-                        <p className="text-xs text-gray-400 mt-1">{a.date}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+                const configs: Partial<
+                  Record<CommandeStatut, { label: string; color: string }>
+                > = {
+                  [CommandeStatut.EN_ATTENTE]: {
+                    label: "En attente",
+                    color: "bg-yellow-100 text-yellow-700",
+                  },
+                  [CommandeStatut.ACCEPTEE]: {
+                    label: "Acceptée",
+                    color: "bg-green-100 text-green-700",
+                  },
+                  [CommandeStatut.COMPLETE]: {
+                    label: "Complète",
+                    color: "bg-green-100 text-green-700",
+                  },
+                  [CommandeStatut.ANNULEE]: {
+                    label: "Annulée",
+                    color: "bg-red-100 text-red-700",
+                  },
+                };
 
-            {/* Contact Tab */}
-            {activeTab === 'contact' && (
-              <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-                <h3 className="text-xl font-bold mb-6">Informations de contact</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-blue-50 to-cyan-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <Mail className="text-blue-600" size={20} />
-                    </div>
+                return status
+                  ? configs[status] ?? defaultConfig
+                  : defaultConfig;
+              };
+
+              const statusConfig = getStatusConfig(order.statut);
+
+              return (
+                <Card key={order.id} className="p-6 hover:shadow-md transition">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
-                      <div className="text-sm text-gray-500 mb-1">Email</div>
-                      <div className="font-semibold">{userProfile.email}</div>
+                      <h4 className="font-bold">
+                        {order.produitRecherche ||
+                          `Commande #${order.id?.slice(0, 8)}`}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {order.collecteur
+                          ? `${order.collecteur.prenom} ${order.collecteur.nom}`
+                          : "Collecteur"}
+                      </p>
                     </div>
+                    <Badge className={statusConfig.color}>
+                      {statusConfig.label}
+                    </Badge>
                   </div>
-                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                      <Phone className="text-green-600" size={20} />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500 mb-1">Téléphone</div>
-                      <div className="font-semibold">{userProfile.telephone}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 p-4 bg-linear-to-r from-purple-50 to-pink-50 rounded-2xl">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <MapPin className="text-purple-600" size={20} />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500 mb-1">Adresse</div>
-                      <div className="font-semibold">{userProfile.adresse}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                {!isOwnProfile && (
-                  <button className="w-full mt-6 py-4 bg-linear-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all font-bold">
-                    Envoyer un message
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            
-            {/* Performance Card (Own Profile) */}
-            {isOwnProfile && (
-              <div className="bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 rounded-3xl p-6 text-white shadow-xl">
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield size={24} />
-                  <h3 className="font-bold text-lg">Votre Score</h3>
-                </div>
-                <div className="text-5xl font-bold mb-2">{userProfile.stats.taux_reussite}%</div>
-                <p className="text-blue-100 text-sm mb-4">Taux de fiabilité excellent</p>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-blue-100">Livraisons à temps</span>
-                    <span className="font-bold">98%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-blue-100">Satisfaction clients</span>
-                    <span className="font-bold">4.8/5</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Stats Card (Visitor View) */}
-            {!isOwnProfile && (
-              <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-                <h3 className="font-bold text-lg mb-4">Statistiques</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Note moyenne</span>
-                    <span className="font-bold flex items-center gap-1">
-                      <Star size={14} fill="#f59e0b" className="text-amber-500" />
-                      {userProfile.stats.note}/5
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">
+                      {order.quantiteTotal} {order.unite}
                     </span>
+                    {order.createdAt && (
+                      <span className="text-gray-500">
+                        {new Date(order.createdAt).toLocaleDateString("fr-FR")}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Transactions</span>
-                    <span className="font-bold">{userProfile.stats.transactions}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Fiabilité</span>
-                    <span className="font-bold text-green-600">{userProfile.stats.taux_reussite}%</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">Membre depuis</span>
-                    <span className="font-bold">{userProfile.stats.membre_depuis}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Quick Actions (Own Profile) */}
-            {/* {isOwnProfile && (
-              <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100"></div>
-                <h3 className="font-bold text-lg mb-4">Actions rapides</h3>
-                <div className="space-y-3">
-                  <button className="w-full flex items-center gap-3 px-4 py-3 bg-green-50 hover:bg-green-100 rounded-xl transition"></button>
-                    <Package className="text-green-600" size={20} />
-                    <span className="font-semibold">Ajouter un nouveau produit</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition">
-                    <TrendingUp className="text-blue-600" size={20} />
-                    <span className="font-semibold">Voir les performances</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-xl transition">
-                    <Settings className="text-purple-600" size={20} />
-                    <span className="font-semibold">Paramètres du compte</span>
-                  </button>
-                </div>
-              </div>
-            )} */}
-          </div>
-        </div>
-      </div>
-    </div>
+                </Card>
+              );
+            })
+          )}
+        </TabsContent>
+      </Tabs>
+    </section>
   );
 };
 

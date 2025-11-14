@@ -268,7 +268,7 @@ export default function AdminDashboard() {
           return (
             <Card
               key={index}
-              className="p-6 hover:shadow-xl transition cursor-pointer group"
+              className="p-6 hover:shadow-md transition cursor-pointer group"
               onClick={() => navigate(stat.link)}
             >
               <div className="flex items-start justify-between mb-4">
