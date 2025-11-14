@@ -78,7 +78,7 @@ const ProductDetail = () => {
 
     setIsDeleting(true);
     try {
-      // await ProductService.deleteProduct(product.id);
+      await ProductService.deleteProduct(product.id);
       toast.success('Produit supprimé avec succès');
       navigate('/products');
     } catch (error) {

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, ShoppingCart, Target } from "lucide-react";
 import { toast } from "sonner";
-import { Role, CommandeStatut, StatutCommandeLigne, Unite, ProductType } from "@/types/enums";
+import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
 import { useNavigate } from "react-router-dom";
 import OrderRequestCard from "@/components/composant/OrderRequestCard";
 import DirectOrderCard from "@/components/composant/DirectOrderCard";
@@ -19,80 +19,7 @@ const Orders = () => {
   const userRole = user?.role;
   const navigate = useNavigate();
   const { setOrder } = useOrder();
-  const [orders, setOrders] = useState<Order[]>([
-    // Exemple de commande directe
-    {
-      id: "1",
-      produitRecherche: null,
-      quantiteTotal: "50",
-      unite: Unite.KG as Unite,
-      prixUnitaire: "12000",
-      statut: CommandeStatut.EN_ATTENTE as CommandeStatut,
-      messageCollecteur: "Livraison souhaitée avant le marché de samedi",
-      adresseLivraison: "Lot II A 45 Bis, Fianarantsoa",
-      dateLivraisonPrevue: "2025-11-20T08:00:00.000Z",
-      createdAt: "2025-11-11T13:58:31.034Z",
-      collecteurId: "1",
-      collecteur: {
-        nom: "Rakoto",
-        prenom: "Jean",
-        telephone: "034 12 345 67",
-      },
-      lignes: [
-        {
-          id: "1",
-          produitId: "p1",
-          produit: { nom: "Riz Premium", prixUnitaire: 2500, type: ProductType.GRAIN as ProductType, quantiteDisponible: 1000, dateRecolte: "2025-10-01", paysan: { nom: "Randria Paul", prenom: "Paul" } },
-          quantiteFournie: "200",
-          prixUnitaire: "2500",
-          sousTotal: "500000",
-          statutLigne: StatutCommandeLigne.EN_ATTENTE as StatutCommandeLigne,
-        },
-      ]
-    },
-    // Exemple de demande de commande
-    {
-      id: "2",
-      produitRecherche: "Riz Premium Bio",
-      quantiteTotal: "500",
-      unite: Unite.KG as Unite,
-      prixUnitaire: null,
-      statut: CommandeStatut.OUVERTE as CommandeStatut,
-      messageCollecteur: "Recherche de riz bio pour exportation",
-      territoire: "Analamanga",
-      latitude: -18.8792,
-      longitude: 47.5079,
-      rayon: 50,
-      dateLivraisonPrevue: "2025-12-01T00:00:00.000Z",
-      createdAt: "2025-11-10T10:00:00.000Z",
-      collecteurId: "2",
-      collecteur: {
-        nom: "Rasoa",
-        prenom: "Marie",
-        telephone: "033 98 765 43",
-      },
-      lignes: [
-        {
-          id: "1",
-          produitId: "p1",
-          produit: { nom: "Riz Premium", prixUnitaire: 2500, type: ProductType.GRAIN as ProductType, quantiteDisponible: 1000, dateRecolte: "2025-10-01", paysan: { nom: "Randria Paul", prenom: "Paul" } },
-          quantiteFournie: "200",
-          prixUnitaire: "2500",
-          sousTotal: "500000",
-          statutLigne: StatutCommandeLigne.EN_ATTENTE as StatutCommandeLigne,
-        },
-        {
-          id: "2",
-          produitId: "p2",
-          produit: { nom: "Riz Bio", prixUnitaire: 2800, type: ProductType.GRAIN as ProductType, quantiteDisponible: 800, dateRecolte: "2025-09-15", paysan: { nom: "Rabe Lala", prenom: "Lala" } },
-          quantiteFournie: "150",
-          prixUnitaire: "2800",
-          sousTotal: "420000",
-          statutLigne: StatutCommandeLigne.ACCEPTEE as StatutCommandeLigne,
-        },
-      ],
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -104,7 +31,7 @@ const Orders = () => {
     try {
       let response;
       if (userRole === Role.PAYSAN) {
-        response = await OrderService.getAllOrders();
+        response = await OrderService.getAllOrdersPaysan();
       }
       else {
         response = await OrderService.getAllOrdersCollecteur(user?.id || "");
@@ -120,6 +47,10 @@ const Orders = () => {
       setIsLoading(false);
     }
   };
+
+
+  console.log(orders);
+  
 
 
 

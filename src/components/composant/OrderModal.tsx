@@ -19,8 +19,9 @@ import { UNITE_LABELS, formatPrice, PRODUCT_TYPE_LABELS } from "@/lib/utils";
 import { Package, ShoppingCart, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { OrderService } from "@/service/order.service";
 
-interface PropositionFormData {
+export interface PropositionFormData {
   paysanId?: string;
   produitId?: string;
   quantiteAccordee: number;
@@ -76,7 +77,7 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
       console.log("🧺 Produit concerné :", product);
 
       // TODO: Appel API
-      // await PropositionService.create({ ...data, productId: product?.id });
+      await OrderService.createOrder({...data, produitId: product?.id});
 
       toast.success("Proposition envoyée avec succès !");
       reset();
