@@ -50,4 +50,5 @@ export const StatutCommandeLigne = {
   EN_ATTENTE: "en_attente",
   ACCEPTEE: "acceptee",
   REJETEE: "rejetee",
+  LIVREE: "livree",
 } as const;
