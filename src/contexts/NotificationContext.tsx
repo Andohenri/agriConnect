@@ -38,14 +38,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   useEffect(() => {
     if (!userId) return;
 
-    console.log("[CONTEXT] Initialisation du socket pour userId:", userId);
-    const socket = initSocket(userId);
-
-    console.log("socket context :", socket);
+    initSocket({userId});
 
     const unsubscribe = subscribeToNotifications((notif: any) => {
       console.log("[CONTEXT] Nouvelle notification:", notif);
       setNotifications((prev) => [notif, ...prev]);
+
       toast.message(`📩 ${notif.titre}`, {
         // description facultative
         description: notif.message,

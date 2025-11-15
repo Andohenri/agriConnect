@@ -147,6 +147,37 @@ const Profile = () => {
     );
   }
 
+  const getRoleConfig = (role?: Role) => {
+    if (!role)
+      return {
+        icon: "👤",
+        label: "Utilisateur",
+        color: "bg-gray-100 text-gray-700",
+      };
+
+    const configs = {
+      [Role.PAYSAN]: {
+        icon: "👨‍🌾",
+        label: "Paysan",
+        color: "bg-green-100 text-green-700",
+      },
+      [Role.COLLECTEUR]: {
+        icon: "🚚",
+        label: "Collecteur",
+        color: "bg-blue-100 text-blue-700",
+      },
+      [Role.ADMIN]: {
+        icon: "🛡️",
+        label: "Administrateur",
+        color: "bg-purple-100 text-purple-700",
+      },
+    };
+    return configs[role];
+  };
+
+
+  const roleConfig = getRoleConfig(currentUser?.role);
+
   return (
     <section className="space-y-6">
       {/* Header Card */}
@@ -158,16 +189,19 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-32 h-32 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
+              <div className="w-32 h-32 bg-linear-to-br rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
                 {displayUser.avatar ? (
                   <img
                     // src={displayUser.avatar}
-                    src={`http://localhost:3000${displayUser.avatar}`}
+                    src={`${import.meta.env.VITE_UPLOAD_URL}${displayUser.avatar}`}
                     alt={displayUser.nom}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover rounded-2xl group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  "👤"
+                  // "👤"
+                  <div className="w-full h-full flex items-center justify-center text-6xl bg-linear-to-br rounded-2xl from-green-400 to-emerald-600">
+                    {roleConfig.icon}
+                  </div>
                 )}
               </div>
               {displayUser.role === Role.PAYSAN && (

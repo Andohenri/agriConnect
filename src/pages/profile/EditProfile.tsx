@@ -90,9 +90,9 @@ const EditProfile = () => {
       });
 
       // Initialiser l'aperçu avec l'avatar existant
-      if (user.avatar) {
-        setAvatarPreview(user.avatar);
-      }
+      // if (user.avatar) {
+      //   setAvatarPreview(user.avatar);
+      // }
     }
   }, [user, reset]);
 
@@ -196,7 +196,7 @@ const EditProfile = () => {
         setAvatarFile(null);
         setRemoveAvatar(false);
         toast.success("Profil mis à jour avec succès !");
-        // navigate("/profile");
+        navigate("/profile");
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -283,22 +283,22 @@ const EditProfile = () => {
           {/* Avatar Preview */}
           <div className="relative group">
             <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-gray-200 bg-linear-to-br from-green-400 to-emerald-600">
-              {avatarPreview ? (
-                // 👉 Preview avant upload (priorité)
+              {avatarFile && avatarPreview ? (
+                // Preview avant upload
                 <img
                   src={avatarPreview}
                   alt="Avatar Preview"
                   className="w-full h-full object-cover"
                 />
               ) : user?.avatar ? (
-                // 👉 Avatar existant du backend
+                // Avatar existant dans la DB
                 <img
-                  src={`http://localhost:3000${user.avatar}`}
+                  src={`${import.meta.env.VITE_UPLOAD_URL}${user.avatar}`}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />
               ) : (
-                // 👉 Icône par défaut
+                // Icône par défaut
                 <div className="w-full h-full flex items-center justify-center text-6xl">
                   {roleConfig.icon}
                 </div>

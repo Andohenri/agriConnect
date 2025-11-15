@@ -15,7 +15,7 @@ function RootApp() {
   const { user } = useAuth();
 
   return (
-    <NotificationProvider userId={user?.id || "invite"}>
+    <NotificationProvider userId={user?.id as string}>
       <AppRouter />
       <Toaster richColors />
     </NotificationProvider>
