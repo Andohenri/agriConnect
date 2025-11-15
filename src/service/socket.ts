@@ -57,7 +57,7 @@ export function initSocket(options: InitOptions = {}) {
   const existing = sockets.get(k);
   if (existing && existing.connected) return existing;
 
-  const base = (import.meta.env.VITE_API_WS_URL as string) || (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+  const base = (import.meta.env.VITE_API_WS_URL as string) || (import.meta.env.VITE_SOCKET_URL as string) || "http://localhost:3000";
   const socketPath = path ?? (import.meta.env.VITE_API_WS_PATH as string) ?? undefined;
   const url = buildUrl(base, namespace);
 
