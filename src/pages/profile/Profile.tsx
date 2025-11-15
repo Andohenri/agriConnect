@@ -159,7 +159,15 @@ const Profile = () => {
             {/* Avatar */}
             <div className="relative">
               <div className="w-32 h-32 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
-                {displayUser.avatar || "👤"}
+                {displayUser.avatar ? (
+                  <img
+                    src={displayUser.avatar}
+                    alt={displayUser.nom}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                ) : (
+                  "👤"
+                )}
               </div>
               {displayUser.role === Role.PAYSAN && (
                 <div className="absolute -bottom-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg">
@@ -403,17 +411,18 @@ const Profile = () => {
                     onClick={() => handleViewProduct(product.id)}
                   >
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl">
+                      <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl overflow-hidden">
                         {product.imageUrl ? (
                           <img
                             src={product.imageUrl}
                             alt={product.nom}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300"
                           />
                         ) : (
                           "📦"
                         )}
                       </div>
+
                       <div className="flex-1">
                         <h4 className="font-bold truncate">{product.nom}</h4>
                         <p className="text-sm text-gray-600">{product.type}</p>

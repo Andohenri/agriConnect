@@ -38,7 +38,7 @@ export const UserService = {
     const formData = new FormData();
     formData.append("avatar", file);
     
-    const response = await Axios.patch(
+    const response = await Axios.post(
       `${this.BASE_PATH}/avatar`,
       formData,
       {
@@ -62,7 +62,7 @@ export const UserService = {
   },
 
   async updateUser(id: string, data: UpdateUserRequest): Promise<User> {
-    const response = await Axios.patch(`${this.BASE_PATH}/${id}`, data);
+    const response = await Axios.put(`${this.BASE_PATH}/${id}`, data);
     return response.data;
   },
 

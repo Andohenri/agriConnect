@@ -16,6 +16,9 @@ import {
   ArrowLeft,
   Save,
   Loader2,
+  Camera,
+  Upload,
+  X,
 } from "lucide-react";
 import { Role } from "@/types/enums";
 import { UserService } from "@/service/user.service";
@@ -35,10 +38,13 @@ interface EditProfileFormData {
 }
 
 const EditProfile = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [changePassword, setChangePassword] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [removeAvatar, setRemoveAvatar] = useState(false);
 
   const {
     register,
@@ -47,6 +53,7 @@ const EditProfile = () => {
     formState: { errors, isSubmitting, isDirty },
     reset,
     watch,
+    setValue,
   } = useForm<EditProfileFormData>({
     defaultValues: {
       nom: user?.nom || "",
@@ -81,8 +88,52 @@ const EditProfile = () => {
         nouveau_mot_de_passe: "",
         confirmation_mot_de_passe: "",
       });
+
+      // Initialiser l'aperçu avec l'avatar existant
+      if (user.avatar) {
+        setAvatarPreview(user.avatar);
+      }
     }
   }, [user, reset]);
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validation du fichier
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image (PNG, JPG, JPEG)");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    // Créer un aperçu local
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+    setAvatarFile(file);
+    setRemoveAvatar(false);
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarPreview(null);
+    setAvatarFile(null);
+    setRemoveAvatar(true);
+
+    // Marquer le formulaire comme modifié
+    setValue("nom", watch("nom"), { shouldDirty: true });
+
+    // Nettoyer l'input file
+    const fileInput = document.getElementById(
+      "avatar-upload"
+    ) as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
 
   const onSubmit: SubmitHandler<EditProfileFormData> = async (data) => {
     if (!user?.id) {
@@ -92,7 +143,30 @@ const EditProfile = () => {
 
     setIsLoading(true);
     try {
-      // Préparer les données à envoyer
+      // 1. Mettre à jour l'avatar si nécessaire
+      console.log("Avatar File:", avatarFile);
+      if (avatarFile) {
+        try {
+          await UserService.updateAvatar(avatarFile);
+          toast.success("Photo de profil mise à jour lfkernfkjer !");
+        } catch (error: any) {
+          console.error("Error updating avatar:", error);
+          toast.error(
+            error?.response?.data?.message ||
+              "Erreur lors de la mise à jour de la photo"
+          );
+          throw error; // Arrêter si l'upload échoue
+        }
+      }
+
+      // 2. Supprimer l'avatar si demandé
+      if (removeAvatar && !avatarFile) {
+        // Appeler l'API pour supprimer l'avatar (à implémenter côté backend)
+        // await UserService.removeAvatar();
+        toast.info("Avatar supprimé");
+      }
+
+      // 3. Mettre à jour les autres informations du profil
       const updateData: any = {
         nom: data.nom,
         prenom: data.prenom,
@@ -104,7 +178,6 @@ const EditProfile = () => {
         longitude: data.longitude,
       };
 
-      // Ajouter les mots de passe seulement si on veut les changer
       if (changePassword && data.nouveau_mot_de_passe) {
         if (data.nouveau_mot_de_passe !== data.confirmation_mot_de_passe) {
           toast.error("Les mots de passe ne correspondent pas");
@@ -115,14 +188,15 @@ const EditProfile = () => {
         updateData.nouveau_mot_de_passe = data.nouveau_mot_de_passe;
       }
 
-      // Appeler le service pour mettre à jour
       const response = await UserService.updateUser(user.id, updateData);
 
       if (response) {
-        // Mettre à jour le contexte utilisateur
-        UserService.updateProfile(updateData);
+        setUser(response);
+        reset(data);
+        setAvatarFile(null);
+        setRemoveAvatar(false);
         toast.success("Profil mis à jour avec succès !");
-        navigate("/profile");
+        // navigate("/profile");
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
@@ -136,12 +210,21 @@ const EditProfile = () => {
   };
 
   const handleCancel = () => {
+    // Nettoyer l'aperçu si c'était un fichier local
+    if (avatarFile && avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
     navigate(-1);
   };
 
   const getRoleConfig = (role?: Role) => {
-    if (!role) return { icon: "👤", label: "Utilisateur", color: "bg-gray-100 text-gray-700" };
-    
+    if (!role)
+      return {
+        icon: "👤",
+        label: "Utilisateur",
+        color: "bg-gray-100 text-gray-700",
+      };
+
     const configs = {
       [Role.PAYSAN]: {
         icon: "👨‍🌾",
@@ -164,12 +247,17 @@ const EditProfile = () => {
 
   const roleConfig = getRoleConfig(user?.role);
 
+  // Vérifier si le formulaire a des modifications (incluant l'avatar)
+  const hasChanges = isDirty || avatarFile !== null || removeAvatar;
+
   return (
     <section className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Modifier mon profil</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">
+            Modifier mon profil
+          </h1>
           <p className="text-gray-600 mt-1">
             Mettez à jour vos informations personnelles
           </p>
@@ -184,17 +272,104 @@ const EditProfile = () => {
         </Button>
       </div>
 
-      {/* Profile Info Card */}
-      <Card className="p-6 bg-linear-to-r from-green-50 to-emerald-50">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-4xl">
-            {roleConfig.icon}
+      {/* Profile + Avatar Card */}
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Camera size={20} className="text-green-600" />
+          Photo de profil
+        </h3>
+
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          {/* Avatar Preview */}
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-gray-200 bg-linear-to-br from-green-400 to-emerald-600">
+              {user?.avatar ? (
+                // 👉 Avatar venu du backend (URL fixe)
+                <img
+                  src={user.avatar}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : avatarPreview ? (
+                // 👉 Preview avant upload
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                // 👉 Icône par défaut
+                <div className="w-full h-full flex items-center justify-center text-6xl">
+                  {roleConfig.icon}
+                </div>
+              )}
+            </div>
+
+            {/* Remove Button */}
+            {avatarPreview && (
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-lg hover:bg-red-600 transition"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <div>
-            <h2 className="text-xl font-bold">
-              {user?.prenom} {user?.nom}
-            </h2>
-            <Badge className={roleConfig.color}>{roleConfig.label}</Badge>
+
+          {/* Infos + Upload */}
+          <div className="flex-1 w-full space-y-4">
+            <div>
+              <h2 className="text-xl font-bold">
+                {user?.prenom} {user?.nom}
+              </h2>
+              <Badge className={roleConfig.color}>{roleConfig.label}</Badge>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {/* Upload Button */}
+              <label htmlFor="avatar-upload">
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="cursor-pointer"
+                  asChild
+                >
+                  <span>
+                    <Upload size={18} className="mr-2" />
+                    Changer la photo
+                  </span>
+                </Button>
+              </label>
+
+              {/* Remove Button */}
+              {avatarPreview && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleRemoveAvatar}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X size={18} className="mr-2" />
+                  Supprimer
+                </Button>
+              )}
+            </div>
+
+            {avatarFile && (
+              <p className="text-sm text-amber-600 flex items-center gap-2">
+                <Camera size={16} />
+                Nouvelle photo sélectionnée - cliquez sur "Enregistrer" pour
+                valider
+              </p>
+            )}
           </div>
         </div>
       </Card>
@@ -400,7 +575,7 @@ const EditProfile = () => {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting || isLoading || !isDirty}
+              disabled={isSubmitting || isLoading || !hasChanges}
               className="flex-1 bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2"
             >
               {isSubmitting || isLoading ? (
