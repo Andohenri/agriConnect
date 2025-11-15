@@ -47,13 +47,7 @@ const Orders = () => {
       setIsLoading(false);
     }
   };
-
-
-  console.log(orders);
   
-
-
-
   // Séparer commandes directes et demandes
   const directOrders = orders.filter(
     (order) => !order.territoire

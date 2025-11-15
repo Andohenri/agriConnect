@@ -23,10 +23,11 @@ import {
   Clock,
   TrendingUp,
   ShoppingCart,
+  TrendingDown,
 } from "lucide-react";
 import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
-import { useNavigate } from "react-router-dom";
-import { formatDate, formatPrice, formatQuantity, ORDER_STATUT_CONFIG, UNITE_LABELS } from "@/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
+import { formatDate, formatPrice, formatQuantity, getPriceIndicator, ORDER_STATUT_CONFIG, UNITE_LABELS } from "@/lib/utils";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 
@@ -92,6 +93,14 @@ const OrderDetails = () => {
 
   const produit = order.lignes?.[0]?.produit;
   const totalOrder = Number(order.quantiteTotal) * Number(order.prixUnitaire);
+
+  const prixOriginal = produit?.prixUnitaire || 0;
+  const prixPropose = order.prixUnitaire || 0;
+  const difference = (prixPropose as number) - prixOriginal;
+  const pourcentage = prixOriginal > 0
+    ? ((difference / prixOriginal) * 100).toFixed(1)
+    : 0;
+  const indicator = getPriceIndicator(difference);
 
   return (
     <section className="space-y-6">
@@ -173,39 +182,140 @@ const OrderDetails = () => {
               </Card>
 
               {/* Détails du produit */}
-              <Card>
+              <Card className="gap-2">
                 <CardHeader>
                   <h3 className="text-xl font-bold">Détails du Produit</h3>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4 p-4 bg-gray-50 rounded-xl">
-                    <div className="w-20 h-20 bg-linear-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-4xl shrink-0">
-                      {produit?.imageUrl ? (
-                        <img src={produit.imageUrl} alt={produit.nom} className="w-full h-full object-cover rounded-xl" />
-                      ) : (
-                        '📦'
+                <CardContent className="p-0">
+                  {/* Header avec image et info produit */}
+                  <div className="flex gap-4 p-5 bg-linear-to-br from-gray-50 to-white">
+                    {/* Image produit avec badge */}
+                    <div className="relative w-24 h-24 shrink-0">
+                      <div className="w-full h-full bg-linear-to-br from-green-100 to-green-200 rounded-2xl overflow-hidden shadow-sm">
+                        {produit?.imageUrl ? (
+                          <Link to={`/products/${produit.id}`}>
+                            <img
+                              src={`${import.meta.env.VITE_UPLOAD_URL}${produit.imageUrl}`}
+                              alt={produit.nom}
+                              className="w-full h-full object-cover"
+                            />
+                          </Link>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-4xl">
+                            📦
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Badge de différence sur l'image */}
+                      {difference !== 0 && (
+                        <Badge
+                          variant={difference > 0 ? "destructive" : "default"}
+                          className="absolute -top-2 -right-2 shadow-md flex items-center gap-1"
+                        >
+                          {difference > 0 ? (
+                            <TrendingUp className="w-3 h-3" />
+                          ) : (
+                            <TrendingDown className="w-3 h-3" />
+                          )}
+                          <span>{difference > 0 ? '+' : ''}{pourcentage}%</span>
+                        </Badge>
                       )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg">{produit?.nom || 'Produit'}</h4>
-                      {produit?.sousType && (
-                        <p className="text-sm text-gray-500">{produit.sousType}</p>
-                      )}
-                      <div className="grid grid-cols-2 gap-4 mt-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Quantité</p>
-                          <p className="font-semibold">
-                            {formatQuantity(order.quantiteTotal!, order.unite)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Prix unitaire</p>
-                          <p className="font-semibold text-green-600">
-                            {formatPrice(order.prixUnitaire!)} Ar
-                          </p>
-                        </div>
+
+                    {/* Info produit */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-xl text-gray-900 mb-1 truncate">
+                        {produit?.nom || 'Produit'}
+                      </h4>
+                      <div className="flex flex-wrap gap-2 items-center">
+                        {produit?.type && (
+                          <Badge variant="secondary" className="text-xs">
+                            {produit.type.toUpperCase()}
+                          </Badge>
+                        )}
+                        {produit?.sousType && (
+                          <Badge variant="outline" className="text-xs">
+                            {produit.sousType}
+                          </Badge>
+                        )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-px bg-linear-to-r from-transparent via-gray-200 to-transparent"></div>
+
+                  {/* Informations de commande */}
+                  <div className="p-5 space-y-4">
+                    {/* Grid Quantité et Prix original */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {/* Quantité */}
+                      <Card className="bg-gray-50 py-4! border-gray-200">
+                        <CardContent>
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            Quantité
+                          </p>
+                          <p className="text-lg font-bold text-gray-900">
+                            {formatQuantity(order.quantiteTotal!, order.unite!)}
+                          </p>
+                        </CardContent>
+                      </Card>
+
+                      {/* Prix Original */}
+                      <Card className="bg-gray-50 py-4! border-gray-200">
+                        <CardContent>
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            Prix original
+                          </p>
+                          <p className={`text-lg font-bold ${difference !== 0 ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                            {formatPrice(prixOriginal)} Ar
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Prix proposé avec indicateur */}
+                    <Card className={`border-2 ${indicator.borderColor} ${indicator.bgColor}`}>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">
+                              Prix proposé
+                            </p>
+                            <p className={`text-2xl font-bold ${indicator.color}`}>
+                              {formatPrice(prixPropose)} Ar
+                            </p>
+                          </div>
+
+                          {difference !== 0 && (
+                            <div className={`flex flex-col items-end ${indicator.color}`}>
+                              <div className="flex items-center gap-1">
+                                <indicator.icon className="w-5 h-5" />
+                                <span className="text-lg font-bold">
+                                  {Math.abs(Number(pourcentage))}%
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium mt-0.5">
+                                {difference > 0 ? '+' : ''}{formatPrice(Math.abs(difference))} Ar
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Message explicatif */}
+                        {difference !== 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className={`text-xs font-medium text-center ${indicator.color}`}>
+                              {difference > 0
+                                ? `Prix ${pourcentage}% plus élevé que le catalogue`
+                                : `Économie de ${Math.abs(Number(pourcentage))}% par rapport au catalogue`
+                              }
+                            </p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
                 </CardContent>
               </Card>

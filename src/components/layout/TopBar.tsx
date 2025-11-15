@@ -14,7 +14,7 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-white border-b px-4 md:px-8 py-1 flex justify-between md:justify-end items-center gap-4 shadow-sm fixed top-0 right-0 transition-all duration-300 md:left-64 left-0 z-10 h-16">
+    <div className="bg-white border-b px-4 md:px-8 py-1 flex justify-between md:justify-end items-center gap-4 shadow-sm fixed top-0 right-0 transition-all duration-300 md:left-64 left-0 z-20 h-16">
       <div className="flex items-center justify-between gap-2 md:mr-4">
         {isMobile && (
           <button onClick={onMenuClick} className="p-2">

@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { ProductType, Unite, ProductStatut, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
-import { CheckCircle, Clock, DollarSign, ShoppingCart, TrendingUp, Truck, X } from "lucide-react";
+import { CheckCircle, Clock, DollarSign, ShoppingCart, TrendingUp, Truck, X, TrendingDown, Minus } from "lucide-react";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -158,3 +158,31 @@ export const LINE_STATUT_CONFIG: Record<StatutCommandeLigne, {
     color: "bg-red-100 text-red-700",
   },
 };
+
+export const getPriceIndicator = (difference: number) => {
+    if (difference > 0) {
+      return {
+        icon: TrendingUp,
+        color: "text-orange-600",
+        bgColor: "bg-orange-50",
+        borderColor: "border-orange-200",
+        label: "Supérieur"
+      };
+    } else if (difference < 0) {
+      return {
+        icon: TrendingDown,
+        color: "text-blue-600",
+        bgColor: "bg-blue-50",
+        borderColor: "border-blue-200",
+        label: "Inférieur"
+      };
+    } else {
+      return {
+        icon: Minus,
+        color: "text-gray-600",
+        bgColor: "bg-gray-50",
+        borderColor: "border-gray-200",
+        label: "Identique"
+      };
+    }
+  };
