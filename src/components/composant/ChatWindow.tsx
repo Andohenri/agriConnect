@@ -3,34 +3,18 @@ import MessageBubble from "./MessageBubble";
 import MessageInput from "./MessageInput";
 import { ArrowLeft, Phone, Video, MoreVertical } from "lucide-react";
 
-export interface Chat {
-  id: number;
-  name: string;
-  role: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  online: boolean;
-}
-
-export interface Message {
-  id: number;
-  sender: "me" | "other";
-  text: string;
-  time: string;
-}
 
 interface Props {
-  selectedChat: Chat | null;
-  messages: Message[];
+  selectedChat: Conversation | null;
+  messages: PrismaMessage[];
   messageValue: string;
+  currentUserId: string;
   onChangeMessage: (v: string) => void;
   onSendMessage: () => void;
   onBack: () => void;
 }
 
-const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, onChangeMessage, onSendMessage, onBack }) => {
+const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, currentUserId, onChangeMessage, onSendMessage, onBack }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -38,6 +22,11 @@ const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, onC
   }, [messages, selectedChat]);
 
   if (!selectedChat) return null;
+
+  const other = selectedChat.participant1?.id === currentUserId ? selectedChat.participant2 : selectedChat.participant1;
+  const name = other?.prenom ? `${other.prenom} ${other.nom ?? ""}`.trim() : other?.email ?? "Utilisateur";
+  const avatar = other?.avatar ?? "👤";
+  const lastActive = selectedChat.dateDerniereActivite;
 
   return (
     <>
@@ -48,17 +37,12 @@ const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, onC
           </button>
           <div className="relative">
             <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-green-700 md:bg-linear-to-br md:from-green-100 md:to-green-200 flex items-center justify-center text-xl md:text-2xl shadow-sm">
-              {selectedChat.avatar}
+              {avatar}
             </div>
-            {selectedChat.online && (
-              <div className="absolute bottom-0 right-0 w-3 md:w-3.5 h-3 md:h-3.5 bg-green-500 rounded-full border-2 border-white"></div>
-            )}
           </div>
           <div>
-            <h2 className="font-semibold text-base md:text-lg">{selectedChat.name}</h2>
-            <p className="text-xs md:text-sm text-green-100 md:text-gray-500">
-              {selectedChat.role} • <span className={selectedChat.online ? "md:text-green-600" : "md:text-gray-400"}>{selectedChat.online ? "En ligne" : "Hors ligne"}</span>
-            </p>
+            <h2 className="font-semibold text-base md:text-lg">{name}</h2>
+            <p className="text-xs md:text-sm text-green-100 md:text-gray-500">Dernière activité: {lastActive ? new Date(lastActive).toLocaleString() : "-"}</p>
           </div>
         </div>
         <div className="flex gap-1 md:gap-2">
@@ -86,7 +70,7 @@ const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, onC
               </div>
             </div>
           ) : (
-            messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)
+            messages.map((msg) => <MessageBubble key={msg.id} msg={msg} currentUserId={currentUserId} />)
           )}
           <div ref={messagesEndRef} />
         </div>

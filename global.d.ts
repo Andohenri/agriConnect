@@ -14,10 +14,10 @@ declare global {
   interface User {
     id?: string;
     nom: string;
-    prenom: string;
+    prenom?: string;
     email: string;
-    telephone: string;
-    mot_de_passe: string;
+    telephone?: string;
+    // mot_de_passe: string;
     role: Role;
     avatar?: string;
     adresse?: string | null;
@@ -103,36 +103,36 @@ declare global {
       latitude?: FieldError;
       longitude?: FieldError;
     };
-  }
+  };
 
   enum ProductType {
-    GRAIN = 'grain',
-    LEGUMINEUSE = 'legumineuse',
-    TUBERCULE = 'tubercule',
-    FRUIT = 'fruit',
-    LEGUME = 'legume',
-    EPICE = 'epice',
-    AUTRE = 'autre'
+    GRAIN = "grain",
+    LEGUMINEUSE = "legumineuse",
+    TUBERCULE = "tubercule",
+    FRUIT = "fruit",
+    LEGUME = "legume",
+    EPICE = "epice",
+    AUTRE = "autre",
   }
 
   enum Unite {
-    KG = 'kg',
-    TONNE = 'tonne',
-    SAC = 'sac',
-    LITRE = 'litre'
+    KG = "kg",
+    TONNE = "tonne",
+    SAC = "sac",
+    LITRE = "litre",
   }
 
   enum ProductStatut {
-    DISPONIBLE = 'disponible',
-    RUPTURE = 'rupture',
-    ARCHIVE = 'archive'
+    DISPONIBLE = "disponible",
+    RUPTURE = "rupture",
+    ARCHIVE = "archive",
   }
 
   type LocalisationInfo = {
     adresse?: string;
     latitude?: number;
     longitude?: number;
-  }
+  };
 
   type Product = {
     id?: string;
@@ -186,7 +186,6 @@ declare global {
     totalItems: number;
   };
 
-
   type Zone = {
     id?: string;
     nom: string;
@@ -209,7 +208,6 @@ declare global {
     createdAt?: string;
     updatedAt?: string;
   };
-
 
   type Order = {
     id?: string;
@@ -270,7 +268,6 @@ declare global {
     REJETEE = "rejetee",
   }
 
-
   export type OrderFormData = {
     produitRecherche: string;
     quantiteTotal: number | string;
@@ -316,6 +313,47 @@ declare global {
     totalPages: number;
     totalItems: number;
   };
+
+  type ChatMessages = Record<number, Message[]>;
+
+  // === Types correspondant au schéma Prisma (backend) ===
+
+  type MessageType = "texte" | "image" | "video" | "document";
+
+  interface PrismaMessage {
+    id: string;
+    expediteurId: string;
+    destinataireId: string;
+    contenu?: string | null;
+    typeContenu: MessageType;
+    fichierUrl?: string | null;
+    lu: boolean;
+    dateEnvoi: string; // ISO string
+    dateLecture?: string | null;
+    updatedAt?: string;
+    // relations (optional on client)
+    expediteur?: User | null;
+    destinataire?: User | null;
+    conversationId?: string | null;
+  }
+
+  interface Conversation {
+    id: string;
+    participant1Id: string;
+    participant2Id: string;
+    dernierMessageId?: string | null;
+    messagesNonLusP1: number;
+    messagesNonLusP2: number;
+    dateDerniereActivite: string; // ISO
+    archiveP1: boolean;
+    archiveP2: boolean;
+    createdAt: string;
+    updatedAt: string;
+    participant1?: User | null;
+    participant2?: User | null;
+    dernierMessage?: PrismaMessage | null;
+    messages?: PrismaMessage[];
+  }
 }
 
-export { };
+export {};

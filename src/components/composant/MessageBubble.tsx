@@ -1,18 +1,13 @@
+// import type { Message } from "@/types/messages";
 import React from "react";
 
-interface Message {
-  id: number;
-  sender: "me" | "other";
-  text: string;
-  time: string;
-}
-
 interface Props {
-  msg: Message;
+  msg: PrismaMessage;
+  currentUserId: string;
 }
 
-const MessageBubble: React.FC<Props> = ({ msg }) => {
-  const isMe = msg.sender === "me";
+const MessageBubble: React.FC<Props> = ({ msg, currentUserId }) => {
+  const isMe = msg.expediteurId === currentUserId;
   return (
     <div className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
       <div
@@ -23,10 +18,10 @@ const MessageBubble: React.FC<Props> = ({ msg }) => {
           borderRadius: isMe ? "8px 8px 0px 8px" : "8px 8px 8px 0px",
         }}
       >
-        <p className="text-sm leading-relaxed wrap-break-word">{msg.text}</p>
+        <p className="text-sm leading-relaxed wrap-break-word">{msg.contenu ?? msg.fichierUrl ?? (msg.typeContenu ?? "")}</p>
         <div className="flex items-center justify-end gap-1 md:gap-1.5 mt-1">
           <span className={`text-xs ${isMe ? "text-green-100" : "text-gray-500"}`}>
-            {msg.time}
+            {msg.dateEnvoi ? new Date(msg.dateEnvoi).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) : ""}
           </span>
           {isMe && (
             <svg width="16" height="12" viewBox="0 0 16 12" fill="none" className="opacity-70">

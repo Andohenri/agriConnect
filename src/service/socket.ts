@@ -1,74 +1,139 @@
-// src/api/socket.ts
 import { io, Socket } from "socket.io-client";
 
-let socket: Socket | null = null;
+/**
+ * Socket client manager
+ * - Supporte option namespace/path/token/userId
+ * - Si votre backend NestJS n'utilise PAS de namespace, laissez `namespace` undefined
+ * - Variables d'env utilisables :
+ *    VITE_API_WS_URL    (ex: http://localhost:3000)
+ *    VITE_API_WS_PATH   (ex: /socket.io)  // laisse undefined si vous utilisez le path par défaut
+ *    VITE_DEBUG_SOCKETS (any) -> si défini active les logs console
+ *
+ * Usage (messages + notifications partagent le même namespace par défaut) :
+ *   const s = initSocket({ token, userId });
+ *   const sNotif = initSocket({ namespace: 'notifications', token });
+ *
+ */
 
-interface NotificationData {
+type InitOptions = {
+  namespace?: string; // ex: 'messages' ou 'notifications' (si vous n'utilisez pas de namespace, omettez)
+  token?: string; // JWT à envoyer via auth
+  userId?: string; // fallback (handshake query)
+  path?: string; // socket.io path si custom
+  autoConnect?: boolean; // default true
+};
+
+type NotificationData = {
   id?: string;
   titre: string;
   message: string;
   [key: string]: any;
+};
+
+const sockets = new Map<string, Socket | null>();
+
+const debug = (...args: any[]) => {
+  if (import.meta.env.VITE_DEBUG_SOCKETS) console.debug("[SOCKET]", ...args);
+};
+
+function keyFor(namespace?: string) {
+  return namespace ? namespace : "default";
+}
+
+function buildUrl(base: string, namespace?: string) {
+  if (!namespace) return base.replace(/\/$/, "");
+  return `${base.replace(/\/$/, "")}/${namespace.replace(/^\//, "")}`;
 }
 
 /**
- * Initialise le socket avec le userId
+ * Initialise (ou récupère) une socket pour un namespace donné.
+ * - Si backend n'utilise pas de namespace, n'en passez pas.
  */
-export function initSocket(userId: string): Socket | null {
+export function initSocket(options: InitOptions = {}) {
   if (typeof window === "undefined") return null;
-  if (socket && socket.connected) return socket;
+  const { namespace, token, userId, path, autoConnect = true } = options;
 
-  const url = import.meta.env.VITE_SOCKET_URL || "http://localhost:3000";
+  const k = keyFor(namespace);
+  const existing = sockets.get(k);
+  if (existing && existing.connected) return existing;
 
-  console.log("[SOCKET] Tentative de connexion avec userId =", userId);
+  const base = (import.meta.env.VITE_API_WS_URL as string) || (import.meta.env.VITE_API_URL as string) || "http://localhost:3000";
+  const socketPath = path ?? (import.meta.env.VITE_API_WS_PATH as string) ?? undefined;
+  const url = buildUrl(base, namespace);
 
-  socket = io(url, {
+  debug("initSocket", { url, path: socketPath, namespace, userId, tokenProvided: !!token });
+
+  const s: Socket = io(url, {
     transports: ["websocket"],
-    query: { userId },
+    auth: token ? { token } : undefined,
+    query: userId ? { userId } : undefined,
+    path: socketPath,
+    autoConnect,
     reconnection: true,
     reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
   });
 
-  socket.on("connect", () => {
-    console.log("[SOCKET] ✅ Connecté au serveur:", socket?.id);
+  s.on("connect", () => debug(`connected ${k}`, s.id));
+  s.on("disconnect", (reason) => debug(`disconnect ${k}`, reason));
+  s.on("connect_error", (err: any) => {
+    console.error(`[SOCKET:${k}] connect_error`, err?.message ?? err);
+    if (err?.message === "Invalid namespace") {
+      console.error(`[SOCKET:${k}] Invalid namespace — vérifiez VITE_API_WS_URL et que le serveur n'utilise pas de namespace`);
+    }
   });
 
-  socket.on("disconnect", (reason : any) => {
-    console.log("[SOCKET] 🔴 Déconnecté:", reason);
-  });
-
-  socket.on("connect_error", (err :any) => {
-    console.error("[SOCKET] ❌ Erreur de connexion:", err.message);
-  });
-
-  return socket;
+  sockets.set(k, s);
+  return s;
 }
 
-/**
- * S’abonner à la réception de notifications
- */
-export function subscribeToNotifications(
-  cb: (notif: NotificationData) => void
-): () => void {
-  if (!socket) return () => {};
-  socket.on("notification", (notif: NotificationData) => {
-    cb(notif);
-  });
-  return () => socket?.off("notification");
+export function getSocket(namespace?: string) {
+  return sockets.get(keyFor(namespace)) ?? null;
 }
 
-/**
- * Déconnecter le socket
- */
-export function disconnectSocket() {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
+export function disconnectSocket(namespace?: string) {
+  const k = keyFor(namespace);
+  const s = sockets.get(k);
+  if (!s) return;
+  s.disconnect();
+  sockets.delete(k);
+}
+
+export function subscribe<T = any>(namespace: string | undefined, event: string, cb: (payload: T) => void) {
+  const s = getSocket(namespace);
+  if (!s) return () => {};
+  const handler = (p: T) => cb(p);
+  s.on(event, handler);
+  return () => s.off(event, handler);
+}
+
+export function emit(namespace: string | undefined, event: string, payload?: any, ack?: (...args: any[]) => void) {
+  const s = getSocket(namespace);
+  if (!s) return;
+  if (ack) s.emit(event, payload, ack);
+  else s.emit(event, payload);
+}
+
+// Helpers spécifiques convenus
+export function joinConversation(conversationId: string, namespace?: string) {
+  emit(namespace, "conversation:join", { conversationId });
+}
+
+export function leaveConversation(conversationId: string, namespace?: string) {
+  emit(namespace, "conversation:leave", { conversationId });
+}
+
+export function subscribeToNotifications(cb: (n: NotificationData) => void) {
+  return subscribe<NotificationData>(undefined, "notification", cb);
 }
 
 export default {
   initSocket,
-  subscribeToNotifications,
+  getSocket,
   disconnectSocket,
+  subscribe,
+  emit,
+  joinConversation,
+  leaveConversation,
+  subscribeToNotifications,
 };
