@@ -283,18 +283,18 @@ const EditProfile = () => {
           {/* Avatar Preview */}
           <div className="relative group">
             <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-gray-200 bg-linear-to-br from-green-400 to-emerald-600">
-              {user?.avatar ? (
-                // 👉 Avatar venu du backend (URL fixe)
-                <img
-                  src={user.avatar}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              ) : avatarPreview ? (
-                // 👉 Preview avant upload
+              {avatarPreview ? (
+                // 👉 Preview avant upload (priorité)
                 <img
                   src={avatarPreview}
                   alt="Avatar Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : user?.avatar ? (
+                // 👉 Avatar existant du backend
+                <img
+                  src={`http://localhost:3000${user.avatar}`}
+                  alt="Avatar"
                   className="w-full h-full object-cover"
                 />
               ) : (

@@ -161,7 +161,8 @@ const Profile = () => {
               <div className="w-32 h-32 bg-linear-to-br from-green-400 to-emerald-600 rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
                 {displayUser.avatar ? (
                   <img
-                    src={displayUser.avatar}
+                    // src={displayUser.avatar}
+                    src={`http://localhost:3000${displayUser.avatar}`}
                     alt={displayUser.nom}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
