@@ -9,12 +9,10 @@ import {
   CommandSeparator,
   Command
 } from '@/components/ui/command';
-import { Loader2, Package, User, Search, TrendingUp, Wheat, Apple, Beef, Droplet } from 'lucide-react';
+import { Loader2, Package, User, Search, TrendingUp, Wheat, Apple, Beef, Droplet, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
-// import { Link } from 'react-router-dom';
 import { useDebounce } from '@/hooks/useDebounce';
 import { cn } from '@/lib/utils';
-// import UserAvatar from './Avatar';
 
 // Types pour les matières premières
 type MaterialType = 'cereales' | 'legumes' | 'fruits' | 'viandes' | 'produits_laitiers' | 'autres';
@@ -84,6 +82,7 @@ export default function SearchCommand({
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResults>({ products: [], users: [] });
+  const [history, setHistory] = useState<string[]>([]);
 
   const isSearchMode = !!searchTerm.trim();
 
@@ -99,6 +98,26 @@ export default function SearchCommand({
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
   }, []);
+
+  //
+  // --- HISTORIQUE ---
+  //
+  useEffect(() => {
+    const h = localStorage.getItem("search_history");
+    h?.slice(0, 5);
+    if (h) setHistory(JSON.parse(h));
+  }, []);
+
+  const saveToHistory = (text: string) => {
+    const list = [...new Set([text, ...history])].slice(0, 10);
+    setHistory(list);
+    localStorage.setItem("search_history", JSON.stringify(list));
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("search_history");
+  };
 
   // Fonction de recherche
   const handleSearch = async () => {
@@ -134,7 +153,8 @@ export default function SearchCommand({
   const isMac = typeof navigator !== 'undefined' &&
     navigator.userAgent.toUpperCase().includes('MAC');
 
-  const handleItemClick = (type: 'product' | 'user', id: string) => {
+  const handleItemClick = (type: 'product' | 'user', id: string, label: string) => {
+    saveToHistory(label);
     console.log(`Navigating to ${type}:`, id);
     handleClose();
   };
@@ -152,7 +172,6 @@ export default function SearchCommand({
         )}
       >
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4" />
           <span>{placeholder}</span>
         </div>
         <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
@@ -178,12 +197,34 @@ export default function SearchCommand({
             value={searchTerm}
             onValueChange={setSearchTerm}
           />
-          {loading && (
-            <Loader2 className='absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500 animate-spin' />
-          )}
         </div>
         <Command>
-          <CommandList className='max-h-[500px] bg-white'>
+          <CommandList className='max-h-[400px] bg-white'>
+            {/* Historique */}
+            {!isSearchMode && history.length > 0 && (
+              <>
+                <div className="flex items-center justify-between px-4 py-1">
+                  <span className="text-[12px] font-medium text-muted-foreground">
+                    Historique
+                  </span>
+
+                  <button
+                    onClick={clearHistory}
+                    className="text-xs text-green-500 hover:underline"
+                  >
+                    Effacer
+                  </button>
+                </div>
+                <CommandGroup>
+                  {history.map((h) => (
+                    <CommandItem key={h} onSelect={() => setSearchTerm(h)}>
+                      <Clock className="mr-2 h-4 w-4" />
+                      {h}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            )}
             {loading ? (
               <CommandEmpty className='py-12 flex flex-col items-center justify-center gap-3'>
                 <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
@@ -212,14 +253,10 @@ export default function SearchCommand({
                     {results.products.map((product) => (
                       <CommandItem
                         key={product.id}
-                        onSelect={() => handleItemClick('product', product.id)}
+                        onSelect={() => handleItemClick('product', product.id, product.name)}
                         className="cursor-pointer"
-                        onClick={() => console.log('')}
                       >
-                        <div
-                          onClick={() => console.log('Navigate to product:', product.id)}
-                          className="flex items-center gap-3 w-full"
-                        >
+                        <div className="flex items-center gap-3 w-full">
                           {product.image ? (
                             <img
                               src={product.image}
@@ -269,13 +306,10 @@ export default function SearchCommand({
                     {results.users.map((user) => (
                       <CommandItem
                         key={user.id}
-                        onSelect={() => handleItemClick('user', user.id)}
+                        onSelect={() => handleItemClick('user', user.id, user.name)}
                         className="cursor-pointer"
                       >
-                        <div
-                          onClick={() => console.log('Navigate to user:', user.id)}
-                          className="flex items-center gap-3 w-full"
-                        >
+                        <div className="flex items-center gap-3 w-full">
                           <div className="h-10 w-10 rounded-full bg-linear-to-br from-purple-100 to-purple-200 flex items-center justify-center border border-gray-200">
                             <span className="text-sm font-semibold text-purple-600">
                               {user.name?.charAt(0)?.toUpperCase() || 'U'}
