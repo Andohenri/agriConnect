@@ -84,7 +84,8 @@ const router = createBrowserRouter([
       { path: "map", element: <MapView /> },
       { path: "messages", element: <Messages /> },
       { path: "profile", element: <Profile /> },
-      { path: "profile/:userId", element: <EditProfile /> },
+      { path: "profile/:id", element: <Profile /> },
+      { path: "profile/edit/:userId", element: <EditProfile /> },
     ],
   },
   // ✅ Routes privées admin avec Layout

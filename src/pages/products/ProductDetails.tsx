@@ -19,7 +19,7 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatDate, formatPrice, formatQuantity, PRODUCT_STATUT_CONFIG, PRODUCT_TYPE_LABELS, UNITE_LABELS } from "@/lib/utils";
@@ -282,7 +282,9 @@ const ProductDetail = () => {
               {/* Avatar et nom */}
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 bg-linear-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {product.paysan?.nom?.charAt(0) || 'P'}
+                  <Link to={`/profile/${product.paysan?.id}`}>
+                    {product.paysan?.nom?.charAt(0) || 'P'}
+                  </Link>
                 </div>
                 <div className="flex-1">
                   <p className="font-bold text-lg">

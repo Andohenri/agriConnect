@@ -359,7 +359,7 @@ const OrderDetails = () => {
                 <CardContent className="space-y-4">
                   {(() => {
                     const acceptedLines = order.lignes?.filter(l => l.statutLigne === StatutCommandeLigne.ACCEPTEE) || [];
-                    const totalAccepted = acceptedLines.reduce((sum, line) => sum + Number(line.quantiteFournie), 0);
+                    const totalAccepted = acceptedLines.reduce((sum, line) => sum + Number(line.quantiteAccordee || 0), 0);
                     const progress = (totalAccepted / Number(order.quantiteTotal)) * 100;
 
                     return (
@@ -448,7 +448,11 @@ const OrderDetails = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-16 h-16 bg-linear-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-3xl shrink-0">
-                  {userRole === Role.PAYSAN ? '🏢' : '👨‍🌾'}
+                  <Link to={`/profile/${order.collecteur?.id}`}>
+                    {order.collecteur?.imageUrl ? (
+                      <img src={`${import.meta.env.VITE_UPLOAD_URL}${order.collecteur?.imageUrl}`} alt="avatar" />
+                    ) : '👨‍🌾'}
+                  </Link>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold truncate">
@@ -485,7 +489,7 @@ const OrderDetails = () => {
                 )}
                 <Button
                   className="w-full bg-blue-600 hover:bg-blue-700"
-                  onClick={() => handleContact(order.collecteurId)}
+                  onClick={() => handleContact(order.collecteur?.id!)}
                 >
                   <MessageSquare size={18} className="mr-2" />
                   Envoyer un message
@@ -652,7 +656,7 @@ const PropositionCard = ({ line, userRole, orderUnite, onAccept, onReject }: Pro
               <div className="flex items-center gap-2">
                 <Package size={14} className="text-gray-400" />
                 <span className="font-semibold">
-                  {line.quantiteFournie} {orderUnite && UNITE_LABELS[orderUnite]}
+                  {line.quantiteAccordee} {orderUnite && UNITE_LABELS[orderUnite]}
                 </span>
               </div>
               <div className="flex items-center gap-2">

@@ -109,7 +109,7 @@ const Profile = () => {
   };
 
   const handleEditProfile = () => {
-    navigate(`/profile/${displayUser?.id}`);
+    navigate(`/profile/edit/${displayUser?.id}`);
   };
 
   const handleContact = () => {

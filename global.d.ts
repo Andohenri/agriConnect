@@ -234,6 +234,7 @@ declare global {
       telephone?: string;
       email?: string;
       role?: Role;
+      imageUrl?: string;
     };
     lignes?: OrderLine[];
   };
@@ -243,7 +244,7 @@ declare global {
     produitId: string;
     commandeId?: string;
     paysanId?: string;
-    quantiteAccordee: number | string;
+    quantiteAccordee?: number;
     prixUnitaire: number | string;
     sousTotal?: number | string;
     statutLigne?: StatutCommandeLigne;
