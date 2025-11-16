@@ -6,10 +6,11 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/components/composant/ProductCard";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, BoxIcon, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProduct } from "@/contexts/ProductContext";
 import { ProductService } from "@/service/product.service";
+import { EmptyState } from "@/components/composant/EmptyState";
 
 const Products = () => {
   const { user } = useAuth();
@@ -17,7 +18,7 @@ const Products = () => {
   const { setIsEditing, setIsAdding, setProduct } = useProduct();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -32,7 +33,10 @@ const Products = () => {
     setIsLoading(true);
     try {
       if (user?.role === Role.PAYSAN) {
-        const response = await ProductService.getAllProductsPaysan(currentPage, limit);
+        const response = await ProductService.getAllProductsPaysan(
+          currentPage,
+          limit
+        );
         if (response?.data) {
           setProducts(response.data);
           setTotalPages(response.totalPages || 1);
@@ -41,7 +45,10 @@ const Products = () => {
           console.warn("Unexpected products response:", response);
         }
       } else {
-        const response = await ProductService.getAllProducts(currentPage, limit);
+        const response = await ProductService.getAllProducts(
+          currentPage,
+          limit
+        );
         if (response?.data) {
           setProducts(response.data);
           setTotalPages(response.totalPages || 1);
@@ -74,7 +81,7 @@ const Products = () => {
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -82,7 +89,7 @@ const Products = () => {
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesToShow = 5;
-    
+
     if (totalPages <= maxPagesToShow) {
       // Si peu de pages, afficher toutes
       for (let i = 1; i <= totalPages; i++) {
@@ -93,23 +100,23 @@ const Products = () => {
       if (currentPage <= 3) {
         // Début de la pagination
         for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         // Fin de la pagination
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
       } else {
         // Milieu de la pagination
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
@@ -125,7 +132,7 @@ const Products = () => {
             </h2>
             {totalProducts > 0 && (
               <p className="text-sm text-gray-500 mt-1">
-                {totalProducts} produit{totalProducts > 1 ? 's' : ''} au total
+                {totalProducts} produit{totalProducts > 1 ? "s" : ""} au total
               </p>
             )}
           </div>
@@ -147,9 +154,15 @@ const Products = () => {
               <ProductCardSkeleton key={i} />
             ))
           ) : products.length === 0 ? (
-            // Message si aucun produit
             <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">Aucun produit disponible</p>
+              <EmptyState
+                title="Aucune production disponible"
+                description="Vous n’avez pas encore de produit. Elles apparaîtront ici dès qu’il y en aura."
+                media={<Package />}
+                actions={[
+                  { label: "Creer un produit", onClick: () => handleAddProduct() },
+                ]}
+              />
             </div>
           ) : (
             products.map((product) => (
@@ -169,7 +182,7 @@ const Products = () => {
             <div className="text-sm text-green-700 font-medium">
               Page {currentPage} sur {totalPages}
             </div>
-            
+
             <div className="flex items-center gap-2">
               {/* Bouton Précédent */}
               <Button
@@ -185,9 +198,12 @@ const Products = () => {
 
               {/* Numéros de page */}
               <div className="hidden sm:flex items-center gap-1">
-                {getPageNumbers().map((page, index) => (
-                  page === '...' ? (
-                    <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                {getPageNumbers().map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-2 text-gray-400"
+                    >
                       ...
                     </span>
                   ) : (
@@ -197,15 +213,15 @@ const Products = () => {
                       size="sm"
                       onClick={() => handlePageChange(page as number)}
                       className={`min-w-10 ${
-                        currentPage === page 
-                          ? "bg-green-600 hover:bg-green-700 text-white" 
+                        currentPage === page
+                          ? "bg-green-600 hover:bg-green-700 text-white"
                           : "hover:bg-green-50 hover:text-green-700 hover:border-green-300"
                       }`}
                     >
                       {page}
                     </Button>
                   )
-                ))}
+                )}
               </div>
 
               {/* Sélecteur de page mobile */}
@@ -215,11 +231,13 @@ const Products = () => {
                   onChange={(e) => handlePageChange(Number(e.target.value))}
                   className="px-3 py-1 border rounded-md text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none"
                 >
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <option key={page} value={page}>
-                      Page {page}
-                    </option>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <option key={page} value={page}>
+                        Page {page}
+                      </option>
+                    )
+                  )}
                 </select>
               </div>
 

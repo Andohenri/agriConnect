@@ -217,7 +217,7 @@ export function convertToCommandeFormatted(data: CommandeProduit): Order {
     lignes: [
       {
         id: data.id,
-        quantiteAccordee: data.quantiteAccordee,
+        quantiteAccordee: Number(data.quantiteAccordee),
         prixUnitaire: data.prixUnitaire,
         statutLigne: data.statutLigne as StatutCommandeLigne,
         createdAt: data.createdAt,
@@ -233,4 +233,32 @@ export function convertToCommandeFormatted(data: CommandeProduit): Order {
 
 export function convertDataToCommandeFormattedList(data: CommandeProduit[]): Order[] {
   return data.map(item => convertToCommandeFormatted(item));
+}
+
+
+export function timeAgo(date: string | Date) {
+  const now = new Date();
+  const past = new Date(date);
+  const diff = (past.getTime() - now.getTime()) / 1000; // en secondes
+
+  const rtf = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+
+  const ranges: Record<string, number> = {
+    year: 3600 * 24 * 365,
+    month: 3600 * 24 * 30,
+    week: 3600 * 24 * 7,
+    day: 3600 * 24,
+    hour: 3600,
+    minute: 60,
+    second: 1,
+  };
+
+  for (const [unit, seconds] of Object.entries(ranges)) {
+    const value = Math.floor(diff / seconds * -1);
+    if (Math.abs(value) >= 1) {
+      return rtf.format(-value, unit as Intl.RelativeTimeFormatUnit);
+    }
+  }
+
+  return "à l’instant";
 }
