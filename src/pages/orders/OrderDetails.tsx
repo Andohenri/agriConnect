@@ -186,40 +186,13 @@ const OrderDetails = () => {
                 <CardHeader>
                   <h3 className="text-xl font-bold">Détails du Produit</h3>
                 </CardHeader>
-                <CardContent className="p-0">
-                  {/* Header avec image et info produit */}
-                  <div className="flex gap-4 p-5 bg-linear-to-br from-gray-50 to-white">
-                    {/* Image produit avec badge */}
-                    <div className="relative w-24 h-24 shrink-0">
-                      <div className="w-full h-full bg-linear-to-br from-green-100 to-green-200 rounded-2xl overflow-hidden shadow-sm">
-                        {produit?.imageUrl ? (
-                          <Link to={`/products/${produit.id}`}>
-                            <img
-                              src={`${import.meta.env.VITE_UPLOAD_URL}${produit.imageUrl}`}
-                              alt={produit.nom}
-                              className="w-full h-full object-cover"
-                            />
-                          </Link>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-4xl">
-                            📦
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Badge de différence sur l'image */}
-                      {difference !== 0 && (
-                        <Badge
-                          variant={difference > 0 ? "destructive" : "default"}
-                          className="absolute -top-2 -right-2 shadow-md flex items-center gap-1"
-                        >
-                          {difference > 0 ? (
-                            <TrendingUp className="w-3 h-3" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3" />
-                          )}
-                          <span>{difference > 0 ? '+' : ''}{pourcentage}%</span>
-                        </Badge>
+                <CardContent>
+                  <div className="flex gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="w-20 h-20 bg-linear-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-4xl shrink-0">
+                      {produit?.imageUrl ? (
+                        <img src={`${import.meta.env.VITE_UPLOAD_URL}${produit.imageUrl}`} alt={produit.nom} className="w-full h-full object-cover rounded-xl" />
+                      ) : (
+                        '📦'
                       )}
                     </div>
 
