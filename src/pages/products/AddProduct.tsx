@@ -62,7 +62,7 @@ const AddProduct = () => {
       latitude: undefined,
       longitude: undefined,
     },
-    mode: 'onBlur',
+    mode: 'onChange',
   });
 
   const watchImage = watch("image");
@@ -151,26 +151,60 @@ const AddProduct = () => {
   };
 
   // Déstructurer pour séparer ref et autres props
-  const { ref: hookFormRef, ...registerProps } = register("image", {
-    required: "L'image est requise",
+  const { ref: hookFormRef, onChange: registerOnChange, ...registerProps } = register("image", {
+    required: (!isEditing && !product?.imageUrl && !imagePreview)
+      ? "L'image est requise"
+      : false,
+
     validate: (files) => {
-      const file = files?.[0];
-      if (!file) return "Veuillez sélectionner une image";
-      if (!file.type.startsWith("image/")) return "Le fichier doit être une image";
-      if (file.size > 5 * 1024 * 1024) return "L'image ne doit pas dépasser 5 Mo";
-      return true;
-    },
-    onChange: (e) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+      console.log('🔍 Validation image:', {
+        isEditing,
+        hasFiles: !!(files && files.length > 0),
+        hasPreview: !!imagePreview,
+        hasProductImage: !!product?.imageUrl
+      });
+
+      if (isEditing && (!files || files.length === 0)) {
+        if (product?.imageUrl || imagePreview) {
+          return true;
+        }
+        return "Veuillez sélectionner une image";
       }
+
+      // ✅ En création sans fichier et sans preview
+      if (!isEditing && (!files || files.length === 0) && !imagePreview) {
+        return "Veuillez sélectionner une image";
+      }
+
+      if (files && files.length > 0) {
+        const file = files[0];
+
+        if (!file.type.startsWith("image/")) {
+          return "Le fichier doit être une image";
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          return "L'image ne doit pas dépasser 5 Mo";
+        }
+      }
+
+      return true;
     }
   });
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    await registerOnChange(e);
+
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    };
+  };
 
   // Combiner les refs avec useCallback
   const combinedRef = useCallback(
@@ -182,7 +216,6 @@ const AddProduct = () => {
   );
 
   const handleModify = () => {
-    console.log('Modify image clicked', imageRef?.current);
     imageRef.current?.click();
   };
 
@@ -410,6 +443,7 @@ const AddProduct = () => {
                   className="hidden"
                   ref={combinedRef}
                   {...registerProps}
+                  onChange={handleImageChange}
                 />
                 <div className="absolute top-2 right-2 flex space-x-2">
                   {isEditing ? (
@@ -448,9 +482,12 @@ const AddProduct = () => {
                   className="hidden"
                   ref={combinedRef}
                   {...registerProps}
+                  onChange={handleImageChange}
                 />
               </label>
             )}
+
+            {errors.image && (<p className="text-red-500 text-sm">{errors.image.message}</p>)}
           </div>
 
           {/* Boutons d'action */}
