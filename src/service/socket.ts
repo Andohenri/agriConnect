@@ -101,6 +101,26 @@ export function joinConversation(conversationId: string) {
   emit("conversation:join", { conversationId });
 }
 
+/**
+ * Indique au serveur que l'utilisateur quitte une conversation en émettant un événement via le socket.
+ *
+ * Émet un événement "conversation:leave" avec la charge utile { conversationId } ; le serveur peut alors
+ * effectuer les opérations associées (mise à jour d'état, notifications aux autres participants, etc.).
+ *
+ * @param conversationId - L'identifiant de la conversation à quitter. Doit être une chaîne non vide représentant la conversation ciblée.
+ *
+ * @remarks
+ * - Cette fonction effectue un effet de bord (envoi d'un événement via la fonction `emit`) et ne retourne pas de valeur.
+ * - Elle ne réalise pas de validation approfondie sur `conversationId` : veillez à fournir un identifiant valide avant l'appel.
+ * - Le comportement côté serveur dépend de la gestion de l'événement "conversation:leave".
+ * - Si la fonction `emit` n'est pas disponible ou le socket est déconnecté, un comportement d'erreur peut se produire.
+ *
+ * @returns void
+ *
+ * @example
+ * // Signaler au serveur que l'utilisateur quitte la conversation d'identifiant "abc123"
+ * leaveConversation("abc123");
+ */
 export function leaveConversation(conversationId: string) {
   emit("conversation:leave", { conversationId });
 }

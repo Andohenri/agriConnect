@@ -36,8 +36,12 @@ const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, cur
             <ArrowLeft size={20} />
           </button>
           <div className="relative">
-            <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-green-700 md:bg-linear-to-br md:from-green-100 md:to-green-200 flex items-center justify-center text-xl md:text-2xl shadow-sm">
-              {avatar}
+            <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-green-700 md:bg-linear-to-br md:from-green-100 md:to-green-200 flex items-center justify-center text-xl md:text-2xl shadow-sm overflow-hidden"> 
+              <img
+                    src={avatar} // avatar contient l'URL de l'image
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
             </div>
           </div>
           <div>
@@ -70,7 +74,7 @@ const ChatWindow: React.FC<Props> = ({ selectedChat, messages, messageValue, cur
               </div>
             </div>
           ) : (
-            messages.map((msg) => <MessageBubble key={msg.id} msg={msg} currentUserId={currentUserId} />)
+            messages?.map((msg) => <MessageBubble key={msg.id} msg={msg} currentUserId={currentUserId} />)
           )}
           <div ref={messagesEndRef} />
         </div>

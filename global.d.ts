@@ -323,6 +323,11 @@ declare global {
 
   type MessageType = "texte" | "image" | "video" | "document";
 
+  interface MessagesGetResponse {
+    messages: PrismaMessage[];
+    pagination :any;
+  }
+
   interface PrismaMessage {
     id: string;
     expediteurId: string;

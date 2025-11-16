@@ -1,15 +1,15 @@
 import Axios from "@/lib/axiosInstance";
 
-const BASE = ""; // laisse vide, l'instance Axios a déjà la baseURL
+const BASE = "conversations"; // laisse vide, l'instance Axios a déjà la baseURL
 
 const getConversations = async (): Promise<Conversation[]> => {
-  const res = await Axios.get(`${BASE}/conversations`);
+  const res = await Axios.get(`${BASE}`);
   return res.data as Conversation[];
 };
 
-const getMessages = async (conversationId: string): Promise<PrismaMessage[]> => {
-  const res = await Axios.get(`${BASE}/conversations/${conversationId}/messages`);
-  return res.data as PrismaMessage[];
+const getMessages = async (conversationId: string): Promise<MessagesGetResponse> => {
+  const res = await Axios.get(`${BASE}/${conversationId}/messages`);
+  return res.data as MessagesGetResponse;
 };
 
 type SendPayload = {
@@ -23,15 +23,15 @@ type SendPayload = {
 const sendMessage = async (payload: SendPayload): Promise<PrismaMessage> => {
   // backend : POST /messages OR POST /conversations/:id/messages
   if (payload.conversationId) {
-    const res = await Axios.post(`${BASE}/conversations/${payload.conversationId}/messages`, payload);
+    const res = await Axios.post(`messages`, payload);
     return res.data as PrismaMessage;
   }
   const res = await Axios.post(`${BASE}/messages`, payload);
   return res.data as PrismaMessage;
 };
 
-const markAsRead = async (conversationId: string, userId: string) => {
-  await Axios.post(`${BASE}/conversations/${conversationId}/read`, { userId });
+const markAsRead = async (conversationId: string) => {
+  await Axios.patch(`${BASE}/${conversationId}/read`);
 };
 
 export default {

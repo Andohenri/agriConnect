@@ -7,6 +7,7 @@ import {
   initSocket,
   joinConversation,
   leaveConversation,
+  sendMessage,
 } from "@/service/socket";
 import { Role } from "@/types/enums";
 
@@ -22,121 +23,121 @@ const Messages: React.FC = () => {
     Record<string, PrismaMessage[]>
   >({});
 
-  const initialChats: Conversation[] = [
-    {
-      id: "1",
-      participant1Id: currentUserId,
-      participant2Id: "2",
-      messagesNonLusP1: 2,
-      messagesNonLusP2: 0,
-      dateDerniereActivite: new Date().toISOString(),
-      archiveP1: false,
-      archiveP2: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      participant1: {
-        id: currentUserId,
-        prenom: "Vous",
-        nom: "",
-        role: Role.COLLECTEUR as Role,
-        avatar: "👩‍🌾",
-        email: "",
-      },
-      participant2: {
-        id: "2",
-        prenom: "Marie",
-        nom: "Rasoa",
-        role: Role.PAYSAN as Role,
-        avatar: "👩‍🌾",
-        email: "",
-      },
-      dernierMessage: {
-        id: "m1",
-        expediteurId: "2",
-        destinataireId: currentUserId,
-        contenu: "Le produit est prêt",
-        typeContenu: "texte",
-        lu: false,
-        dateEnvoi: new Date().toISOString(),
-      },
-    },
-    {
-      id: "2",
-      participant1Id: "3",
-      participant2Id: currentUserId,
-      messagesNonLusP1: 0,
-      messagesNonLusP2: 0,
-      dateDerniereActivite: new Date().toISOString(),
-      archiveP1: false,
-      archiveP2: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      participant1: {
-        id: "3",
-        prenom: "AgriTrade",
-        nom: "SA",
-        role: Role.COLLECTEUR as Role,
-        avatar: "🏢",
-        email: "",
-      },
-      participant2: {
-        id: currentUserId,
-        prenom: "Vous",
-        nom: "SA",
-        role: Role.COLLECTEUR as Role,
-        avatar: "🏢",
-        email: "",
-      },
-      dernierMessage: {
-        id: "m2",
-        expediteurId: "3",
-        destinataireId: currentUserId,
-        contenu: "Quand pouvons-nous récupérer?",
-        typeContenu: "texte",
-        lu: false,
-        dateEnvoi: new Date().toISOString(),
-      },
-    },
-  ];
+  // const initialChats: Conversation[] = [
+  //   {
+  //     id: "1",
+  //     participant1Id: currentUserId,
+  //     participant2Id: "2",
+  //     messagesNonLusP1: 2,
+  //     messagesNonLusP2: 0,
+  //     dateDerniereActivite: new Date().toISOString(),
+  //     archiveP1: false,
+  //     archiveP2: false,
+  //     createdAt: new Date().toISOString(),
+  //     updatedAt: new Date().toISOString(),
+  //     participant1: {
+  //       id: currentUserId,
+  //       prenom: "Vous",
+  //       nom: "",
+  //       role: Role.COLLECTEUR,
+  //       avatar: "👩‍🌾",
+  //       email: "",
+  //     },
+  //     participant2: {
+  //       id: "2",
+  //       prenom: "Marie",
+  //       nom: "Rasoa",
+  //       role: Role.PAYSAN,
+  //       avatar: "👩‍🌾",
+  //       email: "",
+  //     },
+  //     dernierMessage: {
+  //       id: "m1",
+  //       expediteurId: "2",
+  //       destinataireId: currentUserId,
+  //       contenu: "Le produit est prêt",
+  //       typeContenu: "texte",
+  //       lu: false,
+  //       dateEnvoi: new Date().toISOString(),
+  //     },
+  //   },
+  //   {
+  //     id: "2",
+  //     participant1Id: "3",
+  //     participant2Id: currentUserId,
+  //     messagesNonLusP1: 0,
+  //     messagesNonLusP2: 0,
+  //     dateDerniereActivite: new Date().toISOString(),
+  //     archiveP1: false,
+  //     archiveP2: false,
+  //     createdAt: new Date().toISOString(),
+  //     updatedAt: new Date().toISOString(),
+  //     participant1: {
+  //       id: "3",
+  //       prenom: "AgriTrade",
+  //       nom: "SA",
+  //       role: Role.COLLECTEUR,
+  //       avatar: "🏢",
+  //       email: "",
+  //     },
+  //     participant2: {
+  //       id: currentUserId,
+  //       prenom: "Vous",
+  //       nom: "SA",
+  //       role: Role.COLLECTEUR,
+  //       avatar: "🏢",
+  //       email: "",
+  //     },
+  //     dernierMessage: {
+  //       id: "m2",
+  //       expediteurId: "3",
+  //       destinataireId: currentUserId,
+  //       contenu: "Quand pouvons-nous récupérer?",
+  //       typeContenu: "texte",
+  //       lu: false,
+  //       dateEnvoi: new Date().toISOString(),
+  //     },
+  //   },
+  // ];
 
-  const initialMessages: Record<string, PrismaMessage[]> = {
-    "1": [
-      {
-        id: "1",
-        expediteurId: "2",
-        destinataireId: currentUserId,
-        contenu: "Bonjour, est-ce que le riz est toujours disponible?",
-        typeContenu: "texte",
-        lu: false,
-        dateEnvoi: new Date().toISOString(),
-      },
-      {
-        id: "2",
-        expediteurId: currentUserId,
-        destinataireId: "2",
-        contenu: "Oui, nous avons 500kg en stock",
-        typeContenu: "texte",
-        lu: false,
-        dateEnvoi: new Date().toISOString(),
-      },
-    ],
-    "2": [
-      {
-        id: "3",
-        expediteurId: "3",
-        destinataireId: currentUserId,
-        contenu: "Parfait! Je voudrais commander 100kg",
-        typeContenu: "texte",
-        lu: false,
-        dateEnvoi: new Date().toISOString(),
-      },
-    ],
-  };
+  // const initialMessages: Record<string, PrismaMessage[]> = {
+  //   "1": [
+  //     {
+  //       id: "1",
+  //       expediteurId: "2",
+  //       destinataireId: currentUserId,
+  //       contenu: "Bonjour, est-ce que le riz est toujours disponible?",
+  //       typeContenu: "texte",
+  //       lu: false,
+  //       dateEnvoi: new Date().toISOString(),
+  //     },
+  //     {
+  //       id: "2",
+  //       expediteurId: currentUserId,
+  //       destinataireId: "2",
+  //       contenu: "Oui, nous avons 500kg en stock",
+  //       typeContenu: "texte",
+  //       lu: false,
+  //       dateEnvoi: new Date().toISOString(),
+  //     },
+  //   ],
+  //   "2": [
+  //     {
+  //       id: "3",
+  //       expediteurId: "3",
+  //       destinataireId: currentUserId,
+  //       contenu: "Parfait! Je voudrais commander 100kg",
+  //       typeContenu: "texte",
+  //       lu: false,
+  //       dateEnvoi: new Date().toISOString(),
+  //     },
+  //   ],
+  // };
 
   useEffect(() => {
     // données de fallback pour dev
-    setChats(initialChats);
-    setChatMessages(initialMessages);
+    // setChats(initialChats);
+    // setChatMessages(initialMessages);
 
     // charger conversations depuis l'API
     (async () => {
@@ -254,6 +255,12 @@ const Messages: React.FC = () => {
         typeContenu: tempMsg.typeContenu,
       });
       // server devrait émettre 'message:created' — reconcile possible
+      sendMessage({
+        conversationId: selectedChat.id,
+        destinataireId,
+        contenu: tempMsg.contenu,
+        typeContenu: tempMsg.typeContenu,
+      });
     } catch (err) {
       console.error("Erreur envoi message", err);
       // TODO: rollback ou marquer erreur
@@ -269,7 +276,8 @@ const Messages: React.FC = () => {
     (async () => {
       try {
         const msgs = await messageService.getMessages(chat.id);
-        setChatMessages((prev) => ({ ...prev, [chat.id]: msgs }));
+
+        setChatMessages((prev) => ({ ...prev, [chat.id]: msgs.messages }));
       } catch (err) {
         console.warn("Impossible de charger messages", err);
       }
@@ -291,7 +299,7 @@ const Messages: React.FC = () => {
     // marquer comme lu côté backend si nécessaire
     (async () => {
       try {
-        await messageService.markAsRead(chat.id, currentUserId);
+        await messageService.markAsRead(chat.id);
       } catch (err) {
         // ignore
       }
@@ -320,13 +328,14 @@ const Messages: React.FC = () => {
   const filteredChats = chats.filter((chat) =>
     matchesQuery(chat, searchQuery.toLowerCase())
   );
+
   const currentMessages = selectedChat
     ? chatMessages[selectedChat.id] || []
     : [];
 
   return (
     <section className="bg-gray-50 overflow-hidden p-0 pt-2">
-      <div className="max-w-7xl mx-auto bg-white md:rounded-2xl h-[calc(100vh-64px)]">
+      <div className=" mx-auto bg-white md:rounded-2xl h-[calc(100vh-64px)]">
         <div className="grid grid-cols-1 md:grid-cols-12 h-full">
           <div
             className={`${
