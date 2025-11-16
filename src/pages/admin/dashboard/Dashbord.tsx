@@ -24,25 +24,28 @@ import { useState, useEffect } from "react";
 import { UserService } from "@/service/user.service";
 import { ProductService } from "@/service/product.service";
 import { OrderService } from "@/service/order.service";
-import { Role, Statut, ProductStatut } from "@/types/enums";
+import { Role } from "@/types/enums";
 import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState< User[]>([]);
-  const [products, setProducts] = useState< Product[]>([]);
-  const [orders, setOrders] = useState< Order[]>([]);
-  
+  const [users, setUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const usersData = await UserService.getAllUsers();
-        setUsers(usersData)
+        console.log("Users Data:", usersData);
+        setUsers(usersData);
         const productsData = await ProductService.getAllProducts();
-        setProducts(productsData.data)
-        const ordersData = await OrderService.getAllOrders();
-        setOrders(ordersData.data)
+        console.log("Products Data:", productsData);
+        setProducts(productsData.data);
+        const ordersData = await OrderService.getAllOrdersAdmin();
+        console.log("Orders Data:", ordersData);
+        setOrders(ordersData.data);
       } catch (error) {
         toast.error("Erreur lors du chargement des données.");
       } finally {
@@ -59,9 +62,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-
-
   // Données statistiques
   const stats = [
     {
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
       textColor: "text-blue-600",
       link: "/admin/users",
     },
-    {
+       {
       title: "Commandes",
       value: orders.length.toString(),
       change: "+8%",
@@ -134,6 +134,7 @@ export default function AdminDashboard() {
       bg: "bg-purple-50",
     },
   ];
+
 
   // Activités récentes
   const recentActivities = [
@@ -255,7 +256,14 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar size={16} />
-          <span>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span>
+            {new Date().toLocaleDateString("fr-FR", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </span>
         </div>
       </div>
 
@@ -264,7 +272,7 @@ export default function AdminDashboard() {
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           const TrendIcon = stat.trend === "up" ? TrendingUp : TrendingDown;
-          
+
           return (
             <Card
               key={index}
@@ -272,7 +280,9 @@ export default function AdminDashboard() {
               onClick={() => navigate(stat.link)}
             >
               <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 ${stat.bgColor} rounded-xl group-hover:scale-110 transition`}>
+                <div
+                  className={`p-3 ${stat.bgColor} rounded-xl group-hover:scale-110 transition`}
+                >
                   <Icon className={`w-6 h-6 ${stat.textColor}`} />
                 </div>
                 <Badge
@@ -299,8 +309,14 @@ export default function AdminDashboard() {
       {/* Répartition des utilisateurs */}
       <Card className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-semibold">Répartition des Utilisateurs</h3>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/users")}>
+          <h3 className="text-lg font-semibold">
+            Répartition des Utilisateurs
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/admin/users")}
+          >
             Voir tout <ArrowRight size={16} className="ml-1" />
           </Button>
         </div>
@@ -314,7 +330,9 @@ export default function AdminDashboard() {
               >
                 <div className="flex items-center gap-3 mb-2">
                   <Icon className={`${stat.color}`} size={24} />
-                  <span className="font-semibold text-gray-700">{stat.role}</span>
+                  <span className="font-semibold text-gray-700">
+                    {stat.role}
+                  </span>
                 </div>
                 <p className="text-3xl font-bold">{stat.count}</p>
               </div>
@@ -344,7 +362,11 @@ export default function AdminDashboard() {
                   key={activity.id}
                   className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition"
                 >
-                  <div className={`p-2 rounded-lg ${getStatusColor(activity.status)}`}>
+                  <div
+                    className={`p-2 rounded-lg ${getStatusColor(
+                      activity.status
+                    )}`}
+                  >
                     <Icon size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -352,13 +374,18 @@ export default function AdminDashboard() {
                       <span className="font-semibold">{activity.user}</span>{" "}
                       {activity.action}
                       {activity.product && (
-                        <span className="text-blue-600"> {activity.product}</span>
+                        <span className="text-blue-600">
+                          {" "}
+                          {activity.product}
+                        </span>
                       )}
                       {activity.role && (
                         <span className="text-blue-600"> {activity.role}</span>
                       )}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {activity.time}
+                    </p>
                   </div>
                   <Badge variant="outline" className="text-xs">
                     {getStatusIcon(activity.status)}
@@ -376,7 +403,11 @@ export default function AdminDashboard() {
               <Clock size={20} className="text-orange-600" />
               Commandes en Attente
             </h3>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/admin/orders")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin/orders")}
+            >
               Voir tout <ArrowRight size={16} className="ml-1" />
             </Button>
           </div>
@@ -395,11 +426,22 @@ export default function AdminDashboard() {
                   </Badge>
                 </div>
                 <div className="space-y-1 text-sm text-gray-600">
-                  <p>Quantité: <span className="font-semibold">{order.quantity} kg</span></p>
-                  <p>Acheteur: <span className="font-semibold">{order.buyer}</span></p>
-                  <p>Vendeur: <span className="font-semibold">{order.seller}</span></p>
+                  <p>
+                    Quantité:{" "}
+                    <span className="font-semibold">{order.quantity} kg</span>
+                  </p>
+                  <p>
+                    Acheteur:{" "}
+                    <span className="font-semibold">{order.buyer}</span>
+                  </p>
+                  <p>
+                    Vendeur:{" "}
+                    <span className="font-semibold">{order.seller}</span>
+                  </p>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                    <span className="text-green-600 font-bold">{order.price.toLocaleString()} Ar</span>
+                    <span className="text-green-600 font-bold">
+                      {order.price.toLocaleString()} Ar
+                    </span>
                     <span className="text-xs text-gray-500">{order.date}</span>
                   </div>
                 </div>
@@ -416,7 +458,11 @@ export default function AdminDashboard() {
             <TrendingUp size={20} className="text-green-600" />
             Produits les Plus Vendus
           </h3>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/admin/products")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/admin/products")}
+          >
             Voir tout <ArrowRight size={16} className="ml-1" />
           </Button>
         </div>
@@ -434,9 +480,13 @@ export default function AdminDashboard() {
                   <TrendingDown size={18} className="text-red-600" />
                 )}
               </div>
-              <p className="text-2xl font-bold text-blue-600 mb-1">{product.sales}</p>
+              <p className="text-2xl font-bold text-blue-600 mb-1">
+                {product.sales}
+              </p>
               <p className="text-xs text-gray-600 mb-2">ventes</p>
-              <p className="text-sm font-semibold text-green-600">{product.revenue}</p>
+              <p className="text-sm font-semibold text-green-600">
+                {product.revenue}
+              </p>
             </div>
           ))}
         </div>
@@ -450,7 +500,9 @@ export default function AdminDashboard() {
         >
           <Users className="w-10 h-10 text-blue-600 mb-3" />
           <h3 className="font-semibold mb-2">Gérer les Utilisateurs</h3>
-          <p className="text-sm text-gray-600">Voir, modifier, suspendre les comptes</p>
+          <p className="text-sm text-gray-600">
+            Voir, modifier, suspendre les comptes
+          </p>
         </Card>
 
         <Card
@@ -459,7 +511,9 @@ export default function AdminDashboard() {
         >
           <Package className="w-10 h-10 text-green-600 mb-3" />
           <h3 className="font-semibold mb-2">Gérer les Produits</h3>
-          <p className="text-sm text-gray-600">Superviser, modérer les annonces</p>
+          <p className="text-sm text-gray-600">
+            Superviser, modérer les annonces
+          </p>
         </Card>
 
         <Card
