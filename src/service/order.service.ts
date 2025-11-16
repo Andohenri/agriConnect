@@ -4,7 +4,15 @@ import Axios from "@/lib/axiosInstance";
 export const OrderService = {
     BASE_PATH: "/commandes",
     async getAllOrdersPaysan(): Promise<OrderResponse> {
-        const response = await Axios.get(`${this.BASE_PATH}/paysan?page=1&limit=10`);
+        const response = await Axios.get(`/commandes/paysan?page=1&limit=10`);
+        return response.data;
+    },
+    async getAllOrdersRequestPaysan(): Promise<OrderResponse> {
+        const response = await Axios.get(`/commandes/paysan?page=1&limit=10`);
+        return response.data;
+    },
+    async getAllOrdersDirectPaysan(): Promise<CommandeProduitResponse> {
+        const response = await Axios.get(`/commande-produits/paysan?page=1&limit=10`);
         return response.data;
     },
     async getAllOrdersCollecteur(collecteurId: string): Promise<OrderResponse> {

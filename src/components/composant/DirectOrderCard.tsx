@@ -137,7 +137,7 @@ const DirectOrderCard = ({
                     )}
 
                     {(isAccepted || isPaid || isDelivered) && (
-                      <DropdownMenuItem onClick={() => onContact(order.collecteurId)}>
+                      <DropdownMenuItem onClick={() => onContact(order.collecteur?.id!)}>
                         <MessageSquare size={16} className="mr-2" />
                         Contacter le collecteur
                       </DropdownMenuItem>

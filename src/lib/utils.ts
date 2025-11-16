@@ -61,7 +61,7 @@ export const PRODUCT_TYPE_ICONS: Record<ProductType, string> = {
 // Formater la date
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  return d.toLocaleDateString('fr-FR', {
+  return d?.toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -81,7 +81,7 @@ export function formatPrice(price: number | string): string {
 export function formatQuantity(quantity: number | string, unite?: Unite): string {
   const numQuantity = typeof quantity === 'string' ? parseFloat(quantity) : quantity;
   const uniteLabel = unite ? UNITE_LABELS[unite] : 'unité(s)';
-  return `${numQuantity.toLocaleString('fr-FR')} ${uniteLabel}`;
+  return `${numQuantity?.toLocaleString('fr-FR')} ${uniteLabel}`;
 }
 
 // Configuration des statuts
@@ -160,29 +160,77 @@ export const LINE_STATUT_CONFIG: Record<StatutCommandeLigne, {
 };
 
 export const getPriceIndicator = (difference: number) => {
-    if (difference > 0) {
-      return {
-        icon: TrendingUp,
-        color: "text-orange-600",
-        bgColor: "bg-orange-50",
-        borderColor: "border-orange-200",
-        label: "Supérieur"
-      };
-    } else if (difference < 0) {
-      return {
-        icon: TrendingDown,
-        color: "text-blue-600",
-        bgColor: "bg-blue-50",
-        borderColor: "border-blue-200",
-        label: "Inférieur"
-      };
-    } else {
-      return {
-        icon: Minus,
-        color: "text-gray-600",
-        bgColor: "bg-gray-50",
-        borderColor: "border-gray-200",
-        label: "Identique"
-      };
-    }
+  if (difference > 0) {
+    return {
+      icon: TrendingUp,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
+      label: "Supérieur"
+    };
+  } else if (difference < 0) {
+    return {
+      icon: TrendingDown,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200",
+      label: "Inférieur"
+    };
+  } else {
+    return {
+      icon: Minus,
+      color: "text-gray-600",
+      bgColor: "bg-gray-50",
+      borderColor: "border-gray-200",
+      label: "Identique"
+    };
+  }
+};
+
+
+export function convertToCommandeFormatted(data: CommandeProduit): Order {
+  return {
+    id: data.commande.id,
+    produitRecherche: data.commande.produitRecherche,
+    quantiteTotal: Number(data.commande.quantiteTotal),
+    unite: data.produit.unite,
+    prixUnitaire: Number(data.commande.prixUnitaire),
+    statut: data.commande.statut,
+    messageCollecteur: data.commande.messageCollecteur,
+
+    // New fields → you can adjust as needed
+    dateLivraisonPrevue: data.commande.dateLivraisonPrevue,
+    dateLivraison: null,
+    adresseLivraison: data.commande.adresseLivraison,
+    updatedAt: data.commande.createdAt,
+    createdAt: data.commande.createdAt,
+    territoire: data.commande.territoire,
+    latitude: null,
+    longitude: null,
+    rayon: null,
+
+    // Collecteur data
+    collecteurId: data.commande.collecteur?.id,
+    collecteur: data.commande.collecteur,
+
+    // Build lignes array
+    lignes: [
+      {
+        id: data.id,
+        quantiteAccordee: data.quantiteAccordee,
+        prixUnitaire: data.prixUnitaire,
+        statutLigne: data.statutLigne as StatutCommandeLigne,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        commandeId: data.commandeId,
+        produitId: data.produitId,
+        paysanId: data.paysanId,
+        produit: data.produit,
+      }
+    ]
   };
+};
+
+export function convertDataToCommandeFormattedList(data: CommandeProduit[]): Order[] {
+  return data.map(item => convertToCommandeFormatted(item));
+}

@@ -13,6 +13,7 @@ import { useOrder } from "@/contexts/OrderContext";
 import { Button } from "@/components/ui/button";
 import { OrderService } from "@/service/order.service";
 import Tooltip from "../../components/composant/Tooltip";
+import { convertDataToCommandeFormattedList } from "@/lib/utils";
 
 const Orders = () => {
   const { user } = useAuth();
@@ -31,15 +32,19 @@ const Orders = () => {
     try {
       let response;
       if (userRole === Role.PAYSAN) {
-        response = await OrderService.getAllOrdersPaysan();
+        const [orderRequests, directOrders] = await Promise.all([
+          OrderService.getAllOrdersRequestPaysan(),
+          OrderService.getAllOrdersDirectPaysan()
+        ]);
+
+        console.log(`Order Requests`, orderRequests);
+        console.log(`Direct Orders`, convertDataToCommandeFormattedList(directOrders.data));
+        
+        setOrders([...orderRequests.data, ...convertDataToCommandeFormattedList(directOrders.data)]);
       }
       else {
         response = await OrderService.getAllOrdersCollecteur(user?.id || "");
-      }
-      if (response?.data) {
         setOrders(response.data);
-      } else {
-        console.warn("Unexpected products response:", response);
       }
     } catch (error) {
       console.error("Erreur lors du chargement des produits:", error);
@@ -47,7 +52,7 @@ const Orders = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Séparer commandes directes et demandes
   const directOrders = orders.filter(
     (order) => !order.territoire

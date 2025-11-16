@@ -226,7 +226,7 @@ declare global {
     rayon?: number | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
-    collecteurId: string;
+    collecteurId?: string | null;
     collecteur?: {
       id?: string;
       nom?: string;
@@ -241,7 +241,9 @@ declare global {
   type OrderLine = {
     id?: string;
     produitId: string;
-    quantiteFournie: number | string;
+    commandeId?: string;
+    paysanId?: string;
+    quantiteAccordee: number | string;
     prixUnitaire: number | string;
     sousTotal?: number | string;
     statutLigne?: StatutCommandeLigne;
@@ -354,6 +356,28 @@ declare global {
     dernierMessage?: PrismaMessage | null;
     messages?: PrismaMessage[];
   }
+
+  interface CommandeProduit {
+    id: string;
+    quantiteAccordee: string;
+    prixUnitaire: string;
+    statutLigne: string;
+    createdAt: string;
+    updatedAt: string;
+    commandeId: string;
+    produitId: string;
+    paysanId: string;
+    produit: Product;
+    commande: Order;
+  }
+
+  interface CommandeProduitResponse {
+    data: CommandeProduit[];
+    page: number;
+    limit: number;
+    totalPages: number;
+    totalItems: number;
+  }
 }
 
-export {};
+export { };
