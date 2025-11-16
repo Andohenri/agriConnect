@@ -265,9 +265,9 @@ const AdminMapView = () => {
   const defaultCenter: [number, number] = [-18.8792, 47.5079];
 
   return (
-    <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
+    <div className="flex flex-col lg:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-dvh lg:h-[calc(100vh-64px)]">
       {/* Carte */}
-      <div className="relative flex-1 order-1 md:order-2">
+      <div className="relative flex-1 order-1 lg:order-2">
         {isLoading && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-1000 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
             <Loader2 className="animate-spin" size={20} />
@@ -280,17 +280,17 @@ const AdminMapView = () => {
         {/* Bouton de collapse pour mobile */}
         <button
           onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-          className="md:hidden absolute top-4 left-4 z-1000 bg-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-50 transition"
+          className="lg:hidden absolute top-4 right-4 z-1000 bg-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-50 transition"
         >
           {isPanelCollapsed ? (
             <>
               <ChevronDown size={18} />
-              Afficher le panneau
+              Masquer carte
             </>
           ) : (
             <>
               <ChevronUp size={18} />
-              Masquer le panneau
+              Afficher carte
             </>
           )}
         </button>
@@ -469,8 +469,8 @@ const AdminMapView = () => {
 
       {/* Panel administrateur */}
       <div
-        className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${isPanelCollapsed
-          ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
+        className={`w-full lg:w-96 bg-white border-r lg:border-b-0 border-b overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 order-2 lg:order-1 transition-all ${isPanelCollapsed
+          ? "h-0 lg:h-auto overflow-hidden lg:overflow-y-auto p-0 lg:p-6"
           : "h-auto"
           }`}
       >
