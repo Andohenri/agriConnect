@@ -328,7 +328,7 @@ const EnhancedMapView = () => {
         ? {
           id: user.id || "",
           nom: user.nom,
-          prenom: user.prenom,
+          prenom: user.prenom ?? "",
           role: user.role,
         }
         : undefined,
@@ -489,11 +489,11 @@ const EnhancedMapView = () => {
   const mapZoom = searchCenter ? 11 : 7;
 
   return (
-    <div className="flex flex-col md:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-[calc(100vh-64px)]">
+    <div className="flex flex-col lg:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-dvh  lg:h-[calc(100vh-64px)]">
       {/* Carte - Affichée en premier sur mobile */}
       <div
         className={`relative ${isCollector || isFarmer
-          ? "flex-1 order-1 md:order-2"
+          ? "flex-1 order-1 lg:order-2"
           : "w-full h-full"
           }`}
       >
@@ -510,17 +510,17 @@ const EnhancedMapView = () => {
         {(isCollector || isFarmer) && (
           <button
             onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-            className="md:hidden absolute top-4 left-4 z-1000 bg-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-50 transition"
+            className="lg:hidden absolute top-[30px] right-4  z-1000 bg-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-50 transition"
           >
             {isPanelCollapsed ? (
               <>
                 <ChevronDown size={18} />
-                Afficher le panneau
+                Masquer Carte
               </>
             ) : (
               <>
                 <ChevronUp size={18} />
-                Masquer le panneau
+                Afficher Carte
               </>
             )}
           </button>
@@ -748,17 +748,17 @@ const EnhancedMapView = () => {
       {/* Panel de filtrage - Affichée en second sur mobile */}
       {(isCollector || isFarmer) && (
         <div
-          className={`w-full md:w-96 bg-white border-r md:border-b-0 border-b overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 order-2 md:order-1 transition-all ${isPanelCollapsed
-            ? "h-0 md:h-auto overflow-hidden md:overflow-y-auto p-0 md:p-6"
+          className={`w-full lg:w-96 bg-white border-r lg:border-b-0 border-b overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 order-2 lg:order-1 transition-all ${isPanelCollapsed
+            ? "h-0 lg:h-auto overflow-hidden lg:overflow-y-auto p-0 lg:p-6"
             : "h-auto"
             }`}
         >
           {/* Header avec statistiques */}
           <div className="bg-linear-to-r from-green-50 to-blue-50 rounded-xl p-4 shadow-sm">
-            <h2 className="text-xl md:text-2xl font-bold text-green-700 mb-2">
+            <h2 className="text-xl lg:text-2xl font-bold text-green-700 mb-2">
               {isCollector ? "Recherche de Zone" : "Filtres de Recherche"}
             </h2>
-            <p className="text-xs md:text-sm text-gray-600 mb-3">
+            <p className="text-xs lg:text-sm text-gray-600 mb-3">
               {isCollector
                 ? "Trouvez les produits près de vous"
                 : "Explorez les produits disponibles"}

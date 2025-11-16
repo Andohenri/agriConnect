@@ -74,9 +74,15 @@ const AdminOrders = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (order) =>
-          order.produitRecherche?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.collecteur?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.collecteur?.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.produitRecherche
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          order.collecteur?.nom
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          order.collecteur?.prenom
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           order.territoire?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -94,9 +100,11 @@ const AdminOrders = () => {
     total: orders.length,
     direct: directOrders.length,
     requests: orderRequests.length,
-    pending: orders.filter((o) => o.statut === CommandeStatut.EN_ATTENTE).length,
+    pending: orders.filter((o) => o.statut === CommandeStatut.EN_ATTENTE)
+      .length,
     accepted: orders.filter((o) => o.statut === CommandeStatut.ACCEPTEE).length,
-    completed: orders.filter((o) => o.statut === CommandeStatut.COMPLETE).length,
+    completed: orders.filter((o) => o.statut === CommandeStatut.COMPLETE)
+      .length,
     cancelled: orders.filter((o) => o.statut === CommandeStatut.ANNULEE).length,
   };
 
@@ -162,7 +170,14 @@ const AdminOrders = () => {
         color: "bg-purple-100 text-purple-700",
       },
     };
-    return status ? configs[status] : configs[StatutCommandeLigne.EN_ATTENTE];
+
+    // Valeur par défaut si le statut n'existe pas
+    const defaultConfig = {
+      label: "Statut inconnu",
+      color: "bg-gray-100 text-gray-700",
+    };
+
+    return status && configs[status] ? configs[status] : defaultConfig;
   };
 
   const handleViewDetails = (orderId?: string) => {
@@ -173,19 +188,22 @@ const AdminOrders = () => {
 
   const calculateOrderTotal = (order: Order) => {
     if (!order.lignes || order.lignes.length === 0) {
-      const qty = typeof order.quantiteTotal === "string"
-        ? parseFloat(order.quantiteTotal)
-        : order.quantiteTotal || 0;
-      const price = typeof order.prixUnitaire === "string"
-        ? parseFloat(order.prixUnitaire)
-        : order.prixUnitaire || 0;
+      const qty =
+        typeof order.quantiteTotal === "string"
+          ? parseFloat(order.quantiteTotal)
+          : order.quantiteTotal || 0;
+      const price =
+        typeof order.prixUnitaire === "string"
+          ? parseFloat(order.prixUnitaire)
+          : order.prixUnitaire || 0;
       return qty * price;
     }
 
     return order.lignes.reduce((total, line) => {
-      const sousTotal = typeof line.sousTotal === "string"
-        ? parseFloat(line.sousTotal)
-        : line.sousTotal || 0;
+      const sousTotal =
+        typeof line.sousTotal === "string"
+          ? parseFloat(line.sousTotal)
+          : line.sousTotal || 0;
       return total + sousTotal;
     }, 0);
   };
@@ -207,7 +225,9 @@ const AdminOrders = () => {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Gestion des Commandes</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Gestion des Commandes
+            </h1>
             <p className="text-gray-600 mt-1">
               Supervision de toutes les transactions de la plateforme
             </p>
@@ -305,7 +325,10 @@ const AdminOrders = () => {
       {/* Filtres et Recherche */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={20}
+          />
           <Input
             type="text"
             placeholder="Rechercher par produit, collecteur, territoire..."
@@ -325,7 +348,9 @@ const AdminOrders = () => {
             <option value={CommandeStatut.EN_ATTENTE}>En attente</option>
             <option value={CommandeStatut.OUVERTE}>Ouverte</option>
             <option value={CommandeStatut.ACCEPTEE}>Acceptée</option>
-            <option value={CommandeStatut.PARTIELLEMENT_FOURNIE}>Partiellement fournie</option>
+            <option value={CommandeStatut.PARTIELLEMENT_FOURNIE}>
+              Partiellement fournie
+            </option>
             <option value={CommandeStatut.COMPLETE}>Complète</option>
             <option value={CommandeStatut.LIVREE}>Livrée</option>
             <option value={CommandeStatut.ANNULEE}>Annulée</option>
@@ -373,22 +398,36 @@ const AdminOrders = () => {
                     <div className="flex flex-col lg:flex-row gap-4">
                       {/* Icône et Type */}
                       <div className="flex items-start gap-4">
-                        <div className={`w-14 h-14 ${isDirect ? 'bg-purple-100' : 'bg-cyan-100'} rounded-xl flex items-center justify-center text-3xl shrink-0`}>
+                        <div
+                          className={`w-14 h-14 ${
+                            isDirect ? "bg-purple-100" : "bg-cyan-100"
+                          } rounded-xl flex items-center justify-center text-3xl shrink-0`}
+                        >
                           {isDirect ? "📦" : "🔍"}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className={isDirect ? "bg-purple-50 text-purple-700" : "bg-cyan-50 text-cyan-700"}>
+                            <Badge
+                              variant="outline"
+                              className={
+                                isDirect
+                                  ? "bg-purple-50 text-purple-700"
+                                  : "bg-cyan-50 text-cyan-700"
+                              }
+                            >
                               {isDirect ? "Commande Directe" : "Demande"}
                             </Badge>
-                            <Badge className={`${statusConfig.color} flex items-center gap-1`}>
+                            <Badge
+                              className={`${statusConfig.color} flex items-center gap-1`}
+                            >
                               {statusConfig.icon}
                               {statusConfig.label}
                             </Badge>
                           </div>
 
                           <h3 className="text-xl font-bold mb-2">
-                            {order.produitRecherche || "Commande Multi-Produits"}
+                            {order.produitRecherche ||
+                              "Commande Multi-Produits"}
                           </h3>
 
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -406,7 +445,8 @@ const AdminOrders = () => {
                               <div className="flex items-center gap-2 text-gray-600">
                                 <MapPin size={14} />
                                 <span>
-                                  <strong>Zone:</strong> {order.territoire} ({order.rayon}km)
+                                  <strong>Zone:</strong> {order.territoire} (
+                                  {order.rayon}km)
                                 </span>
                               </div>
                             )}
@@ -415,7 +455,9 @@ const AdminOrders = () => {
                               <Calendar size={14} />
                               <span>
                                 {order.createdAt
-                                  ? new Date(order.createdAt).toLocaleDateString("fr-FR")
+                                  ? new Date(
+                                      order.createdAt
+                                    ).toLocaleDateString("fr-FR")
                                   : "Date inconnue"}
                               </span>
                             </div>
@@ -423,7 +465,8 @@ const AdminOrders = () => {
                             <div className="flex items-center gap-2 text-gray-600">
                               <Package size={14} />
                               <span>
-                                <strong>Quantité:</strong> {order.quantiteTotal} {order.unite}
+                                <strong>Quantité:</strong> {order.quantiteTotal}{" "}
+                                {order.unite}
                               </span>
                             </div>
 
@@ -438,7 +481,8 @@ const AdminOrders = () => {
                               <div className="flex items-center gap-2 text-gray-600">
                                 <AlertCircle size={14} />
                                 <span>
-                                  <strong>{order.lignes.length}</strong> proposition(s)
+                                  <strong>{order.lignes.length}</strong>{" "}
+                                  proposition(s)
                                 </span>
                               </div>
                             )}
@@ -453,22 +497,35 @@ const AdminOrders = () => {
                           {/* Afficher les lignes de commande si présentes */}
                           {order.lignes && order.lignes.length > 0 && (
                             <div className="mt-4 space-y-2">
-                              <p className="text-sm font-semibold text-gray-700">Propositions :</p>
+                              <p className="text-sm font-semibold text-gray-700">
+                                Propositions :
+                              </p>
                               <div className="grid gap-2">
                                 {order.lignes.slice(0, 2).map((line) => {
-                                  const lineStatusConfig = getLineStatusConfig(line.statutLigne);
+                                  const lineStatusConfig = getLineStatusConfig(
+                                    line.statutLigne
+                                  );
                                   return (
                                     <div
                                       key={line.id}
                                       className="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm"
                                     >
                                       <div className="flex-1">
-                                        <span className="font-semibold">{line.produit?.nom}</span>
+                                        <span className="font-semibold">
+                                          {line.produit?.nom}
+                                        </span>
                                         <span className="text-gray-600 ml-2">
-                                          {line.quantiteFournie} {order.unite} × {typeof line.prixUnitaire === "string" ? parseFloat(line.prixUnitaire) : line.prixUnitaire} Ar
+                                          {line.quantiteFournie} {order.unite} ×{" "}
+                                          {typeof line.prixUnitaire === "string"
+                                            ? parseFloat(line.prixUnitaire)
+                                            : line.prixUnitaire}{" "}
+                                          Ar
                                         </span>
                                       </div>
-                                      <Badge className={lineStatusConfig.color} variant="secondary">
+                                      <Badge
+                                        className={lineStatusConfig.color}
+                                        variant="secondary"
+                                      >
                                         {lineStatusConfig.label}
                                       </Badge>
                                     </div>
@@ -476,7 +533,8 @@ const AdminOrders = () => {
                                 })}
                                 {order.lignes.length > 2 && (
                                   <p className="text-xs text-gray-500 text-center">
-                                    +{order.lignes.length - 2} autre(s) proposition(s)
+                                    +{order.lignes.length - 2} autre(s)
+                                    proposition(s)
                                   </p>
                                 )}
                               </div>
@@ -534,10 +592,15 @@ const AdminOrders = () => {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                            <Badge
+                              variant="outline"
+                              className="bg-purple-50 text-purple-700"
+                            >
                               Commande Directe
                             </Badge>
-                            <Badge className={`${statusConfig.color} flex items-center gap-1`}>
+                            <Badge
+                              className={`${statusConfig.color} flex items-center gap-1`}
+                            >
                               {statusConfig.icon}
                               {statusConfig.label}
                             </Badge>
@@ -561,14 +624,18 @@ const AdminOrders = () => {
                               <Calendar size={14} />
                               <span>
                                 {order.createdAt
-                                  ? new Date(order.createdAt).toLocaleDateString("fr-FR")
+                                  ? new Date(
+                                      order.createdAt
+                                    ).toLocaleDateString("fr-FR")
                                   : "Date inconnue"}
                               </span>
                             </div>
 
                             <div className="flex items-center gap-2">
                               <Package size={14} />
-                              <span>{order.lignes?.length || 0} produit(s)</span>
+                              <span>
+                                {order.lignes?.length || 0} produit(s)
+                              </span>
                             </div>
 
                             <div className="flex items-center gap-2 text-green-600 font-semibold">
@@ -579,7 +646,11 @@ const AdminOrders = () => {
                         </div>
                       </div>
 
-                      <Button variant="outline" size="sm" className="self-start">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="self-start"
+                      >
                         <Eye size={16} className="mr-2" />
                         Détails
                       </Button>
@@ -617,10 +688,15 @@ const AdminOrders = () => {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="bg-cyan-50 text-cyan-700">
+                            <Badge
+                              variant="outline"
+                              className="bg-cyan-50 text-cyan-700"
+                            >
                               Demande de Produit
                             </Badge>
-                            <Badge className={`${statusConfig.color} flex items-center gap-1`}>
+                            <Badge
+                              className={`${statusConfig.color} flex items-center gap-1`}
+                            >
                               {statusConfig.icon}
                               {statusConfig.label}
                             </Badge>
@@ -656,7 +732,9 @@ const AdminOrders = () => {
 
                             <div className="flex items-center gap-2">
                               <AlertCircle size={14} />
-                              <span>{order.lignes?.length || 0} proposition(s)</span>
+                              <span>
+                                {order.lignes?.length || 0} proposition(s)
+                              </span>
                             </div>
                           </div>
 
@@ -668,7 +746,11 @@ const AdminOrders = () => {
                         </div>
                       </div>
 
-                      <Button variant="outline" size="sm" className="self-start">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="self-start"
+                      >
                         <Eye size={16} className="mr-2" />
                         Détails
                       </Button>
