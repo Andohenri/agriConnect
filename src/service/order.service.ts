@@ -56,7 +56,7 @@ export const OrderService = {
         return response.data;
     },
     async deliverOrder(orderId: string): Promise<Order> {
-        const response = await Axios.patch(`commande-produits//${orderId}/livrer`);
+        const response = await Axios.patch(`commande-produits/${orderId}/livree`);
         return response.data;
     },
 };

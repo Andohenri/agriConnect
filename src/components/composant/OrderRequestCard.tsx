@@ -46,7 +46,7 @@ const OrderRequestCard = ({
   const acceptedLines =
     order.lignes?.filter((l) => l.statutLigne === StatutCommandeLigne.ACCEPTEE) || [];
   const totalAccepted = acceptedLines.reduce(
-    (sum, line) => sum + Number(line.quantiteFournie),
+    (sum, line) => sum + Number(line?.quantiteAccordee),
     0
   );
   const progress = (totalAccepted / Number(order.quantiteTotal)) * 100;
@@ -113,7 +113,7 @@ const OrderRequestCard = ({
 
                     {/* Contacter le collecteur */}
                     {order.collecteur && userRole === Role.PAYSAN && (
-                      <DropdownMenuItem onClick={() => onContact(order.collecteurId)}>
+                      <DropdownMenuItem onClick={() => onContact(order.collecteur?.id!)}>
                         <MessageSquare size={16} className="mr-2" />
                         Contacter le collecteur
                       </DropdownMenuItem>
@@ -233,20 +233,10 @@ const OrderRequestCard = ({
               </Badge>
             </div>
             <div className="text-sm text-purple-900">
-              <span className="font-semibold">{maPropre.quantiteFournie} {order.unite && UNITE_LABELS[order.unite]}</span>
+              <span className="font-semibold">{maPropre.quantiteAccordee} {order.unite && UNITE_LABELS[order.unite]}</span>
               {" • "}
               <span>{formatPrice(maPropre.prixUnitaire)} Ar/{order.unite && UNITE_LABELS[order.unite]}</span>
             </div>
-          </div>
-        )}
-
-        {/* Message du collecteur */}
-        {order.messageCollecteur && (
-          <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <MessageSquare size={14} className="text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-900 line-clamp-2">
-              {order.messageCollecteur}
-            </p>
           </div>
         )}
 

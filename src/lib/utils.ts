@@ -121,7 +121,7 @@ export const ORDER_STATUT_CONFIG: Record<CommandeStatut, {
     color: "bg-green-100 text-green-700 hover:bg-green-200 hover:text-green-800",
     icon: CheckCircle,
   },
-  [CommandeStatut.PAYE]: {
+  [CommandeStatut.PAYEE]: {
     label: "Payée",
     variant: "success",
     color: "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800",

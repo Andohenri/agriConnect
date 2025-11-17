@@ -48,7 +48,7 @@ const DirectOrderCard = ({
   const StatusIcon = statutConfig.icon;
   const isPending = order.statut === CommandeStatut.EN_ATTENTE;
   const isAccepted = order.statut === CommandeStatut.ACCEPTEE;
-  const isPaid = order.statut === CommandeStatut.PAYE;
+  const isPaid = order.statut === CommandeStatut.PAYEE;
   const isDelivered = order.statut === CommandeStatut.LIVREE;
 
   // Récupérer le produit de la première ligne
@@ -248,16 +248,6 @@ const DirectOrderCard = ({
             </div>
           )}
         </div>
-
-        {/* Message du collecteur */}
-        {order.messageCollecteur && (
-          <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <MessageSquare size={14} className="text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-sm text-blue-900 line-clamp-2">
-              {order.messageCollecteur}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

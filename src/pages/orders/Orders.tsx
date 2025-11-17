@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Plus, ShoppingCart, Target } from "lucide-react";
+import { Plus, ShoppingCart, Target } from "lucide-react";
 import { toast } from "sonner";
 import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +14,8 @@ import { OrderService } from "@/service/order.service";
 import Tooltip from "../../components/composant/Tooltip";
 import { convertDataToCommandeFormattedList } from "@/lib/utils";
 import { EmptyState } from "@/components/composant/EmptyState";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Orders = () => {
   const { user } = useAuth();
@@ -116,9 +117,9 @@ const Orders = () => {
               lignes: order.lignes.map((line) =>
                 line.id === lineId
                   ? ({
-                      ...line,
-                      statutLigne: StatutCommandeLigne.ACCEPTEE,
-                    } as OrderLine)
+                    ...line,
+                    statutLigne: StatutCommandeLigne.ACCEPTEE,
+                  } as OrderLine)
                   : line
               ),
             };
@@ -145,9 +146,9 @@ const Orders = () => {
               lignes: order.lignes.map((line) =>
                 line.id === lineId
                   ? ({
-                      ...line,
-                      statutLigne: StatutCommandeLigne.REJETEE,
-                    } as OrderLine)
+                    ...line,
+                    statutLigne: StatutCommandeLigne.REJETEE,
+                  } as OrderLine)
                   : line
               ),
             };
@@ -194,7 +195,7 @@ const Orders = () => {
         {/* Tabs pour séparer commandes directes et demandes */}
         <Tabs defaultValue="direct">
           {/* Header */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
             <div>
               <h1 className="text-lg md:text-3xl font-bold">
                 {userRole === Role.PAYSAN
@@ -242,7 +243,11 @@ const Orders = () => {
             value="direct"
             className="space-y-4 mt-6 grid xl:grid-cols-3 2xl:grid-cols-4 gap-4"
           >
-            {directOrders.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))
+            ) : directOrders.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <EmptyState
                   title="Aucune commande reçue"
@@ -271,7 +276,11 @@ const Orders = () => {
             value="requests"
             className="space-y-4 mt-6 grid xl:grid-cols-3 2xl:grid-cols-4 gap-4"
           >
-            {orderRequests.length === 0 ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))
+            ) : orderRequests.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <EmptyState
                   title="Aucune Demande envoyée"
@@ -300,3 +309,53 @@ const Orders = () => {
 };
 
 export default Orders;
+
+
+const OrderCardSkeleton = () => {
+  return (
+    <Card className="hover:shadow-md transition-all duration-300">
+      <CardHeader>
+        <div className="flex items-start justify-between gap-2">
+          {/* Image et infos principales */}
+          <div className="flex items-start gap-4 flex-1">
+            {/* Image skeleton */}
+            <Skeleton className="w-16 h-16 rounded-xl shrink-0" />
+
+            <div className="flex-1 min-w-0 space-y-2">
+              {/* Titre */}
+              <Skeleton className="h-6 w-3/4" />
+              {/* Sous-titre */}
+              <Skeleton className="h-4 w-1/2" />
+              {/* Badge */}
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+
+            {/* Bouton menu */}
+            <Skeleton className="w-9 h-9 rounded-md shrink-0" />
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-3">
+        {/* Informations utilisateur */}
+        <div className="space-y-1.5">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-5 w-64" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+
+        {/* Total */}
+        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-7 w-28" />
+        </div>
+
+        {/* Informations de livraison */}
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-5 w-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

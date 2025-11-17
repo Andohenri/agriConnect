@@ -23,7 +23,6 @@ import {
   Clock,
   TrendingUp,
   ShoppingCart,
-  TrendingDown,
 } from "lucide-react";
 import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
 import { Link, useNavigate } from "react-router-dom";
@@ -31,7 +30,6 @@ import { formatDate, formatPrice, formatQuantity, getPriceIndicator, ORDER_STATU
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { OrderService } from "@/service/order.service";
-import { set } from "react-hook-form";
 
 const OrderDetails = () => {
   const { user } = useAuth();
@@ -88,6 +86,13 @@ const OrderDetails = () => {
     setOrder({ ...order, statut: CommandeStatut.PAYEE as CommandeStatut });
     toast.info('Fonctionnalité de paiement à venir');
   };
+
+  const handleDelivery = async () => {
+    console.log('Livraison:', order.id);
+    await OrderService.deliverOrder(order.id!);
+    setOrder({ ...order, statut: CommandeStatut.LIVREE as CommandeStatut });
+    toast.success('Commande marquée comme livrée');
+  }
 
   const handleContact = (userId: string) => {
     console.log('Contacter:', userId);
@@ -439,6 +444,15 @@ const OrderDetails = () => {
                     </div>
                   </div>
                 )}
+                {order.dateLivraison && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="text-green-600 mt-1 shrink-0" size={20} />
+                    <div>
+                      <p className="text-sm text-gray-500">Livrée le</p>
+                      <p className="font-semibold">{formatDate(order.dateLivraison)}</p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -557,6 +571,23 @@ const OrderDetails = () => {
                 >
                   <DollarSign size={20} className="mr-2" />
                   Effectuer le paiement
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {userRole === Role.PAYSAN && order.statut === CommandeStatut.PAYEE && !isOrderRequest && (
+            <Card>
+              <CardHeader>
+                <h4 className="font-bold text-lg">Livraison</h4>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700 h-12"
+                  onClick={handleDelivery}
+                >
+                  <Truck size={20} className="mr-2" />
+                  Marquer comme livrée
                 </Button>
               </CardContent>
             </Card>
