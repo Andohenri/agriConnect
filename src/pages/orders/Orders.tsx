@@ -69,7 +69,7 @@ const Orders = () => {
   const handleAcceptOrder = async (orderId: string) => {
     try {
       console.log("Accepter commande:", orderId);
-      // await OrderService.acceptOrder(orderId);
+      await OrderService.acceptOrder(orderId);
       toast.success("Commande acceptée avec succès !");
 
       setOrders(
@@ -87,7 +87,7 @@ const Orders = () => {
   const handleRejectOrder = async (orderId: string) => {
     try {
       console.log("Refuser commande:", orderId);
-      // await OrderService.rejectOrder(orderId);
+      await OrderService.rejectOrder(orderId);
       toast.success("Commande refusée");
 
       setOrders(
@@ -165,9 +165,17 @@ const Orders = () => {
     toast.info("Fonctionnalité de messagerie à venir");
   };
 
-  const handlePayment = (orderId: string) => {
+  const handlePayment = async (orderId: string) => {
     console.log("Payer commande:", orderId);
-    toast.info("Redirection vers le paiement...");
+    await OrderService.payOrder(orderId);
+    setOrders(
+      orders.map((order) =>
+        order.id === orderId
+          ? ({ ...order, statut: CommandeStatut.PAYEE } as Order)
+          : order
+      )
+    );
+    toast.info("Fonctionnalité de paiement à venir");
   };
 
   const handleViewDetails = (orderId: string) => {
@@ -186,7 +194,7 @@ const Orders = () => {
         {/* Tabs pour séparer commandes directes et demandes */}
         <Tabs defaultValue="direct">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h1 className="text-lg md:text-3xl font-bold">
                 {userRole === Role.PAYSAN
@@ -223,7 +231,7 @@ const Orders = () => {
                   className="btn-primary flex items-center gap-2"
                 >
                   <Plus size={24} />
-                  Publier une demande de produit
+                  Publier une demande
                 </Button>
               )}
             </div>

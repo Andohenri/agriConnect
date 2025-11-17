@@ -41,7 +41,7 @@ export const CommandeStatut = {
   PARTIELLEMENT_FOURNIE: "partiellement_fournie",
   COMPLETE: "complete",
   ACCEPTEE: "acceptee",
-  PAYE: "paye",
+  PAYEE: "payee",
   LIVREE: "livree",
   ANNULEE: "annulee",
 } as const;

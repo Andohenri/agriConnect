@@ -260,7 +260,7 @@ declare global {
     EN_ATTENTE = "en_attente",
     COMPLETE = "complete",
     ACCEPTEE = "acceptee",
-    PAYE = "paye",
+    PAYEE = "payee",
     LIVREE = "livree",
     ANNULEE = "annulee",
   }

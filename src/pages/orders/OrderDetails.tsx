@@ -30,11 +30,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { formatDate, formatPrice, formatQuantity, getPriceIndicator, ORDER_STATUT_CONFIG, UNITE_LABELS } from "@/lib/utils";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { OrderService } from "@/service/order.service";
+import { set } from "react-hook-form";
 
 const OrderDetails = () => {
   const { user } = useAuth();
   const userRole = user?.role;
-  const { order, resetOrderState } = useOrder();
+  const { order, resetOrderState, setOrder } = useOrder();
   const navigate = useNavigate();
 
   if (!order) {
@@ -56,13 +58,17 @@ const OrderDetails = () => {
   const StatusIcon = statutConfig.icon;
 
   // Actions handlers
-  const handleAcceptOrder = () => {
+  const handleAcceptOrder = async () => {
     console.log('Accepter commande:', order.id);
+    await OrderService.acceptOrder(order.id!);
+    setOrder({ ...order, statut: CommandeStatut.ACCEPTEE as CommandeStatut });
     toast.success('Commande acceptée !');
   };
 
-  const handleRejectOrder = () => {
+  const handleRejectOrder = async () => {
     console.log('Refuser commande:', order.id);
+    await OrderService.rejectOrder(order.id!);
+    setOrder({ ...order, statut: CommandeStatut.ANNULEE as CommandeStatut });
     toast.success('Commande refusée');
   };
 
@@ -76,9 +82,11 @@ const OrderDetails = () => {
     toast.success('Proposition rejetée');
   };
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     console.log('Paiement:', order.id);
-    toast.info('Redirection vers le paiement...');
+    await OrderService.payOrder(order.id!);
+    setOrder({ ...order, statut: CommandeStatut.PAYEE as CommandeStatut });
+    toast.info('Fonctionnalité de paiement à venir');
   };
 
   const handleContact = (userId: string) => {
@@ -165,8 +173,8 @@ const OrderDetails = () => {
                       <TimelineStep
                         icon={<DollarSign />}
                         title="Paiement effectué"
-                        date={order.statut === CommandeStatut.PAYE || order.statut === CommandeStatut.LIVREE ? 'Payé' : 'En attente'}
-                        completed={order.statut === CommandeStatut.PAYE || order.statut === CommandeStatut.LIVREE}
+                        date={order.statut === CommandeStatut.PAYEE || order.statut === CommandeStatut.LIVREE ? 'Payé' : 'En attente'}
+                        completed={order.statut === CommandeStatut.PAYEE || order.statut === CommandeStatut.LIVREE}
                       />
 
                       {/* Livrée */}

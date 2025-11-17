@@ -6,7 +6,7 @@ import {
   ProductCard,
   ProductCardSkeleton,
 } from "@/components/composant/ProductCard";
-import { Plus, ChevronLeft, ChevronRight, BoxIcon, Package } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useProduct } from "@/contexts/ProductContext";
 import { ProductService } from "@/service/product.service";
@@ -15,8 +15,7 @@ import { EmptyState } from "@/components/composant/EmptyState";
 const Products = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { setIsEditing, setIsAdding, setProduct } = useProduct();
-  const [products, setProducts] = useState<Product[]>([]);
+  const { setIsEditing, setIsAdding, setProduct, products, setProducts } = useProduct();
   const [isLoading, setIsLoading] = useState(false);
 
   // États pour la pagination

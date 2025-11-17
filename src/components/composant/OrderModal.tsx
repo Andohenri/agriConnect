@@ -20,6 +20,7 @@ import { Package, ShoppingCart, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { OrderService } from "@/service/order.service";
+import { useProduct } from "@/contexts/ProductContext";
 
 export interface PropositionFormData {
   paysanId?: string;
@@ -42,6 +43,7 @@ interface OrderModalProps {
 
 export function OrderModal({ product, disableTrigger, children, classTrigger }: OrderModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { updateProductInList } = useProduct();
 
   const {
     register,
@@ -78,6 +80,15 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
 
       // TODO: Appel API
       await OrderService.createOrder({...data, produitId: product?.id});
+
+      // Mettre à jour le produit localement (sans recharger depuis l'API)
+      if (product?.id) {
+        const newQuantite = Number(product.quantiteDisponible || 0) - Number(data.quantiteAccordee || 0);
+        updateProductInList(product.id, {
+          quantiteDisponible: newQuantite,
+          statut: newQuantite === 0 ? ProductStatut.RUPTURE : product.statut,
+        });
+      }
 
       toast.success("Proposition envoyée avec succès !");
       reset();
@@ -288,7 +299,7 @@ export function OrderModal({ product, disableTrigger, children, classTrigger }: 
               ) : (
                 <>
                   <ShoppingCart size={18} className="mr-2" />
-                  Envoyer la proposition
+                  Envoyer la commande
                 </>
               )}
             </Button>

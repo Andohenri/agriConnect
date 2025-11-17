@@ -41,5 +41,22 @@ export const OrderService = {
     },
     async deleteOrder(orderId: string): Promise<void> {
         await Axios.delete(`${this.BASE_PATH}/${orderId}`);
-    }
+    },
+    async acceptOrder(orderId: string): Promise<Order> {
+        const response = await Axios.patch(`commande-produits/${orderId}/accepter`);
+        return response.data;
+    },
+    async rejectOrder(orderId: string): Promise<Order> {
+        const response = await Axios.patch(`commande-produits/${orderId}/refuser`);
+        return response.data;
+    },
+    //
+    async payOrder(orderId: string): Promise<Order> {
+        const response = await Axios.patch(`${this.BASE_PATH}/${orderId}/payer`);
+        return response.data;
+    },
+    async deliverOrder(orderId: string): Promise<Order> {
+        const response = await Axios.patch(`commande-produits//${orderId}/livrer`);
+        return response.data;
+    },
 };
