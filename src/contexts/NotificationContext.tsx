@@ -38,11 +38,15 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   useEffect(() => {
     if (!userId) return;
 
-    initSocket({userId});
-
+    initSocket({ userId });
+    // 🔊 Jouer le son
+    const audio = new Audio("/sounds/Blow.mp3");
     const unsubscribe = subscribeToNotifications((notif: any) => {
       console.log("[CONTEXT] Nouvelle notification:", notif);
       setNotifications((prev) => [notif, ...prev]);
+
+      audio.currentTime = 0; // revenir au début
+      audio.play().catch(console.log);
 
       toast.message(`📩 ${notif.titre}`, {
         // description facultative
@@ -56,8 +60,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             }
           : undefined,
       });
-
-      console.log(`📩 ${notif.titre}`);
     });
 
     return () => {

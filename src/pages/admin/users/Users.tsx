@@ -1,5 +1,15 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Ban, CheckCircle, Edit, Plus, Trash2, Search, Filter, User as UserIcon } from "lucide-react";
+import {
+  Ban,
+  CheckCircle,
+  Edit,
+  Plus,
+  Trash2,
+  Search,
+  Filter,
+  User as UserIcon,
+  User2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserService } from "@/service/user.service";
 import { Role, Statut } from "@/types/enums";
+import { EmptyState } from "@/components/composant/EmptyState";
 
 // Mapping des avatars par rôle
 const ROLE_AVATARS = {
@@ -84,7 +95,7 @@ const AdminUsers = () => {
     // Déterminer le nouveau statut
     let newStatus: string;
     let action: string;
-    
+
     if (user.statut === Statut.ACTIF) {
       newStatus = Statut.SUSPENDU;
       action = "suspendre";
@@ -92,7 +103,7 @@ const AdminUsers = () => {
       newStatus = Statut.ACTIF;
       action = "activer";
     }
-    
+
     const confirmed = window.confirm(
       `Êtes-vous sûr de vouloir ${action} l'utilisateur ${user.nom} ${user.prenom} ?`
     );
@@ -102,7 +113,9 @@ const AdminUsers = () => {
     try {
       await UserService.updateUserStatus(user.id, newStatus as Statut);
       toast.success(
-        `Utilisateur ${newStatus === Statut.ACTIF ? "activé" : "suspendu"} avec succès`
+        `Utilisateur ${
+          newStatus === Statut.ACTIF ? "activé" : "suspendu"
+        } avec succès`
       );
       await fetchUsers();
     } catch (error) {
@@ -164,7 +177,7 @@ const AdminUsers = () => {
         </div>
 
         {/* Filtres et Recherche */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1">
             <Search
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -228,12 +241,11 @@ const AdminUsers = () => {
           ) : filteredUsers.length === 0 ? (
             // Message si aucun utilisateur
             <div className="col-span-full text-center py-12">
-              <UserIcon size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 text-lg">
-                {searchTerm || selectedRole !== "all" || selectedStatus !== "all"
-                  ? "Aucun utilisateur ne correspond aux filtres"
-                  : "Aucun utilisateur disponible"}
-              </p>
+              <EmptyState
+                title="Aucune userisateur trouvé"
+                description="Vous n’avez pas encore de . Elles apparaîtront ici dès qu’il y en aura."
+                media={<User2 />}
+              />
             </div>
           ) : (
             filteredUsers.map((user) => (
@@ -259,7 +271,13 @@ const AdminUsers = () => {
                     </p>
                   </div>
                   <Badge
-                    variant={user.statut === Statut.ACTIF ? "default" : user.statut === Statut.SUSPENDU ? "secondary" : "outline"}
+                    variant={
+                      user.statut === Statut.ACTIF
+                        ? "default"
+                        : user.statut === Statut.SUSPENDU
+                        ? "secondary"
+                        : "outline"
+                    }
                     className={
                       user.statut === Statut.ACTIF
                         ? "bg-green-100 text-green-700"
@@ -268,7 +286,11 @@ const AdminUsers = () => {
                         : "bg-gray-100 text-gray-600"
                     }
                   >
-                    {user.statut === Statut.ACTIF ? "Actif" : user.statut === Statut.SUSPENDU ? "Suspendu" : "Inactif"}
+                    {user.statut === Statut.ACTIF
+                      ? "Actif"
+                      : user.statut === Statut.SUSPENDU
+                      ? "Suspendu"
+                      : "Inactif"}
                   </Badge>
                 </div>
 

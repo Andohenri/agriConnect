@@ -13,6 +13,7 @@ import { NotificationsList } from "./NotificationsList";
 import notifService, {
   type UserNotification,
 } from "@/service/notification.service";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 interface NotificationsSheetProps {
   trigger: React.ReactNode; // bouton TopbarIconButton
@@ -20,7 +21,7 @@ interface NotificationsSheetProps {
 
 export function NotificationsSheet({ trigger }: NotificationsSheetProps) {
   const [active, setActive] = useState<"all" | "unread">("all");
-
+  // const { notifications: notif } = useNotifications();
   const [notifications, setNotifications] = useState<UserNotification[]>([]);
 
   async function fetchNotif() {

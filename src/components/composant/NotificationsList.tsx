@@ -8,7 +8,8 @@ interface NotificationsListProps {
 }
 
 export function NotificationsList({ notifications }: NotificationsListProps) {
-  if (notifications.length !== 0) {
+  
+  if (notifications.length === 0) {
     return (
       <EmptyState
         title="Aucune notification"

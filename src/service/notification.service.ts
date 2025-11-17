@@ -59,10 +59,7 @@ const markAllAsRead = async (): Promise<void> => {
 // --------------------------
 const getUnreadCount = async (): Promise<number> => {
   const res = await Axios.get(`${BASE}/unread-count`);
-  console.log('Mahefa ',res);
-  
   return res.data as number;
-
 };
 
 export default {
