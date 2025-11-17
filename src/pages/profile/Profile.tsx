@@ -50,19 +50,36 @@ const Profile = () => {
   const loadProfileData = async () => {
     setIsLoading(true);
     try {
-      // Charger les données de l'utilisateur si ce n'est pas son propre profil
-      if (!isOwnProfile && id) {
+      let userToDisplay: User | null = null;
+
+      // 1. Charger les données de l'utilisateur
+      if (isOwnProfile) {
+        userToDisplay = currentUser;
+      } else if (id) {
         const userData = await UserService.getUserById(id);
         setProfileUser(userData);
+        userToDisplay = userData;
       }
 
-      // Charger les produits de l'utilisateur (si paysan)
-      if (displayUser?.role === Role.PAYSAN) {
-        const productsData = await ProductService.getAllProductsPaysan();
-        setProducts(productsData.data || []);
+      if (!userToDisplay) {
+        setIsLoading(false);
+        return;
       }
 
-      // Charger les commandes
+      // 2. Charger les produits (si c'est un paysan)
+      if (userToDisplay.role === Role.PAYSAN) {
+        if (isOwnProfile) {
+          // Pour son propre profil
+          const productsData = await ProductService.getAllProductsPaysan();
+          setProducts(productsData.data || []);
+        } else {
+          // Pour visiter le profil d'un autre paysan
+          const productsData = await ProductService.getProductsByUserId(id!);
+          setProducts(productsData.data || []);
+        }
+      }
+
+      // 3. Charger les commandes UNIQUEMENT si c'est son propre profil
       if (isOwnProfile) {
         if (currentUser?.role === Role.PAYSAN) {
           const ordersData = await OrderService.getAllOrdersPaysan();
@@ -73,6 +90,9 @@ const Profile = () => {
           );
           setOrders(ordersData.data || []);
         }
+      } else {
+        // Ne pas charger les commandes si on visite le profil d'un autre utilisateur
+        setOrders([]);
       }
     } catch (error) {
       console.error("Erreur lors du chargement du profil:", error);
@@ -175,15 +195,12 @@ const Profile = () => {
     return configs[role];
   };
 
-
-  const roleConfig = getRoleConfig(currentUser?.role);
+  const roleConfig = getRoleConfig(displayUser?.role);
 
   return (
     <section className="space-y-6">
       {/* Header Card */}
       <Card className="p-0! overflow-hidden">
-        {/* Banner */}
-
         {/* Profile Content */}
         <div className="px-6 py-6">
           <div className="flex flex-col md:flex-row gap-6">
@@ -192,13 +209,11 @@ const Profile = () => {
               <div className="w-32 h-32 bg-linear-to-br rounded-2xl flex items-center justify-center text-6xl border-4 border-white shadow-md">
                 {displayUser.avatar ? (
                   <img
-                    // src={displayUser.avatar}
                     src={`${import.meta.env.VITE_UPLOAD_URL}${displayUser.avatar}`}
                     alt={displayUser.nom}
                     className="w-full h-full object-cover rounded-2xl group-hover:scale-110 transition-transform duration-300"
                   />
                 ) : (
-                  // "👤"
                   <div className="w-full h-full flex items-center justify-center text-6xl bg-linear-to-br rounded-2xl from-green-400 to-emerald-600">
                     {roleConfig.icon}
                   </div>
@@ -219,12 +234,8 @@ const Profile = () => {
                     {displayUser.prenom} {displayUser.nom}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <Badge className="bg-green-600">
-                      {displayUser.role === Role.PAYSAN
-                        ? "🌾 Paysan"
-                        : displayUser.role === Role.COLLECTEUR
-                        ? "🚚 Collecteur"
-                        : "🛡️ Admin"}
+                    <Badge className={roleConfig.color}>
+                      {roleConfig.icon} {roleConfig.label}
                     </Badge>
                     {displayUser.localisation && (
                       <span className="flex items-center gap-1 text-sm text-gray-600">
@@ -266,7 +277,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Quick Stats */}
+              {/* Quick Stats - Visible pour tous */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                 {displayUser.role === Role.PAYSAN && (
                   <>
@@ -284,18 +295,24 @@ const Profile = () => {
                     </div>
                   </>
                 )}
-                <div>
-                  <div className="text-2xl font-bold text-purple-600">
-                    {stats.totalOrders}
-                  </div>
-                  <div className="text-xs text-gray-600">Commandes</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {stats.completedOrders}
-                  </div>
-                  <div className="text-xs text-gray-600">Complétées</div>
-                </div>
+                
+                {/* Statistiques des commandes visibles UNIQUEMENT pour son propre profil */}
+                {isOwnProfile && (
+                  <>
+                    <div>
+                      <div className="text-2xl font-bold text-purple-600">
+                        {stats.totalOrders}
+                      </div>
+                      <div className="text-xs text-gray-600">Commandes</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {stats.completedOrders}
+                      </div>
+                      <div className="text-xs text-gray-600">Complétées</div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -312,28 +329,31 @@ const Profile = () => {
           {displayUser.role === Role.PAYSAN && (
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package size={16} />
-              <span className="hidden sm:block">Produits publiés</span>
+              <span className="hidden sm:block">Produits</span>
               <Tooltip text="Produits publiés">
                 <Badge variant="secondary">{stats.totalProducts}</Badge>
               </Tooltip>
             </TabsTrigger>
           )}
-          <TabsTrigger value="orders" className="flex items-center gap-2">
-            <ShoppingCart size={16} />
-            {displayUser.role === Role.PAYSAN ? (
-              <span className="hidden sm:block">Commandes reçues</span>
-            ) : (
-              <span className="hidden sm:block">Commandes passées</span>
-            )}
-            <Tooltip text="Commandes">
-              <Badge variant="secondary">{stats.totalOrders}</Badge>
-            </Tooltip>
-          </TabsTrigger>
+          {/* Onglet Commandes visible UNIQUEMENT pour son propre profil */}
+          {isOwnProfile && (
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <ShoppingCart size={16} />
+              {displayUser.role === Role.PAYSAN ? (
+                <span className="hidden sm:block">Commandes reçues</span>
+              ) : (
+                <span className="hidden sm:block">Mes commandes</span>
+              )}
+              <Tooltip text="Commandes">
+                <Badge variant="secondary">{stats.totalOrders}</Badge>
+              </Tooltip>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          {/* Stats Cards */}
+          {/* Stats Cards - Visibles UNIQUEMENT pour son propre profil */}
           {isOwnProfile && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="p-6 bg-linear-to-br from-green-50 to-emerald-50">
@@ -435,7 +455,11 @@ const Profile = () => {
             {products.length === 0 ? (
               <Card className="p-12 text-center">
                 <Package size={48} className="mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-600">Aucun produit disponible</p>
+                <p className="text-gray-600">
+                  {isOwnProfile
+                    ? "Vous n'avez aucun produit publié"
+                    : "Aucun produit disponible"}
+                </p>
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -507,83 +531,85 @@ const Profile = () => {
           </TabsContent>
         )}
 
-        {/* Orders Tab */}
-        <TabsContent value="orders" className="space-y-4">
-          {orders.length === 0 ? (
-            <Card className="p-12 text-center">
-              <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Aucune commande</p>
-            </Card>
-          ) : (
-            orders.slice(0, 5).map((order) => {
-              const getStatusConfig = (status?: CommandeStatut) => {
-                const defaultConfig = {
-                  label: "En attente",
-                  color: "bg-yellow-100 text-yellow-700",
-                };
-
-                const configs: Partial<
-                  Record<CommandeStatut, { label: string; color: string }>
-                > = {
-                  [CommandeStatut.EN_ATTENTE]: {
+        {/* Orders Tab - Visible UNIQUEMENT pour son propre profil */}
+        {isOwnProfile && (
+          <TabsContent value="orders" className="space-y-4">
+            {orders.length === 0 ? (
+              <Card className="p-12 text-center">
+                <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Aucune commande</p>
+              </Card>
+            ) : (
+              orders.slice(0, 5).map((order) => {
+                const getStatusConfig = (status?: CommandeStatut) => {
+                  const defaultConfig = {
                     label: "En attente",
                     color: "bg-yellow-100 text-yellow-700",
-                  },
-                  [CommandeStatut.ACCEPTEE]: {
-                    label: "Acceptée",
-                    color: "bg-green-100 text-green-700",
-                  },
-                  [CommandeStatut.COMPLETE]: {
-                    label: "Complète",
-                    color: "bg-green-100 text-green-700",
-                  },
-                  [CommandeStatut.ANNULEE]: {
-                    label: "Annulée",
-                    color: "bg-red-100 text-red-700",
-                  },
+                  };
+
+                  const configs: Partial<
+                    Record<CommandeStatut, { label: string; color: string }>
+                  > = {
+                    [CommandeStatut.EN_ATTENTE]: {
+                      label: "En attente",
+                      color: "bg-yellow-100 text-yellow-700",
+                    },
+                    [CommandeStatut.ACCEPTEE]: {
+                      label: "Acceptée",
+                      color: "bg-green-100 text-green-700",
+                    },
+                    [CommandeStatut.COMPLETE]: {
+                      label: "Complète",
+                      color: "bg-green-100 text-green-700",
+                    },
+                    [CommandeStatut.ANNULEE]: {
+                      label: "Annulée",
+                      color: "bg-red-100 text-red-700",
+                    },
+                  };
+
+                  return status
+                    ? configs[status] ?? defaultConfig
+                    : defaultConfig;
                 };
 
-                return status
-                  ? configs[status] ?? defaultConfig
-                  : defaultConfig;
-              };
+                const statusConfig = getStatusConfig(order.statut);
 
-              const statusConfig = getStatusConfig(order.statut);
-
-              return (
-                <Card key={order.id} className="p-6 hover:shadow-md transition">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h4 className="font-bold">
-                        {order.produitRecherche ||
-                          `Commande #${order.id?.slice(0, 8)}`}
-                      </h4>
-                      <p className="text-sm text-gray-600">
-                        {order.collecteur
-                          ? `${order.collecteur.prenom} ${order.collecteur.nom}`
-                          : "Collecteur"}
-                      </p>
+                return (
+                  <Card key={order.id} className="p-6 hover:shadow-md transition">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="font-bold">
+                          {order.produitRecherche ||
+                            `Commande #${order.id?.slice(0, 8)}`}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {order.collecteur
+                            ? `${order.collecteur.prenom} ${order.collecteur.nom}`
+                            : "Collecteur"}
+                        </p>
+                      </div>
+                      <Badge className={statusConfig.color}>
+                        {statusConfig.label}
+                      </Badge>
                     </div>
-                    <Badge className={statusConfig.color}>
-                      {statusConfig.label}
-                    </Badge>
-                  </div>
 
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">
-                      {order.quantiteTotal} {order.unite}
-                    </span>
-                    {order.createdAt && (
-                      <span className="text-gray-500">
-                        {new Date(order.createdAt).toLocaleDateString("fr-FR")}
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">
+                        {order.quantiteTotal} {order.unite}
                       </span>
-                    )}
-                  </div>
-                </Card>
-              );
-            })
-          )}
-        </TabsContent>
+                      {order.createdAt && (
+                        <span className="text-gray-500">
+                          {new Date(order.createdAt).toLocaleDateString("fr-FR")}
+                        </span>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </section>
   );

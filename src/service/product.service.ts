@@ -22,6 +22,10 @@ export const ProductService = {
     const response = await Axios.get(`${this.BASE_PATH}/${productId}`);
     return response.data;
   },
+  async getProductsByUserId(userId: string): Promise<ProductResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/user/${userId}`);
+    return response.data;
+  },
   async updateProduct(productId: string, productData: FormData): Promise<Product> {
     const response = await Axios.put(`${this.BASE_PATH}/${productId}`, productData, {
       headers: { "Content-Type": "multipart/form-data" },
