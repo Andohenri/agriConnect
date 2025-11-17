@@ -25,10 +25,6 @@ const Messages: React.FC = () => {
 
 
   useEffect(() => {
-    // données de fallback pour dev
-    // setChats(initialChats);
-    // setChatMessages(initialMessages);
-
     // charger conversations depuis l'API
     (async () => {
       try {

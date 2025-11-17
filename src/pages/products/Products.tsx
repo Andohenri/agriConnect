@@ -158,6 +158,7 @@ const Products = () => {
                 title="Aucune production disponible"
                 description="Vous n’avez pas encore de produit. Elles apparaîtront ici dès qu’il y en aura."
                 media={<Package />}
+                isMe={user?.role === Role.PAYSAN}
                 actions={[
                   { label: "Creer un produit", onClick: () => handleAddProduct() },
                 ]}

@@ -22,6 +22,7 @@ interface EmptyStateProps {
   media?: React.ReactNode;
   actions?: ActionButton[];
   linkAction?: ActionButton;
+  isMe:boolean
 }
 
 export function EmptyState({
@@ -30,6 +31,7 @@ export function EmptyState({
   media,
   actions = [],
   linkAction,
+  isMe
 }: EmptyStateProps) {
   return (
     <Empty>
@@ -69,7 +71,7 @@ export function EmptyState({
         </EmptyContent>
       )}
 
-      {linkAction && (
+      {(linkAction && isMe) && (
         <Button
           variant={linkAction.variant || "link"}
           asChild={!!linkAction.href}
