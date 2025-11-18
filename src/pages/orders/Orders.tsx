@@ -161,6 +161,11 @@ const Orders = () => {
     }
   };
 
+  const handleProposeOffer = (orderId: string) => {
+    console.log("Proposer une offre pour la demande:", orderId);
+    toast.info("Fonctionnalité de proposition d'offre à venir");
+  }
+
   const handleContact = (userId: string) => {
     console.log("Contacter utilisateur:", userId);
     toast.info("Fonctionnalité de messagerie à venir");
@@ -298,6 +303,7 @@ const Orders = () => {
                   onRejectLine={handleRejectOrderLine}
                   onContact={handleContact}
                   onViewDetails={handleViewDetails}
+                  onProposeOffer={handleProposeOffer}
                 />
               ))
             )}

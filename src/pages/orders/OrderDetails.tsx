@@ -94,6 +94,11 @@ const OrderDetails = () => {
     toast.success('Commande marquée comme livrée');
   }
 
+  const handleProposeOffer = (orderId: string) => {
+    console.log('Proposer une offre pour la demande:', orderId);
+    toast.info('Fonctionnalité de proposition d\'offre à venir');
+  };
+
   const handleContact = (userId: string) => {
     console.log('Contacter:', userId);
     toast.info('Messagerie à venir');
@@ -166,13 +171,29 @@ const OrderDetails = () => {
                         completed={true}
                       />
 
-                      {/* Acceptée */}
-                      <TimelineStep
-                        icon={<Check />}
-                        title="Commande acceptée"
-                        date={order.statut !== CommandeStatut.EN_ATTENTE ? 'Confirmée' : 'En attente'}
-                        completed={order.statut !== CommandeStatut.EN_ATTENTE}
-                      />
+                      {/* Acceptée ou refusée */}
+                      {order.statut === CommandeStatut.ACCEPTEE || order.statut === CommandeStatut.PAYEE || order.statut === CommandeStatut.LIVREE ? (
+                        <TimelineStep
+                          icon={<Check />}
+                          title="Commande acceptée"
+                          date="Confirmée"
+                          completed={true}
+                        />
+                      ) : order.statut === CommandeStatut.ANNULEE ? (
+                        <TimelineStep
+                          icon={<X />}
+                          title="Commande refusée"
+                          date="Refusée"
+                          completed={true}
+                        />
+                      ) : (
+                        <TimelineStep
+                          icon={<Check />}
+                          title="Commande en attente"
+                          date="En attente de validation"
+                          completed={false}
+                        />
+                      )}
 
                       {/* Payée */}
                       <TimelineStep
@@ -199,7 +220,7 @@ const OrderDetails = () => {
                 <CardHeader>
                   <h3 className="text-xl font-bold">Détails du Produit</h3>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <div className="flex gap-4 p-4 bg-gray-50 rounded-xl">
                     <div className="w-20 h-20 bg-linear-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center text-4xl shrink-0">
                       {produit?.imageUrl ? (
@@ -233,7 +254,7 @@ const OrderDetails = () => {
                   <div className="h-px bg-linear-to-r from-transparent via-gray-200 to-transparent"></div>
 
                   {/* Informations de commande */}
-                  <div className="p-5 space-y-4">
+                  <div className="space-y-4">
                     {/* Grid Quantité et Prix original */}
                     <div className="grid grid-cols-2 gap-4">
                       {/* Quantité */}
@@ -520,19 +541,6 @@ const OrderDetails = () => {
             </CardContent>
           </Card>
 
-          {/* Message du collecteur */}
-          {order.messageCollecteur && (
-            <Card className="bg-blue-50 border-2 border-blue-200">
-              <CardContent>
-                <h4 className="font-bold mb-2 flex items-center gap-2">
-                  <MessageSquare className="text-blue-600" size={20} />
-                  Message du collecteur
-                </h4>
-                <p className="text-gray-700">{order.messageCollecteur}</p>
-              </CardContent>
-            </Card>
-          )}
-
           {/* Actions selon rôle et statut */}
           {userRole === Role.PAYSAN && order.statut === CommandeStatut.EN_ATTENTE && isDirectOrder && (
             <Card>
@@ -589,6 +597,36 @@ const OrderDetails = () => {
                   <Truck size={20} className="mr-2" />
                   Marquer comme livrée
                 </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {userRole === Role.PAYSAN && order.statut === CommandeStatut.OUVERTE && isOrderRequest && (
+            <Card>
+              <CardHeader>
+                <h4 className="font-bold text-lg">Proposer une Offre</h4>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700 h-12"
+                  onClick={() => handleProposeOffer(order.id!)}
+                >
+                  <ShoppingCart size={20} className="mr-2" />
+                  Proposer une offre
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Message du collecteur */}
+          {order.messageCollecteur && (
+            <Card className="bg-blue-50 border-2 border-blue-200">
+              <CardContent>
+                <h4 className="font-bold mb-2 flex items-center gap-2">
+                  <MessageSquare className="text-blue-600" size={20} />
+                  Message du collecteur
+                </h4>
+                <p className="text-gray-700">{order.messageCollecteur}</p>
               </CardContent>
             </Card>
           )}

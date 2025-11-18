@@ -10,6 +10,7 @@ import {
   User,
   CheckCircle,
   Clock,
+  Plus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 import {
@@ -33,6 +34,7 @@ interface OrderRequestCardProps {
   onRejectLine: (orderId: string, lineId: string) => void;
   onContact: (userId: string) => void;
   onViewDetails: (orderId: string) => void;
+  onProposeOffer: (orderId: string) => void;
 }
 
 const OrderRequestCard = ({
@@ -40,6 +42,7 @@ const OrderRequestCard = ({
   userRole,
   onContact,
   onViewDetails,
+  onProposeOffer,
 }: OrderRequestCardProps) => {
   const statutConfig = ORDER_STATUT_CONFIG[order.statut || CommandeStatut.OUVERTE];
   const StatusIcon = statutConfig.icon;
@@ -104,6 +107,12 @@ const OrderRequestCard = ({
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+
+                    {/* Voir les détails - Toujours visible */}
+                    <DropdownMenuItem onClick={() => onProposeOffer(order.id!)}>
+                      <Plus size={16} className="mr-2" />
+                      Proposer une offre
+                    </DropdownMenuItem>
 
                     {/* Voir les détails - Toujours visible */}
                     <DropdownMenuItem onClick={() => onViewDetails(order.id!)}>
