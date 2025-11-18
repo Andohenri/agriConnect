@@ -70,13 +70,23 @@ const OrderDetails = () => {
     toast.success('Commande refusée');
   };
 
-  const handleAcceptLine = (lineId: string) => {
+  const handleAcceptLine = async (lineId: string) => {
     console.log('Accepter ligne:', lineId);
+    // await OrderService.acceptProposal(lineId);
+    const updatedLignes = order.lignes?.map(l =>
+      l.id === lineId ? ({ ...l, statutLigne: StatutCommandeLigne.ACCEPTEE } as OrderLine) : l
+    );
+    setOrder({ ...order, lignes: updatedLignes });
     toast.success('Proposition acceptée !');
   };
 
-  const handleRejectLine = (lineId: string) => {
+  const handleRejectLine = async (lineId: string) => {
     console.log('Rejeter ligne:', lineId);
+    // await OrderService.rejectProposal(lineId);
+    const updatedLignes = order.lignes?.map(l =>
+      l.id === lineId ? ({ ...l, statutLigne: StatutCommandeLigne.REJETEE } as OrderLine) : l
+    );
+    setOrder({ ...order, lignes: updatedLignes });
     toast.success('Proposition rejetée');
   };
 
@@ -105,8 +115,8 @@ const OrderDetails = () => {
   };
 
   const handleBack = () => {
+    navigate(-1);
     resetOrderState();
-    navigate('/orders');
   };
 
   const produit = order.lignes?.[0]?.produit;
@@ -703,8 +713,10 @@ const PropositionCard = ({ line, userRole, orderUnite, onAccept, onReject }: Pro
   const isAccepted = line.statutLigne === StatutCommandeLigne.ACCEPTEE;
   const isRejected = line.statutLigne === StatutCommandeLigne.REJETEE;
 
+  const sousTotal = Number(line.quantiteAccordee) * Number(line.prixUnitaire);
+
   return (
-    <Card className="bg-gray-50">
+    <Card key={line.id} className="bg-gray-50">
       <CardContent className="pt-4">
         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div className="flex-1">
@@ -745,7 +757,7 @@ const PropositionCard = ({ line, userRole, orderUnite, onAccept, onReject }: Pro
               <div className="flex items-center gap-2">
                 <TrendingUp size={14} className="text-green-600" />
                 <span className="font-semibold text-green-600">
-                  Sous-total: {formatPrice(line.sousTotal!)} Ar
+                  Sous-total: {formatPrice(sousTotal)} Ar
                 </span>
               </div>
             </div>

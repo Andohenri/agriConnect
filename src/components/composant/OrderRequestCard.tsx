@@ -26,6 +26,7 @@ import { Button } from "../ui/button";
 import { CommandeStatut, StatutCommandeLigne, Role } from "@/types/enums";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface OrderRequestCardProps {
   order: Order;
@@ -44,6 +45,7 @@ const OrderRequestCard = ({
   onViewDetails,
   onProposeOffer,
 }: OrderRequestCardProps) => {
+  const { user } = useAuth()
   const statutConfig = ORDER_STATUT_CONFIG[order.statut || CommandeStatut.OUVERTE];
   const StatusIcon = statutConfig.icon;
   const acceptedLines =
@@ -68,7 +70,7 @@ const OrderRequestCard = ({
 
   // Pour le paysan: trouver sa proposition
   const maPropre = order.lignes?.find(
-    (l) => l.produit?.paysan?.id === userRole // À adapter selon votre logique
+    (l) => l.produit?.paysan?.id === user?.id // À adapter selon votre logique
   );
 
   return (
@@ -108,11 +110,12 @@ const OrderRequestCard = ({
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
-                    {/* Voir les détails - Toujours visible */}
-                    <DropdownMenuItem onClick={() => onProposeOffer(order.id!)}>
-                      <Plus size={16} className="mr-2" />
-                      Proposer une offre
-                    </DropdownMenuItem>
+                    {userRole === Role.PAYSAN && (
+                      <DropdownMenuItem onClick={() => onProposeOffer(order.id!)}>
+                        <Plus size={16} className="mr-2" />
+                        Proposer une offre
+                      </DropdownMenuItem>
+                    )}
 
                     {/* Voir les détails - Toujours visible */}
                     <DropdownMenuItem onClick={() => onViewDetails(order.id!)}>

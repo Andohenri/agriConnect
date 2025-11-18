@@ -1,4 +1,5 @@
 import type { PropositionFormData } from "@/components/composant/OrderModal";
+import type { ProposalFormData } from "@/components/composant/ProposalModal";
 import Axios from "@/lib/axiosInstance";
 
 export const OrderService = {
@@ -59,4 +60,18 @@ export const OrderService = {
         const response = await Axios.patch(`commande-produits/${orderId}/livree`);
         return response.data;
     },
+    async createProposal(orderId: string, orderData: ProposalFormData): Promise<Order> {
+        const response = await Axios.post(`commande-produits/${orderId}/propositions`, orderData);
+        return response.data;
+    },
+
+    async acceptProposal(lineId: string): Promise<Order> {
+        const response = await Axios.patch(`commande-produits/propositions/${lineId}/accepter`);
+        return response.data;
+    },
+
+    async rejectProposal(lineId: string): Promise<Order> {
+        const response = await Axios.patch(`commande-produits/propositions/${lineId}/refuser`);
+        return response.data;
+    }
 };

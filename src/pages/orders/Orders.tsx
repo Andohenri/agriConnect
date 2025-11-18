@@ -16,18 +16,37 @@ import { convertDataToCommandeFormattedList } from "@/lib/utils";
 import { EmptyState } from "@/components/composant/EmptyState";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProposalModal } from "@/components/composant/ProposalModal";
+import { ProductService } from "@/service/product.service";
 
 const Orders = () => {
   const { user } = useAuth();
   const userRole = user?.role;
   const navigate = useNavigate();
   const { setOrder } = useOrder();
+  const [showProposalModal, setShowProposalModal] = useState(false);
+  const [paysanProducts, setPaysanProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const fetchPaysanProducts = async () => {
+    try {
+      const response = await ProductService.getAllProductsPaysan(1, 100);
+      setPaysanProducts(response.data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits du paysan:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (userRole === Role.PAYSAN) {
+      fetchPaysanProducts();
+    }
+  }, [userRole]);
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -38,13 +57,7 @@ const Orders = () => {
           OrderService.getAllOrdersRequestPaysan(),
           OrderService.getAllOrdersDirectPaysan(),
         ]);
-
-        console.log(`Order Requests`, orderRequests);
-        console.log(
-          `Direct Orders`,
-          convertDataToCommandeFormattedList(directOrders.data)
-        );
-
+        
         setOrders([
           ...orderRequests.data,
           ...convertDataToCommandeFormattedList(directOrders.data),
@@ -65,6 +78,7 @@ const Orders = () => {
   const orderRequests = orders.filter(
     (order) => order.produitRecherche && order.territoire
   );
+  
 
   // Fonctions d'action
   const handleAcceptOrder = async (orderId: string) => {
@@ -162,6 +176,7 @@ const Orders = () => {
   };
 
   const handleProposeOffer = (orderId: string) => {
+    setShowProposalModal(true);
     console.log("Proposer une offre pour la demande:", orderId);
     toast.info("Fonctionnalité de proposition d'offre à venir");
   }
@@ -295,16 +310,25 @@ const Orders = () => {
               </div>
             ) : (
               orderRequests.map((order) => (
-                <OrderRequestCard
-                  key={order.id}
-                  order={order}
-                  userRole={userRole}
-                  onAcceptLine={handleAcceptOrderLine}
-                  onRejectLine={handleRejectOrderLine}
-                  onContact={handleContact}
-                  onViewDetails={handleViewDetails}
-                  onProposeOffer={handleProposeOffer}
-                />
+                <>
+                  <OrderRequestCard
+                    key={order.id}
+                    order={order}
+                    userRole={userRole}
+                    onAcceptLine={handleAcceptOrderLine}
+                    onRejectLine={handleRejectOrderLine}
+                    onContact={handleContact}
+                    onViewDetails={handleViewDetails}
+                    onProposeOffer={handleProposeOffer}
+                  />
+
+                  <ProposalModal
+                    isOpen={showProposalModal}
+                    onClose={() => setShowProposalModal(false)}
+                    order={order}
+                    availableProducts={paysanProducts}
+                  />
+                </>
               ))
             )}
           </TabsContent>
