@@ -30,11 +30,11 @@ export const useSocketEvents = ({
     };
 
     s?.on("message:created", onMessageCreated);
-    s?.on("conversation:readed", onConversationRead);
+    s?.on("message:readed", onConversationRead);
 
     return () => {
       s?.off("message:created", onMessageCreated);
-      s?.off("conversation:readed", onConversationRead);
+      s?.off("message:readed", onConversationRead);
     };
   }, []);
 };
