@@ -86,6 +86,11 @@ const EnhancedMapView = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalAvailableProducts, setTotalAvailableProducts] = useState(0);
+  const [totalOutOfStockProducts, setTotalOutOfStockProducts] = useState(0);
+  // const [avgPrice, setAvgPrice] = useState(0);
+
   // États pour la recherche de zone (Collecteur)
   const [searchAddress, setSearchAddress] = useState("");
   const [searchRadius, setSearchRadius] = useState(10);
@@ -109,7 +114,7 @@ const EnhancedMapView = () => {
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   // Statistiques
-  const [stats, setStats] = useState({
+  const [filteredStats, setFilteredStats] = useState({
     total: 0,
     disponibles: 0,
     enRupture: 0,
@@ -121,6 +126,7 @@ const EnhancedMapView = () => {
 
   useEffect(() => {
     fetchProducts();
+    loadProductsStats();
     if (isCollector) {
       loadSavedZones();
     }
@@ -128,7 +134,7 @@ const EnhancedMapView = () => {
 
   useEffect(() => {
     applyFilters();
-    calculateStats();
+    calculateFilteredStats();
   }, [
     products,
     searchCenter,
@@ -160,7 +166,23 @@ const EnhancedMapView = () => {
     }
   };
 
-  const calculateStats = () => {
+  const loadProductsStats = async () => {
+  try {
+    const statsData = isFarmer
+      ? await ProductService.getProductsStats()
+      : await ProductService.getGlobalProductsStats(); // Stats globales pour collecteur
+
+    if (statsData) {
+      setTotalProducts(statsData.totalProduits || 0);
+      setTotalAvailableProducts(statsData.produitsDisponibles || 0);
+      setTotalOutOfStockProducts(statsData.produitsRupture || 0);
+    }
+  } catch (error) {
+    console.error("Erreur lors du chargement des stats produits:", error);
+  }
+};
+
+  const calculateFilteredStats = () => {
     const disponibles = filteredProducts.filter(
       (p) => p.statut === ProductStatut.DISPONIBLE
     ).length;
@@ -170,10 +192,10 @@ const EnhancedMapView = () => {
     const avgPrice =
       filteredProducts.length > 0
         ? filteredProducts.reduce((sum, p) => sum + (p.prixUnitaire || 0), 0) /
-        filteredProducts.length
+          filteredProducts.length
         : 0;
 
-    setStats({
+    setFilteredStats({
       total: filteredProducts.length,
       disponibles,
       enRupture,
@@ -205,9 +227,9 @@ const EnhancedMapView = () => {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
@@ -326,11 +348,11 @@ const EnhancedMapView = () => {
       },
       createdBy: user
         ? {
-          id: user.id || "",
-          nom: user.nom,
-          prenom: user.prenom ?? "",
-          role: user.role,
-        }
+            id: user.id || "",
+            nom: user.nom,
+            prenom: user.prenom ?? "",
+            role: user.role,
+          }
         : undefined,
       createdAt: new Date().toISOString(),
     };
@@ -472,7 +494,7 @@ const EnhancedMapView = () => {
 
   const handleViewProfile = (farmerId?: string) => {
     if (farmerId) {
-      navigate(`/farmers/${farmerId}`);
+      navigate(`/profile/${farmerId}`);
     } else {
       toast.error("Profil non disponible");
     }
@@ -492,10 +514,11 @@ const EnhancedMapView = () => {
     <div className="flex flex-col lg:flex-row bg-white shadow-lg overflow-hidden mt-16 z-10 relative h-dvh  lg:h-[calc(100vh-64px)]">
       {/* Carte - Affichée en premier sur mobile */}
       <div
-        className={`relative ${isCollector || isFarmer
-          ? "flex-1 order-1 lg:order-2"
-          : "w-full h-full"
-          }`}
+        className={`relative ${
+          isCollector || isFarmer
+            ? "flex-1 order-1 lg:order-2"
+            : "w-full h-full"
+        }`}
       >
         {isLoading && (
           <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-1000 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
@@ -602,7 +625,9 @@ const EnhancedMapView = () => {
                   {/* Header avec gradient */}
                   <div className="bg-linear-to-r from-green-500 to-emerald-600 p-4 text-white">
                     <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-2xl font-bold tracking-tight">{product.nom}</h3>
+                      <h3 className="text-2xl font-bold tracking-tight">
+                        {product.nom}
+                      </h3>
                       <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
                         {product.type}
                       </span>
@@ -612,10 +637,14 @@ const EnhancedMapView = () => {
                     <div className="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20">
                       <div className="flex items-center gap-2">
                         <Package className="w-5 h-5" />
-                        <span className="font-semibold">{product.quantiteDisponible} {product.unite}</span>
+                        <span className="font-semibold">
+                          {product.quantiteDisponible} {product.unite}
+                        </span>
                       </div>
                       <div className="text-right flex flex-col">
-                        <span className="text-2xl font-bold">{formatPrice(product.prixUnitaire)}</span>
+                        <span className="text-2xl font-bold">
+                          {formatPrice(product.prixUnitaire)}
+                        </span>
                         <span className="text-xs opacity-90">Ariary</span>
                       </div>
                     </div>
@@ -626,7 +655,8 @@ const EnhancedMapView = () => {
                         <MapPin className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
                         <div>
                           <span className="text-sm font-medium text-gray-900">
-                            {product.localisation?.adresse || "Localisation inconnue"}
+                            {product.localisation?.adresse ||
+                              "Localisation inconnue"}
                           </span>
                         </div>
                       </div>
@@ -634,9 +664,13 @@ const EnhancedMapView = () => {
                       <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <User className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{farmerName}</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {farmerName}
+                          </span>
                           {product.paysan?.telephone && (
-                            <span className="text-xs text-gray-600 mt-1">{product.paysan.telephone}</span>
+                            <span className="text-xs text-gray-600 mt-1">
+                              {product.paysan.telephone}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -655,7 +689,9 @@ const EnhancedMapView = () => {
                       {/* Voir détails */}
                       <Button
                         onClick={() => handleViewProduct(product.id)}
-                        className={`flex ${isFarmer ? 'col-span-2' : ''} items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium`}
+                        className={`flex ${
+                          isFarmer ? "col-span-2" : ""
+                        } items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium`}
                       >
                         <Eye className="w-4 h-4" />
                         <span className="text-sm">Détails</span>
@@ -676,7 +712,9 @@ const EnhancedMapView = () => {
                           {/* Appeler */}
                           {product.paysan?.telephone && (
                             <Button
-                              onClick={() => handleCall(product.paysan?.telephone)}
+                              onClick={() =>
+                                handleCall(product.paysan?.telephone)
+                              }
                               className="flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 text-white hover:bg-orange-600 active:scale-95 transition-all shadow-md hover:shadow-lg font-medium"
                             >
                               <Phone className="w-4 h-4" />
@@ -698,12 +736,14 @@ const EnhancedMapView = () => {
                       {/* Profil - Pleine largeur */}
                       {product.paysan?.id && (
                         <Button
-                          variant={'outline'}
+                          variant={"outline"}
                           onClick={() => handleViewProfile(product.paysan?.id)}
                           className="col-span-2 flex items-center justify-center gap-2 active:scale-95 transition-all font-medium border-2"
                         >
                           <User className="w-4 h-4" />
-                          <span className="text-sm">Voir le profil de l'agriculteur</span>
+                          <span className="text-sm">
+                            Voir le profil de l'agriculteur
+                          </span>
                         </Button>
                       )}
                     </div>
@@ -748,10 +788,11 @@ const EnhancedMapView = () => {
       {/* Panel de filtrage - Affichée en second sur mobile */}
       {(isCollector || isFarmer) && (
         <div
-          className={`w-full lg:w-96 bg-white border-r lg:border-b-0 border-b overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 order-2 lg:order-1 transition-all ${isPanelCollapsed
-            ? "h-0 lg:h-auto overflow-hidden lg:overflow-y-auto p-0 lg:p-6"
-            : "h-auto"
-            }`}
+          className={`w-full lg:w-96 bg-white border-r lg:border-b-0 border-b overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 order-2 lg:order-1 transition-all ${
+            isPanelCollapsed
+              ? "h-0 lg:h-auto overflow-hidden lg:overflow-y-auto p-0 lg:p-6"
+              : "h-auto"
+          }`}
         >
           {/* Header avec statistiques */}
           <div className="bg-linear-to-r from-green-50 to-blue-50 rounded-xl p-4 shadow-sm">
@@ -769,19 +810,19 @@ const EnhancedMapView = () => {
               <div className="bg-white rounded-lg px-2 py-1.5 text-center">
                 <p className="text-xs text-gray-500">Total</p>
                 <p className="text-lg font-bold text-green-600">
-                  {stats.total}
+                  {filteredStats.total}
                 </p>
               </div>
               <div className="bg-white rounded-lg px-2 py-1.5 text-center">
                 <p className="text-xs text-gray-500">Disponibles</p>
                 <p className="text-lg font-bold text-blue-600">
-                  {stats.disponibles}
+                  {filteredStats.disponibles}
                 </p>
               </div>
               <div className="bg-white rounded-lg px-2 py-1.5 text-center">
                 <p className="text-xs text-gray-500">Prix moyen</p>
                 <p className="text-sm font-bold text-purple-600">
-                  {stats.avgPrice.toLocaleString()} Ar
+                  {filteredStats.avgPrice.toLocaleString()} Ar
                 </p>
               </div>
             </div>
@@ -992,16 +1033,16 @@ const EnhancedMapView = () => {
                 {(statusFilter !== "all" ||
                   typeFilter !== "all" ||
                   regionFilter !== "all") && (
-                    <Button
-                      onClick={handleResetFilters}
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      <X size={14} className="mr-1" />
-                      Réinitialiser
-                    </Button>
-                  )}
+                  <Button
+                    onClick={handleResetFilters}
+                    variant="ghost"
+                    size="sm"
+                    className="text-xs"
+                  >
+                    <X size={14} className="mr-1" />
+                    Réinitialiser
+                  </Button>
+                )}
               </div>
 
               <div>
@@ -1126,13 +1167,13 @@ const EnhancedMapView = () => {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Disponibles:</span>
                 <span className="font-bold text-blue-600">
-                  {stats.disponibles}
+                  {filteredStats.disponibles}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">En rupture:</span>
                 <span className="font-bold text-red-600">
-                  {stats.enRupture}
+                  {filteredStats.enRupture}
                 </span>
               </div>
             </div>
@@ -1186,10 +1227,11 @@ const EnhancedMapView = () => {
                             {product.nom}
                           </p>
                           <span
-                            className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${product.statut === ProductStatut.DISPONIBLE
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                              }`}
+                            className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
+                              product.statut === ProductStatut.DISPONIBLE
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
                           >
                             {product.statut === ProductStatut.DISPONIBLE
                               ? "✅"

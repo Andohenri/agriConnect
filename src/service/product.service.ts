@@ -47,4 +47,10 @@ export const ProductService = {
     const response = await Axios.get(`${this.BASE_PATH}/stats/user/${userId}`);
     return response.data;
   },
+
+  // Statistiques globales des produits (Collecteur)
+  async getGlobalProductsStats(): Promise<ProductStatsResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/stats/global`);
+    return response.data;
+  },
 };
