@@ -9,10 +9,9 @@ import {
   leaveConversation,
   sendMessage,
 } from "@/service/socket";
-import { Role } from "@/types/enums";
 
 const Messages: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const currentUserId = user?.id ?? "1"; // fallback pour le dev
 
   const [selectedChat, setSelectedChat] = useState<Conversation | null>(null);
@@ -23,12 +22,7 @@ const Messages: React.FC = () => {
     Record<string, PrismaMessage[]>
   >({});
 
-
   useEffect(() => {
-    // données de fallback pour dev
-    // setChats(initialChats);
-    // setChatMessages(initialMessages);
-
     // charger conversations depuis l'API
     (async () => {
       try {
@@ -87,12 +81,37 @@ const Messages: React.FC = () => {
       );
     };
 
+    const onConversationRead = (data: any) => {
+      if (!data) return;
+      const { conversationId, readerId } = data;
+
+      setChatMessages((prev) => {
+        const messages = prev[conversationId];
+        if (!messages) return prev;
+
+        // mettre tous les messages destinés au lecteur en "lu: true"
+        const updatedMessages = messages.map((m) => {
+          if (m.destinataireId === readerId) {
+            return { ...m, lu: true };
+          }
+          return m;
+        });
+
+        return {
+          ...prev,
+          [conversationId]: updatedMessages,
+        };
+      });
+    };
+
     s?.on("message:created", onMessageCreated);
-    s?.on("conversation:updated", onConversationUpdated);
+    s?.on("message:updated", onConversationUpdated);
+    s?.on("message:readed", onConversationRead);
 
     return () => {
       s?.off("message:created", onMessageCreated);
-      s?.off("conversation:updated", onConversationUpdated);
+      s?.off("message:updated", onConversationUpdated);
+      s?.off("message:readed", onConversationRead);
       // ne pas disconnect le socket global si utilisé ailleurs
       // disconnectSocket();
     };
@@ -222,6 +241,9 @@ const Messages: React.FC = () => {
   const currentMessages = selectedChat
     ? chatMessages[selectedChat.id] || []
     : [];
+console.log(chatMessages);
+
+    
 
   return (
     <section className="bg-gray-50 overflow-hidden p-0 pt-2">

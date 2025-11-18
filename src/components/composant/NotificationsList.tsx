@@ -15,11 +15,6 @@ export function NotificationsList({ notifications }: NotificationsListProps) {
         title="Aucune notification"
         description="Vous n’avez pas encore de notifications. Elles apparaîtront ici dès qu’il y en aura."
         media={<BellOff />}
-        // actions={[
-        //   { label: "Create Project", onClick: () => console.log("Create") },
-        //   { label: "Import Project", onClick: () => console.log("Import"), variant: "outline" },
-        // ]}
-        // linkAction={{ label: "Learn More", href: "#", variant: "link" }}
       />
     );
   }
