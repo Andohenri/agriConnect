@@ -42,7 +42,7 @@ const AdminProduit = () => {
       if (response?.data) {
         setProducts(response.data);
         setTotalPages(response.totalPages || 1);
-        setTotalProducts(response.totalItems || 0);
+        setTotalProducts(response.total || 0);
       } else {
         console.warn("Unexpected products response:", response);
       }

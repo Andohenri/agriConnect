@@ -20,6 +20,8 @@ import {
   Loader2,
   CheckCircle,
   Clock,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { UserService } from "@/service/user.service";
@@ -37,15 +39,50 @@ const Profile = () => {
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  // États pour le chargement
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
+  // États pour la pagination des produits
+  const [productsPage, setProductsPage] = useState(1);
+  const [productsTotalPages, setProductsTotalPages] = useState(1);
+  const [productsLimit] = useState(9);
+
+  // États pour la pagination des commandes
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersTotalPages, setOrdersTotalPages] = useState(1);
+  const [ordersLimit] = useState(5);
+
+  // Stats réelles (totales, pas paginées)
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalAvailableProducts, setTotalAvailableProducts] = useState(0);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalCompletedOrders, setTotalCompletedOrders] = useState(0);
+  const [totalPendingOrders, setTotalPendingOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   const isOwnProfile = !id || id === currentUser?.id;
   const displayUser = isOwnProfile ? currentUser : profileUser;
 
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<string>("overview");
+
   useEffect(() => {
     loadProfileData();
   }, [id]);
+
+  useEffect(() => {
+    if (displayUser?.role === Role.PAYSAN) {
+      loadProducts();
+    }
+  }, [productsPage, displayUser]);
+
+  useEffect(() => {
+    if (isOwnProfile) {
+      loadOrders();
+    }
+  }, [ordersPage, isOwnProfile]);
 
   const loadProfileData = async () => {
     setIsLoading(true);
@@ -66,33 +103,13 @@ const Profile = () => {
         return;
       }
 
-      // 2. Charger les produits (si c'est un paysan)
+      // 2. Charger les statistiques réelles (sans pagination)
       if (userToDisplay.role === Role.PAYSAN) {
-        if (isOwnProfile) {
-          // Pour son propre profil
-          const productsData = await ProductService.getAllProductsPaysan();
-          setProducts(productsData.data || []);
-        } else {
-          // Pour visiter le profil d'un autre paysan
-          const productsData = await ProductService.getProductsByUserId(id!);
-          setProducts(productsData.data || []);
-        }
+        await loadProductsStats();
       }
 
-      // 3. Charger les commandes UNIQUEMENT si c'est son propre profil
       if (isOwnProfile) {
-        if (currentUser?.role === Role.PAYSAN) {
-          const ordersData = await OrderService.getAllOrdersPaysan();
-          setOrders(ordersData.data || []);
-        } else if (currentUser?.role === Role.COLLECTEUR) {
-          const ordersData = await OrderService.getAllOrdersCollecteur(
-            currentUser?.id || ""
-          );
-          setOrders(ordersData.data || []);
-        }
-      } else {
-        // Ne pas charger les commandes si on visite le profil d'un autre utilisateur
-        setOrders([]);
+        await loadOrdersStats();
       }
     } catch (error) {
       console.error("Erreur lors du chargement du profil:", error);
@@ -102,31 +119,215 @@ const Profile = () => {
     }
   };
 
-  // Calculer les statistiques
-  const stats = {
-    totalProducts: products.length,
-    availableProducts: products.filter(
-      (p) => p.statut === ProductStatut.DISPONIBLE
-    ).length,
-    totalOrders: orders.length,
-    completedOrders: orders.filter((o) => o.statut === CommandeStatut.COMPLETE)
-      .length,
-    pendingOrders: orders.filter((o) => o.statut === CommandeStatut.EN_ATTENTE)
-      .length,
-    totalRevenue: orders.reduce((sum, order) => {
-      if (!order.lignes || order.lignes.length === 0) return sum;
-      return (
-        sum +
-        order.lignes.reduce((lineSum, line) => {
-          const sousTotal =
-            typeof line.sousTotal === "string"
-              ? parseFloat(line.sousTotal)
-              : line.sousTotal || 0;
-          return lineSum + sousTotal;
-        }, 0)
-      );
-    }, 0),
+  const loadProductsStats = async () => {
+    try {
+      let statsData;
+      if (isOwnProfile) {
+        statsData = await ProductService.getProductsStats();
+      } else {
+        statsData = await ProductService.getProductsStatsByUserId(id!);
+      }
+
+      if (statsData) {
+        setTotalProducts(statsData.totalProduits || 0);
+        setTotalAvailableProducts(statsData.produitsDisponibles || 0);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des stats produits:", error);
+    }
   };
+
+  const loadOrdersStats = async () => {
+    try {
+      let statsData;
+      if (currentUser?.role === Role.PAYSAN) {
+        statsData = await OrderService.getOrdersStatsPaysan();
+      } else if (currentUser?.role === Role.COLLECTEUR) {
+        statsData = await OrderService.getOrdersStatsCollecteur();
+      }
+
+      if (statsData) {
+        setTotalOrders(statsData.totalCommandes || 0);
+        setTotalCompletedOrders(statsData.commandesCompletees || 0);
+        
+        // En attente = Ouvertes + Acceptées (commandes non finalisées)
+        const pending = (statsData.commandesOuvertes || 0) + (statsData.commandesAcceptees || 0);
+        setTotalPendingOrders(pending);
+        
+        // Revenue: vous devrez peut-être ajouter ce champ dans votre backend
+        // ou le calculer côté frontend si nécessaire
+        setTotalRevenue(0); // À ajuster selon votre logique métier
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des stats commandes:", error);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      let productsData;
+      if (isOwnProfile) {
+        productsData = await ProductService.getAllProductsPaysan(productsPage, productsLimit);
+      } else {
+        productsData = await ProductService.getProductsByUserId(id!, productsPage, productsLimit);
+      }
+
+      if (productsData?.data) {
+        setProducts(productsData.data);
+        setProductsTotalPages(productsData.totalPages || 1);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits:", error);
+    }
+  };
+
+  const loadOrders = async () => {
+    try {
+      let ordersData;
+      if (currentUser?.role === Role.PAYSAN) {
+        ordersData = await OrderService.getAllOrdersDirectPaysan(ordersPage, ordersLimit);
+        console.log("Orders Data getAllOrdersPaysan:", ordersData);
+      } else if (currentUser?.role === Role.COLLECTEUR) {
+        ordersData = await OrderService.getAllOrdersCollecteur(
+          currentUser.id!,
+          ordersPage,
+          ordersLimit
+        );
+      }
+
+      if (ordersData?.data) {
+        setOrders(ordersData.data);
+        setOrdersTotalPages(ordersData.totalPages || 1);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des commandes:", error);
+    }
+  };
+
+  const handleProductsPageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= productsTotalPages) {
+      setProductsPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleOrdersPageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= ordersTotalPages) {
+      setOrdersPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const getPageNumbers = (currentPage: number, totalPages: number) => {
+    const pages = [];
+    const maxPagesToShow = 5;
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
+  const PaginationControls = ({
+    currentPage,
+    totalPages,
+    onPageChange,
+  }: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  }) => (
+    <>
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t">
+          <div className="text-sm text-green-700 font-medium">
+            Page {currentPage} sur {totalPages}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 hover:bg-green-50 hover:text-green-700 hover:border-green-300 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+            >
+              <ChevronLeft size={16} />
+              Précédent
+            </Button>
+
+            <div className="hidden sm:flex items-center gap-1">
+              {getPageNumbers(currentPage, totalPages).map((page, index) =>
+                page === "..." ? (
+                  <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                    ...
+                  </span>
+                ) : (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onPageChange(page as number)}
+                    className={`min-w-10 ${
+                      currentPage === page
+                        ? "bg-green-600 hover:bg-green-700 text-white"
+                        : "hover:bg-green-50 hover:text-green-700 hover:border-green-300"
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
+            </div>
+
+            <div className="sm:hidden">
+              <select
+                value={currentPage}
+                onChange={(e) => onPageChange(Number(e.target.value))}
+                className="px-3 py-1 border rounded-md text-sm focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none"
+              >
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <option key={page} value={page}>
+                    Page {page}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 hover:bg-green-50 hover:text-green-700 hover:border-green-300 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+            >
+              Suivant
+              <ChevronRight size={16} />
+            </Button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 
   const handleEditProfile = () => {
     navigate(`/profile/edit/${displayUser?.id}`);
@@ -201,7 +402,6 @@ const Profile = () => {
     <section className="space-y-6">
       {/* Header Card */}
       <Card className="p-0! overflow-hidden">
-        {/* Profile Content */}
         <div className="px-6 py-6">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
@@ -247,9 +447,7 @@ const Profile = () => {
                       <span className="flex items-center gap-1 text-sm text-gray-600">
                         <Calendar size={14} className="text-green-600" />
                         Membre depuis{" "}
-                        {new Date(displayUser.createdAt).toLocaleDateString(
-                          "fr-FR"
-                        )}
+                        {new Date(displayUser.createdAt).toLocaleDateString("fr-FR")}
                       </span>
                     )}
                   </div>
@@ -277,37 +475,36 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Quick Stats - Visible pour tous */}
+              {/* Quick Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                 {displayUser.role === Role.PAYSAN && (
                   <>
                     <div>
                       <div className="text-2xl font-bold text-green-600">
-                        {stats.totalProducts}
+                        {totalProducts}
                       </div>
                       <div className="text-xs text-gray-600">Produits</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-blue-600">
-                        {stats.availableProducts}
+                        {totalAvailableProducts}
                       </div>
                       <div className="text-xs text-gray-600">Disponibles</div>
                     </div>
                   </>
                 )}
-                
-                {/* Statistiques des commandes visibles UNIQUEMENT pour son propre profil */}
+
                 {isOwnProfile && (
                   <>
                     <div>
                       <div className="text-2xl font-bold text-purple-600">
-                        {stats.totalOrders}
+                        {totalOrders}
                       </div>
                       <div className="text-xs text-gray-600">Commandes</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold text-orange-600">
-                        {stats.completedOrders}
+                        {totalCompletedOrders}
                       </div>
                       <div className="text-xs text-gray-600">Complétées</div>
                     </div>
@@ -331,11 +528,10 @@ const Profile = () => {
               <Package size={16} />
               <span className="hidden sm:block">Produits</span>
               <Tooltip text="Produits publiés">
-                <Badge variant="secondary">{stats.totalProducts}</Badge>
+                <Badge variant="secondary">{totalProducts}</Badge>
               </Tooltip>
             </TabsTrigger>
           )}
-          {/* Onglet Commandes visible UNIQUEMENT pour son propre profil */}
           {isOwnProfile && (
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingCart size={16} />
@@ -345,7 +541,7 @@ const Profile = () => {
                 <span className="hidden sm:block">Mes commandes</span>
               )}
               <Tooltip text="Commandes">
-                <Badge variant="secondary">{stats.totalOrders}</Badge>
+                <Badge variant="secondary">{totalOrders}</Badge>
               </Tooltip>
             </TabsTrigger>
           )}
@@ -353,7 +549,6 @@ const Profile = () => {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
-          {/* Stats Cards - Visibles UNIQUEMENT pour son propre profil */}
           {isOwnProfile && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card className="p-6 bg-linear-to-br from-green-50 to-emerald-50">
@@ -364,7 +559,7 @@ const Profile = () => {
                   <div>
                     <p className="text-sm text-gray-600">Revenus Totaux</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {Math.round(stats.totalRevenue).toLocaleString()} Ar
+                      {Math.round(totalRevenue).toLocaleString()} Ar
                     </p>
                   </div>
                 </div>
@@ -377,9 +572,7 @@ const Profile = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Commandes</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {stats.totalOrders}
-                    </p>
+                    <p className="text-2xl font-bold text-blue-600">{totalOrders}</p>
                   </div>
                 </div>
               </Card>
@@ -392,7 +585,7 @@ const Profile = () => {
                   <div>
                     <p className="text-sm text-gray-600">En Attente</p>
                     <p className="text-2xl font-bold text-yellow-600">
-                      {stats.pendingOrders}
+                      {totalPendingOrders}
                     </p>
                   </div>
                 </div>
@@ -406,7 +599,7 @@ const Profile = () => {
                   <div>
                     <p className="text-sm text-gray-600">Complétées</p>
                     <p className="text-2xl font-bold text-purple-600">
-                      {stats.completedOrders}
+                      {totalCompletedOrders}
                     </p>
                   </div>
                 </div>
@@ -416,9 +609,7 @@ const Profile = () => {
 
           {/* Contact Info */}
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">
-              Informations de Contact
-            </h3>
+            <h3 className="text-lg font-semibold mb-4">Informations de Contact</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                 <Mail className="text-blue-600" size={20} />
@@ -452,7 +643,11 @@ const Profile = () => {
         {/* Products Tab */}
         {displayUser.role === Role.PAYSAN && (
           <TabsContent value="products" className="space-y-4">
-            {products.length === 0 ? (
+            {isLoadingProducts ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+              </div>
+            ) : totalProducts === 0 ? (
               <Card className="p-12 text-center">
                 <Package size={48} className="mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-600">
@@ -461,152 +656,182 @@ const Profile = () => {
                     : "Aucun produit disponible"}
                 </p>
               </Card>
+            ) : products.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Package size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Aucun produit sur cette page</p>
+              </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {products.map((product) => (
-                  <Card
-                    key={product.id}
-                    className="p-6 hover:shadow-md transition cursor-pointer"
-                    onClick={() => handleViewProduct(product.id)}
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl overflow-hidden">
-                        {product.imageUrl ? (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.nom}
-                            className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300"
-                          />
-                        ) : (
-                          "📦"
-                        )}
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {products.map((product) => (
+                    <Card
+                      key={product.id}
+                      className="p-6 hover:shadow-md transition cursor-pointer"
+                      onClick={() => handleViewProduct(product.id)}
+                    >
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-16 h-16 bg-linear-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-3xl overflow-hidden">
+                          {product.imageUrl ? (
+                            <img
+                              src={product.imageUrl}
+                              alt={product.nom}
+                              className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300"
+                            />
+                          ) : (
+                            "📦"
+                          )}
+                        </div>
+
+                        <div className="flex-1">
+                          <h4 className="font-bold truncate">{product.nom}</h4>
+                          <p className="text-sm text-gray-600">{product.type}</p>
+                        </div>
+                        <Badge
+                          className={
+                            product.statut === ProductStatut.DISPONIBLE
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-600"
+                          }
+                        >
+                          {product.statut === ProductStatut.DISPONIBLE
+                            ? "Disponible"
+                            : "Épuisé"}
+                        </Badge>
                       </div>
 
-                      <div className="flex-1">
-                        <h4 className="font-bold truncate">{product.nom}</h4>
-                        <p className="text-sm text-gray-600">{product.type}</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-600">Quantité</p>
+                          <p className="font-bold">
+                            {product.quantiteDisponible} {product.unite}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3">
+                          <p className="text-xs text-gray-600">Prix</p>
+                          <p className="font-bold text-green-600">
+                            {product.prixUnitaire.toLocaleString()} Ar
+                          </p>
+                        </div>
                       </div>
-                      <Badge
-                        className={
-                          product.statut === ProductStatut.DISPONIBLE
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-100 text-gray-600"
-                        }
-                      >
-                        {product.statut === ProductStatut.DISPONIBLE
-                          ? "Disponible"
-                          : "Épuisé"}
-                      </Badge>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600">Quantité</p>
-                        <p className="font-bold">
-                          {product.quantiteDisponible} {product.unite}
-                        </p>
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <span className="text-xs text-gray-500 flex items-center gap-1">
+                          <MapPin size={12} />
+                          {product.localisation?.adresse || "Localisation"}
+                        </span>
+                        <Button size="sm" variant="ghost">
+                          <Eye size={14} className="mr-1" />
+                          Voir
+                        </Button>
                       </div>
-                      <div className="bg-green-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600">Prix</p>
-                        <p className="font-bold text-green-600">
-                          {product.prixUnitaire.toLocaleString()} Ar
-                        </p>
-                      </div>
-                    </div>
+                    </Card>
+                  ))}
+                </div>
 
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <span className="text-xs text-gray-500 flex items-center gap-1">
-                        <MapPin size={12} />
-                        {product.localisation?.adresse || "Localisation"}
-                      </span>
-                      <Button size="sm" variant="ghost">
-                        <Eye size={14} className="mr-1" />
-                        Voir
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                <PaginationControls
+                  currentPage={productsPage}
+                  totalPages={productsTotalPages}
+                  onPageChange={handleProductsPageChange}
+                />
+              </>
             )}
           </TabsContent>
         )}
 
-        {/* Orders Tab - Visible UNIQUEMENT pour son propre profil */}
+        {/* Orders Tab */}
         {isOwnProfile && (
           <TabsContent value="orders" className="space-y-4">
-            {orders.length === 0 ? (
+            {isLoadingOrders ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+              </div>
+            ) : totalOrders === 0 ? (
               <Card className="p-12 text-center">
                 <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-600">Aucune commande</p>
               </Card>
+            ) : orders.length === 0 ? (
+              <Card className="p-12 text-center">
+                <ShoppingCart size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Aucune commande sur cette page</p>
+              </Card>
             ) : (
-              orders.slice(0, 5).map((order) => {
-                const getStatusConfig = (status?: CommandeStatut) => {
-                  const defaultConfig = {
-                    label: "En attente",
-                    color: "bg-yellow-100 text-yellow-700",
-                  };
+              <>
+                <div className="space-y-4">
+                  {orders.map((order) => {
+                    const getStatusConfig = (status?: CommandeStatut) => {
+                      const defaultConfig = {
+                        label: "En attente",
+                        color: "bg-yellow-100 text-yellow-700",
+                      };
 
-                  const configs: Partial<
-                    Record<CommandeStatut, { label: string; color: string }>
-                  > = {
-                    [CommandeStatut.EN_ATTENTE]: {
-                      label: "En attente",
-                      color: "bg-yellow-100 text-yellow-700",
-                    },
-                    [CommandeStatut.ACCEPTEE]: {
-                      label: "Acceptée",
-                      color: "bg-green-100 text-green-700",
-                    },
-                    [CommandeStatut.COMPLETE]: {
-                      label: "Complète",
-                      color: "bg-green-100 text-green-700",
-                    },
-                    [CommandeStatut.ANNULEE]: {
-                      label: "Annulée",
-                      color: "bg-red-100 text-red-700",
-                    },
-                  };
+                      const configs: Partial<
+                        Record<CommandeStatut, { label: string; color: string }>
+                      > = {
+                        [CommandeStatut.EN_ATTENTE]: {
+                          label: "En attente",
+                          color: "bg-yellow-100 text-yellow-700",
+                        },
+                        [CommandeStatut.ACCEPTEE]: {
+                          label: "Acceptée",
+                          color: "bg-green-100 text-green-700",
+                        },
+                        [CommandeStatut.COMPLETE]: {
+                          label: "Complète",
+                          color: "bg-green-100 text-green-700",
+                        },
+                        [CommandeStatut.ANNULEE]: {
+                          label: "Annulée",
+                          color: "bg-red-100 text-red-700",
+                        },
+                      };
 
-                  return status
-                    ? configs[status] ?? defaultConfig
-                    : defaultConfig;
-                };
+                      return status ? configs[status] ?? defaultConfig : defaultConfig;
+                    };
 
-                const statusConfig = getStatusConfig(order.statut);
+                    const statusConfig = getStatusConfig(order.statut);
 
-                return (
-                  <Card key={order.id} className="p-6 hover:shadow-md transition">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h4 className="font-bold">
-                          {order.produitRecherche ||
-                            `Commande #${order.id?.slice(0, 8)}`}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {order.collecteur
-                            ? `${order.collecteur.prenom} ${order.collecteur.nom}`
-                            : "Collecteur"}
-                        </p>
-                      </div>
-                      <Badge className={statusConfig.color}>
-                        {statusConfig.label}
-                      </Badge>
-                    </div>
+                    return (
+                      <Card key={order.id} className="p-6 hover:shadow-md transition">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h4 className="font-bold">
+                              {order.produitRecherche ||
+                                `Commande #${order.id?.slice(0, 8)}`}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              {order.collecteur
+                                ? `${order.collecteur.prenom} ${order.collecteur.nom}`
+                                : "Collecteur"}
+                            </p>
+                          </div>
+                          <Badge className={statusConfig.color}>
+                            {statusConfig.label}
+                          </Badge>
+                        </div>
 
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">
-                        {order.quantiteTotal} {order.unite}
-                      </span>
-                      {order.createdAt && (
-                        <span className="text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString("fr-FR")}
-                        </span>
-                      )}
-                    </div>
-                  </Card>
-                );
-              })
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">
+                            {order.quantiteTotal} {order.unite}
+                          </span>
+                          {order.createdAt && (
+                            <span className="text-gray-500">
+                              {new Date(order.createdAt).toLocaleDateString("fr-FR")}
+                            </span>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                <PaginationControls
+                  currentPage={ordersPage}
+                  totalPages={ordersTotalPages}
+                  onPageChange={handleOrdersPageChange}
+                />
+              </>
             )}
           </TabsContent>
         )}
