@@ -4,24 +4,20 @@ import Axios from "@/lib/axiosInstance";
 
 export const OrderService = {
     BASE_PATH: "/commandes",
-    async getAllOrdersPaysan(): Promise<OrderResponse> {
-        const response = await Axios.get(`/commandes/paysan?page=1&limit=10`);
+    async getAllOrdersRequestPaysan(page: number = 1, limit: number = 12): Promise<OrderResponse> {
+        const response = await Axios.get(`/commandes/paysan?page=${page}&limit=${limit}`);
         return response.data;
     },
-    async getAllOrdersRequestPaysan(): Promise<OrderResponse> {
-        const response = await Axios.get(`/commandes/paysan?page=1&limit=10`);
+    async getAllOrdersDirectPaysan(page: number = 1, limit: number = 12): Promise<CommandeProduitResponse> {
+        const response = await Axios.get(`/commande-produits/paysan?page=${page}&limit=${limit}`);
         return response.data;
     },
-    async getAllOrdersDirectPaysan(): Promise<CommandeProduitResponse> {
-        const response = await Axios.get(`/commande-produits/paysan?page=1&limit=10`);
+    async getAllOrdersCollecteur(collecteurId: string, page: number = 1, limit: number = 12): Promise<OrderResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/collecteur/${collecteurId}?page=${page}&limit=${limit}`);
         return response.data;
     },
-    async getAllOrdersCollecteur(collecteurId: string): Promise<OrderResponse> {
-        const response = await Axios.get(`${this.BASE_PATH}/collecteur/${collecteurId}?page=1&limit=10`);
-        return response.data;
-    },
-    async getAllOrdersAdmin(): Promise<OrderResponse> {
-        const response = await Axios.get(`${this.BASE_PATH}/admin/all?page=1&limit=10`);
+    async getAllOrdersAdmin(page: number = 1, limit: number = 12): Promise<OrderResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/admin/all?page=${page}&limit=${limit}`);
         return response.data;
     },
     async createOrder(orderData: PropositionFormData): Promise<Order> {
@@ -73,5 +69,17 @@ export const OrderService = {
     async rejectProposal(lineId: string): Promise<Order> {
         const response = await Axios.patch(`commande-produits/propositions/${lineId}/refuser`);
         return response.data;
-    }
+    },
+
+    // Statistiques des commandes pour un paysan
+    async getOrdersStatsPaysan(): Promise<OrderStatsResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/stats/paysan`);
+        return response.data;
+    },
+
+    // Statistiques des commandes pour un collecteur
+    async getOrdersStatsCollecteur(): Promise<OrderStatsResponse> {
+        const response = await Axios.get(`${this.BASE_PATH}/stats/collecteur`);
+        return response.data;
+    },
 };

@@ -22,8 +22,8 @@ export const ProductService = {
     const response = await Axios.get(`${this.BASE_PATH}/${productId}`);
     return response.data;
   },
-  async getProductsByUserId(userId: string): Promise<ProductResponse> {
-    const response = await Axios.get(`${this.BASE_PATH}/user/${userId}`);
+  async getProductsByUserId(userId: string, page: number = 1, limit: number = 12): Promise<ProductResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/paysan/${userId}?page=${page}&limit=${limit}`);
     return response.data;
   },
   async updateProduct(productId: string, productData: FormData): Promise<Product> {
@@ -34,5 +34,23 @@ export const ProductService = {
   },
   async deleteProduct(productId: string): Promise<void> {
     await Axios.delete(`${this.BASE_PATH}/${productId}`);
-  }
+  },
+
+  // Statistiques des produits pour le paysan connecté
+  async getProductsStats(): Promise<ProductStatsResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/stats/paysan`);
+    return response.data;
+  },
+
+  // Statistiques des produits pour un utilisateur spécifique (visiteur)
+  async getProductsStatsByUserId(userId: string): Promise<ProductStatsResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/stats/user/${userId}`);
+    return response.data;
+  },
+
+  // Statistiques globales des produits (Collecteur)
+  async getGlobalProductsStats(): Promise<ProductStatsResponse> {
+    const response = await Axios.get(`${this.BASE_PATH}/stats/global`);
+    return response.data;
+  },
 };

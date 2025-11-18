@@ -1,3 +1,5 @@
+import type { X } from "lucide-react";
+
 declare global {
   enum Statut {
     ACTIF = "actif",
@@ -183,7 +185,14 @@ declare global {
     page: number;
     limit: number;
     totalPages: number;
-    totalItems: number;
+    total: number;
+  };
+
+  type ProductStatsResponse = {
+    totalProduits: number;
+    produitsDisponibles: number;
+    produitsRupture: number;
+    produitsArchives: number;
   };
 
   type Zone = {
@@ -314,7 +323,18 @@ declare global {
     page: number;
     limit: number;
     totalPages: number;
-    totalItems: number;
+    total: number;
+  };
+
+  type OrderStatsResponse = {
+    totalCommandes: number;
+    commandesOuvertes: number;
+    commandesPartiellementFournies: number;
+    commandesCompletees: number;
+    commandesAcceptees: number;
+    commandesPayees: number;
+    commandesLivrees: number;
+    commandesAnnulees: number;
   };
 
   type ChatMessages = Record<number, Message[]>;
@@ -382,7 +402,7 @@ declare global {
     page: number;
     limit: number;
     totalPages: number;
-    totalItems: number;
+    total: number;
   }
 }
 
