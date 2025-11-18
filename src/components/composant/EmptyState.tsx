@@ -22,7 +22,7 @@ interface EmptyStateProps {
   media?: React.ReactNode;
   actions?: ActionButton[];
   linkAction?: ActionButton;
-  isMe:boolean
+  isMe?:boolean
 }
 
 export function EmptyState({

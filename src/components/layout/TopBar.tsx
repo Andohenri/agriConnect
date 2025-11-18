@@ -21,7 +21,6 @@ const TopBar = ({ onMenuClick, isMobile }: TopBarProps) => {
       try {
         const nbs = await notifService.getUnreadCount();
         setCount(nbs);
-        console.log(nbs);
       } catch (err) {
         console.warn(
           "Impossible de charger les conversations, utilisation des données locales",

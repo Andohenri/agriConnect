@@ -39,7 +39,6 @@ export function initSocket(options: InitOptions = {}) {
   
   const socketPath = path ?? (import.meta.env.VITE_API_WS_PATH as string) ?? undefined;
 
-  log("initSocket", { base, socketPath, userId, tokenProvided: !!token });
 
   socket = io(base, {
     transports: ["websocket"],

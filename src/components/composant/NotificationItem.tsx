@@ -1,6 +1,7 @@
 import { cn, timeAgo } from "@/lib/utils";
 import type { UserNotification } from "@/service/notification.service";
 import { BadgeCheck, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface NotificationItemProps {
   id: string;
@@ -36,6 +37,7 @@ interface NotificationItemdd {
 }
 
 export function NotificationItem(notify: UserNotification) {
+  const navigate = useNavigate();
   return (
     <div
       className={cn(
@@ -43,12 +45,15 @@ export function NotificationItem(notify: UserNotification) {
         !notify.lu && "bg-gray-50 border-gray-300",
         notify.lu && "bg-white hover:bg-gray-50"
       )}
+      onClick={() => navigate(notify.notification.lien as string)}
     >
       {/* Avatar ou Icône */}
       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-        {notify.notification.lien ? (
+        {notify.notification.reference_id ? (
           <img
-            src={notify.notification.lien}
+            src={`${import.meta.env.VITE_UPLOAD_URL}${
+              notify.notification.reference_id
+            }`}
             alt=""
             className="w-full h-full object-cover"
           />
