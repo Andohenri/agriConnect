@@ -81,9 +81,9 @@ const DirectOrderCard = ({
                   <h3 className="text-lg font-bold line-clamp-1">
                     {produit?.nom || `Commande #${order.id?.slice(0, 8)}`}
                   </h3>
-                  {produit?.sousType && (
+                  {/* {produit?.sousType && (
                     <p className="text-xs text-gray-500">{produit.sousType}</p>
-                  )}
+                  )} */}
                 </div>
               </div>
               <Badge className={statutConfig.color}>
