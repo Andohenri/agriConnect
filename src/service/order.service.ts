@@ -62,12 +62,12 @@ export const OrderService = {
     },
 
     async acceptProposal(lineId: string): Promise<Order> {
-        const response = await Axios.patch(`commande-produits/propositions/${lineId}/accepter`);
+        const response = await Axios.patch(`${this.BASE_PATH}/${lineId}/accepter-proposition`);
         return response.data;
     },
 
     async rejectProposal(lineId: string): Promise<Order> {
-        const response = await Axios.patch(`commande-produits/propositions/${lineId}/refuser`);
+        const response = await Axios.patch(`${this.BASE_PATH}/${lineId}/rejeter-proposition`);
         return response.data;
     },
 
