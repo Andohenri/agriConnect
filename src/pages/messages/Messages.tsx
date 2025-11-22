@@ -139,10 +139,10 @@ const Messages: React.FC = () => {
       conversationId: selectedChat.id,
     };
 
-    setChatMessages((prev) => ({
-      ...prev,
-      [selectedChat.id]: [...(prev[selectedChat.id] || []), tempMsg],
-    }));
+    // setChatMessages((prev) => ({
+    //   ...prev,
+    //   [selectedChat.id]: [...(prev[selectedChat.id] || []), tempMsg],
+    // }));
     setChats((prev) =>
       prev.map((c) =>
         c.id === selectedChat.id

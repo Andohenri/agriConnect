@@ -106,7 +106,6 @@ const Orders = () => {
   const handleProposeOffer = (orderId: string) => {
     setShowProposalModal(true);
     console.log("Proposer une offre pour la demande:", orderId);
-    toast.info("Fonctionnalité de proposition d'offre à venir");
   }
 
   const handleContact = (userId: string) => {
