@@ -31,8 +31,6 @@ import { useAuth } from "@/contexts/AuthContext";
 interface OrderRequestCardProps {
   order: Order;
   userRole?: Role;
-  onAcceptLine: (orderId: string, lineId: string) => void;
-  onRejectLine: (orderId: string, lineId: string) => void;
   onContact: (userId: string) => void;
   onViewDetails: (orderId: string) => void;
   onProposeOffer: (orderId: string) => void;
@@ -40,12 +38,12 @@ interface OrderRequestCardProps {
 
 const OrderRequestCard = ({
   order,
-  userRole,
   onContact,
   onViewDetails,
   onProposeOffer,
 }: OrderRequestCardProps) => {
   const { user } = useAuth()
+  const userRole = user?.role
   const statutConfig = ORDER_STATUT_CONFIG[order.statut || CommandeStatut.OUVERTE];
   const StatusIcon = statutConfig.icon;
   const acceptedLines =

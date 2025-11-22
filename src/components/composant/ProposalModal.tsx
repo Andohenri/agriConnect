@@ -1,12 +1,36 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import InputField from "@/components/composant/forms/InputField";
-import { Package, ShoppingCart, TrendingUp, Target, User, Calendar, AlertCircle, Sparkles, ChevronsUpDown, Check } from "lucide-react";
-import { formatPrice, formatDate, UNITE_LABELS, PRODUCT_TYPE_LABELS, cn } from "@/lib/utils";
+import {
+  Package,
+  ShoppingCart,
+  TrendingUp,
+  Target,
+  User,
+  Calendar,
+  AlertCircle,
+  Sparkles,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
+import {
+  formatPrice,
+  formatDate,
+  UNITE_LABELS,
+  PRODUCT_TYPE_LABELS,
+  cn,
+} from "@/lib/utils";
 import { toast } from "sonner";
 import { OrderService } from "@/service/order.service";
 import { ProductStatut } from "@/types/enums";
@@ -23,6 +47,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ProductService } from "@/service/product.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { Role, CommandeStatut, StatutCommandeLigne } from "@/types/enums";
 
 export interface ProposalFormData {
   produitId: string;
@@ -34,18 +61,14 @@ interface ProposalModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: Order;
-  availableProducts: Product[];
   paysanId?: string;
 }
 
-export function ProposalModal({
-  isOpen,
-  onClose,
-  order,
-  availableProducts
-}: ProposalModalProps) {
+export function ProposalModal({ isOpen, onClose, order }: ProposalModalProps) {
+  const { user } = useAuth();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [openCombobox, setOpenCombobox] = useState(false);
+  const [paysanProducts, setPaysanProducts] = useState<Product[]>([]);
 
   const {
     register,
@@ -61,13 +84,28 @@ export function ProposalModal({
     },
   });
 
+  useEffect(() => {
+    if (user?.role === Role.PAYSAN) {
+      fetchPaysanProducts();
+    }
+  }, []);
+
+  const fetchPaysanProducts = async () => {
+    try {
+      const response = await ProductService.getAllProductsPaysan(1, 100);
+      setPaysanProducts(response.data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des produits du paysan:", error);
+    }
+  };
+
   const watchQuantite = watch("quantite");
   const watchPrix = watch("prixUnitaire");
 
   const total = watchQuantite && watchPrix ? watchQuantite * watchPrix : 0;
 
   // Filtrer les produits pertinents (même unité si possible)
-  const relevantProducts = availableProducts.filter(
+  const relevantProducts = paysanProducts.filter(
     (p) =>
       p.statut === ProductStatut.DISPONIBLE &&
       Number(p.quantiteDisponible) > 0 &&
@@ -132,7 +170,9 @@ export function ProposalModal({
                 🎯
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-lg mb-2">Demande du collecteur</h4>
+                <h4 className="font-bold text-lg mb-2">
+                  Demande du collecteur
+                </h4>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex items-center gap-2 text-gray-700">
                     <Package size={14} className="text-blue-600" />
@@ -155,14 +195,18 @@ export function ProposalModal({
                     {order.rayon && (
                       <>
                         <span className="text-gray-400">•</span>
-                        <span className="text-xs font-medium">{order.rayon} km</span>
+                        <span className="text-xs font-medium">
+                          {order.rayon} km
+                        </span>
                       </>
                     )}
                   </div>
                   {order.createdAt && (
                     <div className="flex items-center gap-2 text-gray-500">
                       <Calendar size={14} />
-                      <span className="text-xs">{formatDate(order.createdAt)}</span>
+                      <span className="text-xs">
+                        {formatDate(order.createdAt)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -243,7 +287,9 @@ export function ProposalModal({
                       {relevantProducts.map((product) => (
                         <CommandItem
                           key={product.id}
-                          value={`${product.nom} ${product.type} ${product.sousType || ""}`}
+                          value={`${product.nom} ${product.type} ${
+                            product.sousType || ""
+                          }`}
                           onSelect={() => handleProductSelect(product)}
                           className="cursor-pointer py-3"
                         >
@@ -277,14 +323,20 @@ export function ProposalModal({
                               </div>
                               <div className="flex items-center gap-3 text-xs text-gray-600">
                                 <span className="flex items-center gap-1">
-                                  <Package size={12} className="text-green-600" />
+                                  <Package
+                                    size={12}
+                                    className="text-green-600"
+                                  />
                                   {product.quantiteDisponible}{" "}
                                   {product.unite
                                     ? UNITE_LABELS[product.unite]
                                     : "unités"}
                                 </span>
                                 <span className="flex items-center gap-1">
-                                  <TrendingUp size={12} className="text-green-600" />
+                                  <TrendingUp
+                                    size={12}
+                                    className="text-green-600"
+                                  />
                                   <span className="font-semibold text-green-700">
                                     {formatPrice(product.prixUnitaire)} Ar
                                   </span>
@@ -323,10 +375,11 @@ export function ProposalModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InputField
                     name="quantite"
-                    label={`Quantité proposée (${selectedProduct.unite
-                      ? UNITE_LABELS[selectedProduct.unite]
-                      : "unité"
-                      })`}
+                    label={`Quantité proposée (${
+                      selectedProduct.unite
+                        ? UNITE_LABELS[selectedProduct.unite]
+                        : "unité"
+                    })`}
                     type="number"
                     placeholder="Ex: 100"
                     register={register}
@@ -349,17 +402,21 @@ export function ProposalModal({
 
                   <InputField
                     name="prixUnitaire"
-                    label={`Prix unitaire (Ar/${selectedProduct.unite
-                      ? UNITE_LABELS[selectedProduct.unite]
-                      : "unité"
-                      })`}
+                    label={`Prix unitaire (Ar/${
+                      selectedProduct.unite
+                        ? UNITE_LABELS[selectedProduct.unite]
+                        : "unité"
+                    })`}
                     type="number"
                     placeholder="Ex: 2500"
                     register={register}
                     error={errors.prixUnitaire}
                     validation={{
                       required: "Le prix est requis",
-                      min: { value: 1, message: "Le prix doit être supérieur à 0" },
+                      min: {
+                        value: 1,
+                        message: "Le prix doit être supérieur à 0",
+                      },
                     }}
                   />
                 </div>
@@ -368,29 +425,35 @@ export function ProposalModal({
                 {total > 0 && (
                   <div className="mt-4 p-3 bg-white rounded-lg border-2 border-green-300">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-700 font-medium">Total de la proposition :</span>
+                      <span className="text-gray-700 font-medium">
+                        Total de la proposition :
+                      </span>
                       <span className="text-2xl font-bold text-green-600">
                         {formatPrice(total)} Ar
                       </span>
                     </div>
                     {watchQuantite && (
                       <p className="text-xs text-gray-500 mt-1">
-                        {watchQuantite} {selectedProduct.unite && UNITE_LABELS[selectedProduct.unite]} ×{" "}
-                        {formatPrice(watchPrix)} Ar = {formatPrice(total)} Ar
+                        {watchQuantite}{" "}
+                        {selectedProduct.unite &&
+                          UNITE_LABELS[selectedProduct.unite]}{" "}
+                        × {formatPrice(watchPrix)} Ar = {formatPrice(total)} Ar
                       </p>
                     )}
                   </div>
                 )}
 
                 {/* Info restante */}
-                {watchQuantite && Number(watchQuantite) < Number(order.quantiteTotal) && (
-                  <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
-                    <p className="text-xs text-blue-700">
-                      ℹ️ Votre proposition couvre {watchQuantite} /{" "}
-                      {order.quantiteTotal} {order.unite && UNITE_LABELS[order.unite]} demandé(s)
-                    </p>
-                  </div>
-                )}
+                {watchQuantite &&
+                  Number(watchQuantite) < Number(order.quantiteTotal) && (
+                    <div className="mt-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs text-blue-700">
+                        ℹ️ Votre proposition couvre {watchQuantite} /{" "}
+                        {order.quantiteTotal}{" "}
+                        {order.unite && UNITE_LABELS[order.unite]} demandé(s)
+                      </p>
+                    </div>
+                  )}
               </CardContent>
             </Card>
 

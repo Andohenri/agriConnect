@@ -28,6 +28,7 @@ import AdminProductDetail from "@/pages/admin/products/ProductDetails";
 import Users from "@/pages/admin/users/Users";
 import OrderPublish from "@/pages/orders/OrderPublish";
 import EditProfile from "@/pages/profile/EditProfile";
+import Commande from "@/pages/orders/orders-mb/Orders";
 
 // ✅ Loader pour afficher le spinner pendant l’auth
 
@@ -76,6 +77,14 @@ const router = createBrowserRouter([
         path: "orders",
         children: [
           { index: true, element: <Orders /> },
+          { path: ":id", element: <OrderDetails /> },
+          { path: "ask", element: <OrderPublish /> },
+        ],
+      },
+      {
+        path: "commande",
+        children: [
+          { index: true, element: <Commande /> },
           { path: ":id", element: <OrderDetails /> },
           { path: "ask", element: <OrderPublish /> },
         ],

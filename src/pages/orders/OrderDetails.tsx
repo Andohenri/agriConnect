@@ -72,7 +72,7 @@ const OrderDetails = () => {
 
   const handleAcceptLine = async (lineId: string) => {
     console.log('Accepter ligne:', lineId);
-    // await OrderService.acceptProposal(lineId);
+    await OrderService.acceptProposal(lineId);
     const updatedLignes = order.lignes?.map(l =>
       l.id === lineId ? ({ ...l, statutLigne: StatutCommandeLigne.ACCEPTEE } as OrderLine) : l
     );
@@ -82,7 +82,7 @@ const OrderDetails = () => {
 
   const handleRejectLine = async (lineId: string) => {
     console.log('Rejeter ligne:', lineId);
-    // await OrderService.rejectProposal(lineId);
+    await OrderService.rejectProposal(lineId);
     const updatedLignes = order.lignes?.map(l =>
       l.id === lineId ? ({ ...l, statutLigne: StatutCommandeLigne.REJETEE } as OrderLine) : l
     );
