@@ -1,5 +1,7 @@
 # React + TypeScript + Vite
 
+Agri-Connect est une plateforme SaaS développée avec React et Vite, pensée pour digitaliser les interactions entre acteurs du secteur agricole. Elle propose un espace complet de gestion des produits et commandes, une messagerie instantanée, des notifications, des profils utilisateurs, une cartographie des zones, et un back-office administrateur avec analytics pour piloter l’activité efficacement.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
